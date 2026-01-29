@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './pages/homepage.css';
-import logo from './assets/logo.png';
-import restaurantImage from './assets/restaurant.png';
-import heartImage from './assets/heart.png';
-import emailImage from './assets/email.png';
-import orderHistoryImage from './assets/order-history.png';
-import otherImage from './assets/other.png';
-import userImage from './assets/user.png';
+import './homepage.css';
+import logo from '../assets/logo.png';
+import restaurantImage from '../assets/restaurant.png';
+import heartImage from '../assets/heart.png';
+import emailImage from '../assets/email.png';
+import orderHistoryImage from '../assets/order-history.png';
+import otherImage from '../assets/other.png';
+import userImage from '../assets/user.png';
 
 const OthersPage = () => {
   const navigate = useNavigate();

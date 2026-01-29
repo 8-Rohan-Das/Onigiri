@@ -4,12 +4,12 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 // Import pages
 import LoginPage from './pages/auth/LoginPage';
 import SignUpPage from './pages/auth/SignUpPage';
-import Homepage from './pages/home';
-import CategoryPage from './pages/category';
-import FavoritePage from './pages/favorites';
-import MessagesPage from './pages/messages';
-import OrderHistoryPage from './pages/orders';
-import OthersPage from './pages/others';
+import Homepage from './pages/homepage';
+import CategoryPage from './pages/CategoryPage';
+import FavoritePage from './pages/FavoritePage';
+import MessagesPage from './pages/MessagesPage';
+import OrderHistoryPage from './pages/OrderHistoryPage';
+import OthersPage from './pages/OthersPage';
 
 function App() {
   return (

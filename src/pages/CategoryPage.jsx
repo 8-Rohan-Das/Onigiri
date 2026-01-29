@@ -1,33 +1,33 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import './pages/homepage.css';
+import './homepage.css';
 import './CategoryPage.css';
 
 // Import images
-import logo from './assets/logo.png';
-import biryaniImage from './assets/vecteezy_ai-generated-delicious-dum-handi-biryani-in-bowl-isolated-on_41856072.png';
-import burgerImage from './assets/icons8-burger-100.png';
-import pizzaImage from './assets/pizza.png';
-import parathaImage from './assets/paratha.png';
-import cakeImage from './assets/cake.png';
-import springRollsImage from './assets/spring-rolls.png';
-import noodlesImage from './assets/noodles.png';
-import choleBhatureImage from './assets/chole-bhature.png';
-import butterChickenImage from './assets/vecteezy_butter-chicken-with_25270174.png';
-import sushiPlatterImage from './assets/vecteezy_sushi-platter-with-different-types-of-sushi_27735645.png';
-import manchurianImage from './assets/vecteezy_chili-soup-in-a-bowl-on-a-transparent-background_57754847.png';
-import dimSumImage from './assets/vecteezy_ai-generated-steamed-stuff-custard-bun-in-bamboo-basket-png_35675661.png';
-import kungPaoImage from './assets/vecteezy_spicy-kung-pao-chicken-a-fiery-sichuan-favorite-with_47072686.png';
-import tempuraImage from './assets/vecteezy_golden-fried-shrimp-tempura-on-white-plate_50278149.png';
-import pekingDuckImage from './assets/vecteezy_peking-duck-png-with-ai-generated_26758795.png';
+import logo from '../assets/logo.png';
+import biryaniImage from '../assets/vecteezy_ai-generated-delicious-dum-handi-biryani-in-bowl-isolated-on_41856072.png';
+import burgerImage from '../assets/icons8-burger-100.png';
+import pizzaImage from '../assets/pizza.png';
+import parathaImage from '../assets/paratha.png';
+import cakeImage from '../assets/cake.png';
+import springRollsImage from '../assets/spring-rolls.png';
+import noodlesImage from '../assets/noodles.png';
+import choleBhatureImage from '../assets/chole-bhature.png';
+import butterChickenImage from '../assets/vecteezy_butter-chicken-with_25270174.png';
+import sushiPlatterImage from '../assets/vecteezy_sushi-platter-with-different-types-of-sushi_27735645.png';
+import manchurianImage from '../assets/vecteezy_chili-soup-in-a-bowl-on-a-transparent-background_57754847.png';
+import dimSumImage from '../assets/vecteezy_ai-generated-steamed-stuff-custard-bun-in-bamboo-basket-png_35675661.png';
+import kungPaoImage from '../assets/vecteezy_spicy-kung-pao-chicken-a-fiery-sichuan-favorite-with_47072686.png';
+import tempuraImage from '../assets/vecteezy_golden-fried-shrimp-tempura-on-white-plate_50278149.png';
+import pekingDuckImage from '../assets/vecteezy_peking-duck-png-with-ai-generated_26758795.png';
 
 // Import navigation images
-import restaurantImage from './assets/restaurant.png';
-import heartImage from './assets/heart.png';
-import emailImage from './assets/email.png';
-import orderHistoryImage from './assets/order-history.png';
-import otherImage from './assets/other.png';
-import userImage from './assets/user.png';
+import restaurantImage from '../assets/restaurant.png';
+import heartImage from '../assets/heart.png';
+import emailImage from '../assets/email.png';
+import orderHistoryImage from '../assets/order-history.png';
+import otherImage from '../assets/other.png';
+import userImage from '../assets/user.png';
 
 const CategoryPage = () => {
   const { category } = useParams();
