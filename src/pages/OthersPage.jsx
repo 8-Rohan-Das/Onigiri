@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './homepage.css';
+import './OthersPage.css';
 import logo from '../assets/logo.png';
 import restaurantImage from '../assets/restaurant.png';
 import heartImage from '../assets/heart.png';
@@ -44,6 +45,12 @@ const OthersPage = () => {
     paymentMethod: 'Credit Card'
   });
 
+  // Contact Form State
+  const [contactForm, setContactForm] = useState({
+    subject: '',
+    message: ''
+  });
+
   const handleSettingChange = (setting, value) => {
     setSettings({ ...settings, [setting]: value });
   };
@@ -52,12 +59,28 @@ const OthersPage = () => {
     setProfile({ ...profile, [field]: value });
   };
 
+  const handleContactChange = (field, value) => {
+    setContactForm({ ...contactForm, [field]: value });
+  };
+
   const handleSaveProfile = () => {
     localStorage.setItem('user', JSON.stringify({
       ...userData,
       ...profile
     }));
     alert('Profile updated successfully!');
+  };
+
+  const handleSendContact = (e) => {
+    e.preventDefault();
+    if (!contactForm.subject || !contactForm.message) {
+      alert('Please fill in all fields');
+      return;
+    }
+    // Simulate API call
+    console.log('Sending message:', contactForm);
+    alert('Message sent successfully! We will get back to you shortly.');
+    setContactForm({ subject: '', message: '' });
   };
 
   const handleLogout = () => {
@@ -171,6 +194,38 @@ const OthersPage = () => {
                 Save Profile
               </button>
             </div>
+          </section>
+
+          {/* Contact Us Section */}
+          <section className="settings-section">
+            <h2 className="section-title">Contact Us</h2>
+            <form className="settings-form contact-form" onSubmit={handleSendContact}>
+              <div className="form-group">
+                <label>Subject</label>
+                <input
+                  type="text"
+                  value={contactForm.subject}
+                  onChange={(e) => handleContactChange('subject', e.target.value)}
+                  className="input-custom"
+                  placeholder="How can we help you?"
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label>Message</label>
+                <textarea
+                  value={contactForm.message}
+                  onChange={(e) => handleContactChange('message', e.target.value)}
+                  className="input-custom"
+                  placeholder="Describe your issue or feedback..."
+                  rows={4}
+                  required
+                />
+              </div>
+              <button type="submit" className="order-btn">
+                Send Message
+              </button>
+            </form>
           </section>
 
           {/* Notification Settings */}
