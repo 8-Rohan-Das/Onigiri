@@ -1,35 +1,31 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './homepage.css';
-<<<<<<< HEAD:src/pages/homepage.jsx
 import logo from '../assets/logo.png';
-=======
-import logo from './assets/logo.png';
-import butterChickenImage from './assets/vecteezy_butter-chicken-with_25270174.png';
-import sushiPlatterImage from './assets/vecteezy_sushi-platter-with-different-types-of-sushi_27735645.png';
-import springRollsImage from './assets/vecteezy_a-plate-with-several-spring-rolls-and-a-small-bowl-of-sauce_53110058.png';
-import manchurianSoupImage from './assets/vecteezy_chili-soup-in-a-bowl-on-a-transparent-background_57754847.png';
-import dimSumImage from './assets/vecteezy_ai-generated-steamed-stuff-custard-bun-in-bamboo-basket-png_35675661.png';
-import pekingDuckImage from './assets/vecteezy_peking-duck-png-with-ai-generated_26758795.png';
-import kungPaoImage from './assets/vecteezy_spicy-kung-pao-chicken-a-fiery-sichuan-favorite-with_47072686.png';
-import tempuraImage from './assets/vecteezy_golden-fried-shrimp-tempura-on-white-plate_50278149.png';
-import biryaniImage from './assets/vecteezy_ai-generated-delicious-dum-handi-biryani-in-bowl-isolated-on_41856072.png';
-import burgerImage from './assets/icons8-burger-100.png';
-import pizzaImage from './assets/pizza.png';
-import biryaniCategoryImage from './assets/biryani.png';
-import parathaImage from './assets/paratha.png';
-import cakeImage from './assets/cake.png';
-import springRollsCategoryImage from './assets/spring-rolls.png';
-import noodlesImage from './assets/noodles.png';
-import choleBhatureImage from './assets/chole-bhature.png';
-import notificationImage from './assets/notification.png';
-import userImage from './assets/user.png';
-import restaurantImage from './assets/restaurant.png';
-import heartImage from './assets/heart.png';
-import emailImage from './assets/email.png';
-import orderHistoryImage from './assets/order-history.png';
-import otherImage from './assets/other.png';
->>>>>>> f4a35e0 (Added images and changes some icon):src/homepage.jsx
+import butterChickenImage from '../assets/vecteezy_butter-chicken-with_25270174.png';
+import sushiPlatterImage from '../assets/vecteezy_sushi-platter-with-different-types-of-sushi_27735645.png';
+import springRollsImage from '../assets/vecteezy_a-plate-with-several-spring-rolls-and-a-small-bowl-of-sauce_53110058.png';
+import manchurianSoupImage from '../assets/vecteezy_chili-soup-in-a-bowl-on-a-transparent-background_57754847.png';
+import dimSumImage from '../assets/vecteezy_ai-generated-steamed-stuff-custard-bun-in-bamboo-basket-png_35675661.png';
+import pekingDuckImage from '../assets/vecteezy_peking-duck-png-with-ai-generated_26758795.png';
+import kungPaoImage from '../assets/vecteezy_spicy-kung-pao-chicken-a-fiery-sichuan-favorite-with_47072686.png';
+import tempuraImage from '../assets/vecteezy_golden-fried-shrimp-tempura-on-white-plate_50278149.png';
+import biryaniImage from '../assets/vecteezy_ai-generated-delicious-dum-handi-biryani-in-bowl-isolated-on_41856072.png';
+import burgerImage from '../assets/icons8-burger-100.png';
+import pizzaImage from '../assets/pizza.png';
+import biryaniCategoryImage from '../assets/biryani.png';
+import parathaImage from '../assets/paratha.png';
+import cakeImage from '../assets/cake.png';
+import springRollsCategoryImage from '../assets/spring-rolls.png';
+import noodlesImage from '../assets/noodles.png';
+import choleBhatureImage from '../assets/chole-bhature.png';
+import notificationImage from '../assets/notification.png';
+import restaurantImage from '../assets/restaurant.png';
+import heartImage from '../assets/heart.png';
+import emailImage from '../assets/email.png';
+import orderHistoryImage from '../assets/order-history.png';
+import otherImage from '../assets/other.png';
+import userImage from '../assets/user.png';
 
 const Homepage = () => {
   const navigate = useNavigate();
@@ -177,7 +173,7 @@ const Homepage = () => {
         <header className="main-header">
           <div className="user-profile">
             <div className="profile-image">
-              <img src={userImage} alt="User Profile" style={{width: '55px', height: '55px', objectFit: 'cover', borderRadius: '50%'}} />
+              <img src={userImage} alt="User Profile" style={{width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%'}} />
             </div>
             <div className="user-info">
               <h3>Welcome back, {userName}!</h3>
@@ -214,7 +210,10 @@ const Homepage = () => {
               <div
                 key={category.id}
                 className={`category-card ${activeCategory === category.id ? 'active' : ''}`}
-                onClick={() => setActiveCategory(category.id)}
+                onClick={() => {
+                  setActiveCategory(category.id);
+                  navigate(`/category/${category.id}`);
+                }}
               >
                 <div className="category-icon">
                   {category.image ? (
