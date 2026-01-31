@@ -11,6 +11,16 @@
   --text-light: #636E72;
 }
 
+/* Performance optimizations */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 .homepage-container {
   min-height: 100vh;
   background-color: var(--light-gray);
@@ -19,6 +29,8 @@
   overflow-x: hidden;
   overflow-y: auto;
   width: 100%;
+  will-change: auto;
+  contain: layout style paint;
 }
 
 /* Sidebar Navigation */
@@ -72,7 +84,7 @@
   border-radius: 12px;
   margin-bottom: 10px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: background-color 0.15s ease;
   color: var(--text-dark);
   font-weight: 500;
   border: none;
@@ -84,13 +96,11 @@
 
 .nav-item:hover {
   background-color: var(--medium-gray);
-  transform: translateX(5px);
 }
 
 .nav-item.active {
   background: linear-gradient(90deg, var(--primary-orange), #FF8B35);
   color: white;
-  box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
 }
 
 .nav-icon {
@@ -158,13 +168,12 @@
   justify-content: center;
   cursor: pointer;
   font-size: 1.3rem;
-  transition: all 0.3s ease;
+  transition: border-color 0.15s ease, color 0.15s ease;
 }
 
 .notification-btn:hover {
   border-color: var(--primary-orange);
   color: var(--primary-orange);
-  transform: scale(1.05);
 }
 
 /* Discount Banner */
@@ -202,13 +211,12 @@
   border-radius: 25px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: background-color 0.15s ease;
   font-size: 1rem;
 }
 
 .order-btn:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  background-color: #f8f9fa;
 }
 
 .banner-image {
@@ -244,7 +252,6 @@
   display: flex;
   gap: 20px;
   overflow-x: auto;
-  scroll-behavior: smooth;
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE and Edge */
   padding: 10px 0;
@@ -268,14 +275,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s ease;
+  transition: background-color 0.15s ease;
   z-index: 10;
   flex-shrink: 0;
 }
 
 .scroll-arrow:hover {
   background: #ff5722;
-  transform: scale(1.1);
 }
 
 .scroll-arrow:disabled {
@@ -290,15 +296,14 @@
   padding: 20px;
   text-align: center;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: background-color 0.15s ease;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
   min-width: 140px;
   flex-shrink: 0;
 }
 
 .category-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  background-color: var(--light-gray);
 }
 
 .category-card.active {
@@ -346,12 +351,12 @@
   display: flex;
   gap: 20px;
   overflow-x: auto;
-  scroll-behavior: smooth;
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE and Edge */
   padding: 10px 0;
   width: 100%;
   flex-wrap: nowrap;
+  scroll-behavior: smooth;
 }
 
 .dishes-grid::-webkit-scrollbar {
@@ -362,15 +367,15 @@
   background: var(--light-gray);
   border-radius: 15px;
   overflow: hidden;
-  transition: all 0.3s ease;
+  transition: background-color 0.15s ease, transform 0.2s ease;
   min-width: 280px;
   max-width: 280px;
   flex-shrink: 0;
 }
 
 .dish-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  background-color: #e8eaed;
+  transform: translateY(-2px);
 }
 
 .dish-badge {
@@ -507,7 +512,7 @@
   padding: 12px;
   border-radius: 10px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: background-color 0.15s ease;
   font-size: 0.9rem;
   display: flex;
   flex-direction: column;
@@ -517,7 +522,6 @@
 
 .balance-btn:hover {
   background: rgba(255, 255, 255, 0.2);
-  transform: translateY(-2px);
 }
 
 /* Address Card */
@@ -543,7 +547,7 @@
   border-radius: 15px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: border-color 0.15s ease, color 0.15s ease;
   font-size: 0.9rem;
 }
 
@@ -568,7 +572,7 @@
   border-radius: 15px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: border-color 0.15s ease, color 0.15s ease;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -578,7 +582,6 @@
 .add-details-btn:hover {
   border-color: var(--primary-orange);
   color: var(--primary-orange);
-  background: rgba(255, 107, 53, 0.05);
 }
 
 /* Order Menu */
@@ -676,13 +679,11 @@
   font-weight: 600;
   font-size: 1.1rem;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: background-color 0.15s ease;
 }
 
 .checkout-btn:hover {
   background: #E55A2B;
-  transform: translateY(-2px);
-  box-shadow: 0 10px 20px rgba(255, 107, 53, 0.3);
 }
 
 /* Footer */
@@ -704,7 +705,7 @@
   border-radius: 15px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 .logout-btn:hover {

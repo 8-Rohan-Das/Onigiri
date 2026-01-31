@@ -10,6 +10,7 @@ import FavoritePage from './pages/FavoritePage';
 import MessagesPage from './pages/MessagesPage';
 import OrderHistoryPage from './pages/OrderHistoryPage';
 import OthersPage from './pages/OthersPage';
+import CheckoutPage from './pages/CheckoutPage';
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
         <Route path="/messages" element={<MessagesPage />} />
         <Route path="/order-history" element={<OrderHistoryPage />} />
         <Route path="/others" element={<OthersPage />} />
+        <Route path="/checkout" element={<CheckoutPage />} />
       </Routes>
     </BrowserRouter>
   );

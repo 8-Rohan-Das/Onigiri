@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './homepage.css';
+import HoveringCart from '../components/HoveringCart';
 import logo from '../assets/logo.png';
 import butterChickenImage from '../assets/vecteezy_butter-chicken-with_25270174.png';
 import sushiPlatterImage from '../assets/vecteezy_sushi-platter-with-different-types-of-sushi_27735645.png';
@@ -90,11 +91,22 @@ const Homepage = () => {
 
   // Handlers
   const handleAddToCart = (dish) => {
-    alert(`Added ${dish.name} to cart!`);
+    // Use global addToCart function if available
+    if (window.addToCart) {
+      const cartItem = {
+        id: dish.id || Date.now(),
+        name: dish.name,
+        price: parseFloat(dish.price.replace('₹', '')),
+        icon: dish.icon || '🍽️'
+      };
+      window.addToCart(cartItem);
+    } else {
+      alert(`Added ${dish.name} to cart!`);
+    }
   };
 
   const handleCheckout = () => {
-    alert(`Proceeding to checkout! Total: ₹${total.toFixed(2)}`);
+    navigate('/checkout');
   };
 
   const handleLogout = () => {
@@ -105,11 +117,32 @@ const Homepage = () => {
     const grid = document.getElementById('categoriesGrid');
     if (grid) {
       const scrollAmount = 200;
-      if (direction === 'left') {
-        grid.scrollLeft -= scrollAmount;
-      } else {
-        grid.scrollLeft += scrollAmount;
-      }
+      const startScroll = grid.scrollLeft;
+      const targetScroll = direction === 'left' 
+        ? Math.max(0, startScroll - scrollAmount)
+        : startScroll + scrollAmount;
+      
+      // Smooth animation
+      const duration = 300;
+      const startTime = performance.now();
+      
+      const animateScroll = (currentTime) => {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        
+        // Easing function for smooth animation
+        const easeInOutCubic = progress < 0.5
+          ? 4 * progress * progress * progress
+          : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+        
+        grid.scrollLeft = startScroll + (targetScroll - startScroll) * easeInOutCubic;
+        
+        if (progress < 1) {
+          requestAnimationFrame(animateScroll);
+        }
+      };
+      
+      requestAnimationFrame(animateScroll);
     }
   };
 
@@ -117,11 +150,32 @@ const Homepage = () => {
     const grid = document.getElementById('dishesGrid');
     if (grid) {
       const scrollAmount = 300;
-      if (direction === 'left') {
-        grid.scrollLeft -= scrollAmount;
-      } else {
-        grid.scrollLeft += scrollAmount;
-      }
+      const startScroll = grid.scrollLeft;
+      const targetScroll = direction === 'left' 
+        ? Math.max(0, startScroll - scrollAmount)
+        : startScroll + scrollAmount;
+      
+      // Smooth animation
+      const duration = 300;
+      const startTime = performance.now();
+      
+      const animateScroll = (currentTime) => {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        
+        // Easing function for smooth animation
+        const easeInOutCubic = progress < 0.5
+          ? 4 * progress * progress * progress
+          : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+        
+        grid.scrollLeft = startScroll + (targetScroll - startScroll) * easeInOutCubic;
+        
+        if (progress < 1) {
+          requestAnimationFrame(animateScroll);
+        }
+      };
+      
+      requestAnimationFrame(animateScroll);
     }
   };
 
@@ -368,12 +422,15 @@ const Homepage = () => {
 
         {/* Footer */}
         <footer className="homepage-footer">
-          <p>© 2026 Onigiri - Delicious Food Delivery</p>
+          <p> 2026 Onigiri - Delicious Food Delivery</p>
           <button className="logout-btn" onClick={handleLogout}>
             Logout
           </button>
         </footer>
       </main>
+      
+      {/* Hovering Cart */}
+      <HoveringCart />
     </div>
   );
 };
