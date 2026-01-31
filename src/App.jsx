@@ -11,6 +11,7 @@ import MessagesPage from './pages/MessagesPage';
 import OrderHistoryPage from './pages/OrderHistoryPage';
 import OthersPage from './pages/OthersPage';
 import CheckoutPage from './pages/CheckoutPage';
+import OrderConfirmationPage from './pages/OrderConfirmationPage';
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
         <Route path="/order-history" element={<OrderHistoryPage />} />
         <Route path="/others" element={<OthersPage />} />
         <Route path="/checkout" element={<CheckoutPage />} />
+        <Route path="/order-confirmation" element={<OrderConfirmationPage />} />
       </Routes>
     </BrowserRouter>
   );

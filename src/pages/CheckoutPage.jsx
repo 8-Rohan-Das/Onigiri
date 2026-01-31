@@ -1,27 +1,39 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './CheckoutPage.css';
 import logo from '../assets/logo.png';
 import userImage from '../assets/user.png';
 
+const inr = (value) =>
+  new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 }).format(value);
+
 const CheckoutPage = () => {
   const navigate = useNavigate();
-  
-  // Get user data from localStorage
+
+  // user data from localStorage
   const userData = JSON.parse(localStorage.getItem('user')) || {};
   const userName = userData.name || 'Guest';
-  
-  // Cart items from localStorage or default
+
+  // cart items: load from localStorage or defaults
   const [cartItems, setCartItems] = useState(() => {
-    const savedCart = localStorage.getItem('cartItems');
-    return savedCart ? JSON.parse(savedCart) : [
-      { id: 1, name: 'Vegan Pizza Dough', quantity: 1, price: 120.00, icon: '🍕' },
-      { id: 2, name: 'Pepperoni Pizza', quantity: 1, price: 180.00, icon: '🍕' },
-      { id: 3, name: 'Fish Burger & Vege', quantity: 1, price: 150.00, icon: '🍔' },
+    const saved = localStorage.getItem('cartItems');
+    if (saved) return JSON.parse(saved);
+    return [
+      { id: 1, name: 'Vegan Pizza Dough', quantity: 1, price: 120.0, icon: '🍕' },
+      { id: 2, name: 'Pepperoni Pizza', quantity: 1, price: 180.0, icon: '🍕' },
+      { id: 3, name: 'Fish Burger & Vege', quantity: 1, price: 150.0, icon: '🍔' },
     ];
   });
 
-  // Form state
+  // persist cart to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('cartItems', JSON.stringify(cartItems));
+  }, [cartItems]);
+
+  // mobile summary drawer toggle
+  const [showSummary, setShowSummary] = useState(false);
+
+  // form state
   const [formData, setFormData] = useState({
     fullName: userName,
     email: userData.email || '',
@@ -34,202 +46,185 @@ const CheckoutPage = () => {
     cardNumber: '',
     cardName: '',
     expiryDate: '',
-    cvv: ''
+    cvv: '',
+    upiId: ''
   });
 
-  // Calculate totals
-  const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const deliveryFee = 40.00;
-  const tax = subtotal * 0.05; // 5% tax
-  const total = subtotal + deliveryFee + tax;
+  // derived totals
+  const subtotal = useMemo(
+    () => cartItems.reduce((s, it) => s + it.price * (it.quantity || 0), 0),
+    [cartItems]
+  );
+  const deliveryFee = 40.0;
+  const tax = +(subtotal * 0.05).toFixed(2); // 5% tax
+  const total = +(subtotal + deliveryFee + tax).toFixed(2);
 
-  // Handle form input changes
+  // update form inputs
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setFormData((p) => ({ ...p, [name]: value }));
   };
 
-  // Handle quantity changes
+  // quantity updates (guard against negatives)
   const updateQuantity = (id, newQuantity) => {
-    if (newQuantity === 0) {
-      setCartItems(cartItems.filter(item => item.id !== id));
+    if (newQuantity <= 0) {
+      // remove after confirmation-like UX (for now immediate)
+      setCartItems((prev) => prev.filter((it) => it.id !== id));
     } else {
-      setCartItems(cartItems.map(item => 
-        item.id === id ? { ...item, quantity: newQuantity } : item
-      ));
+      setCartItems((prev) => prev.map((it) => (it.id === id ? { ...it, quantity: newQuantity } : it)));
     }
   };
 
-  // Remove item from cart
-  const removeItem = (id) => {
-    setCartItems(cartItems.filter(item => item.id !== id));
+  const removeItem = (id) => setCartItems((prev) => prev.filter((it) => it.id !== id));
+
+  // basic client-side validation for card fields only when card selected
+  const validatePayment = () => {
+    if (formData.paymentMethod === 'card') {
+      // simple checks (lengths); production needs stronger validation
+      const cardNumber = formData.cardNumber.replace(/\s+/g, '');
+      if (!/^\d{12,19}$/.test(cardNumber)) return { ok: false, message: 'Enter a valid card number' };
+      if (!formData.cardName.trim()) return { ok: false, message: 'Card name required' };
+      if (!/^(0[1-9]|1[0-2])\/?([0-9]{2})$/.test(formData.expiryDate)) return { ok: false, message: 'Expiry should be MM/YY' };
+      if (!/^\d{3,4}$/.test(formData.cvv)) return { ok: false, message: 'CVV should be 3 or 4 digits' };
+    } else if (formData.paymentMethod === 'upi') {
+      if (!formData.upiId || !formData.upiId.includes('@')) return { ok: false, message: 'Enter a valid UPI ID' };
+    }
+    return { ok: true };
   };
 
-  // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Save cart items to localStorage for order history
-    localStorage.setItem('lastOrder', JSON.stringify({
+
+    if (cartItems.length === 0) {
+      alert('Your cart is empty. Add items before placing an order.');
+      return;
+    }
+
+    const paymentValid = validatePayment();
+    if (!paymentValid.ok) {
+      alert(paymentValid.message);
+      return;
+    }
+
+    const orderNumber = 'ORD' + Date.now();
+    const orderPayload = {
+      orderNumber,
       items: cartItems,
-      total: total,
-      date: new Date().toISOString(),
-      address: `${formData.address}, ${formData.city}, ${formData.state} ${formData.zipCode}`
-    }));
-    
-    // Clear cart
+      subtotal,
+      deliveryFee,
+      tax,
+      total,
+      deliveryInfo: {
+        name: formData.fullName,
+        email: formData.email,
+        phone: formData.phone,
+        address: formData.address,
+        city: formData.city,
+        state: formData.state,
+        zipCode: formData.zipCode
+      },
+      paymentMethod: formData.paymentMethod,
+      timestamp: new Date().toISOString()
+    };
+
+    // save last order and clear cart
+    localStorage.setItem('lastOrder', JSON.stringify(orderPayload));
     localStorage.removeItem('cartItems');
     setCartItems([]);
-    
-    alert('Order placed successfully! Thank you for your order.');
-    navigate('/order-history');
+
+    // navigate to a confirmation page (keep history)
+    navigate('/order-confirmation', { state: { orderNumber } });
   };
 
-  const handleBackToHome = () => {
-    navigate('/home');
-  };
+  const handleBackToHome = () => navigate('/home');
 
   return (
     <div className="checkout-container">
-      {/* Header */}
-      <header className="checkout-header">
+      <header className="checkout-header" role="banner">
         <div className="header-left">
-          <button className="back-btn" onClick={handleBackToHome}>
-            ← Back to Home
+          <button aria-label="Back to home" className="back-btn" onClick={handleBackToHome} type="button">
+            <span>←</span>
+            <span className="btn-text">Back to Home</span>
           </button>
-          <div className="logo-section">
+
+          <div className="logo-section" aria-hidden>
             <img src={logo} alt="Onigiri Logo" className="logo-image" />
             <h1>ONIGIRI</h1>
           </div>
         </div>
+
         <div className="header-right">
-          <div className="user-info">
-            <img src={userImage} alt="User" className="user-avatar" />
-            <span>{userName}</span>
+          <div className="user-info" aria-label={`Signed in as ${userName}`}>
+            <img src={userImage} alt="" className="user-avatar" />
+            <span className="user-name">{userName}</span>
           </div>
         </div>
       </header>
 
       <div className="checkout-content">
-        {/* Main Content */}
-        <main className="checkout-main">
-          <form onSubmit={handleSubmit} className="checkout-form">
-            {/* Delivery Information */}
-            <section className="form-section">
-              <h2>Delivery Information</h2>
+        <main className="checkout-main" aria-labelledby="checkout-title">
+          <form className="checkout-form" onSubmit={handleSubmit}>
+            <h2 id="checkout-title" className="visually-hidden">Checkout form</h2>
+
+            <section className="form-section" aria-labelledby="delivery-heading">
+              <h2 id="delivery-heading">Delivery Information</h2>
+
               <div className="form-grid">
                 <div className="form-group">
-                  <label>Full Name</label>
-                  <input
-                    type="text"
-                    name="fullName"
-                    value={formData.fullName}
-                    onChange={handleInputChange}
-                    required
-                  />
+                  <label htmlFor="fullName">Full Name</label>
+                  <input id="fullName" name="fullName" value={formData.fullName} onChange={handleInputChange} required />
                 </div>
+
                 <div className="form-group">
-                  <label>Email</label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    required
-                  />
+                  <label htmlFor="email">Email</label>
+                  <input id="email" name="email" type="email" value={formData.email} onChange={handleInputChange} required />
                 </div>
+
                 <div className="form-group">
-                  <label>Phone Number</label>
-                  <input
-                    type="tel"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleInputChange}
-                    placeholder="+91 98765 43210"
-                    required
-                  />
+                  <label htmlFor="phone">Phone Number</label>
+                  <input id="phone" name="phone" type="tel" value={formData.phone} onChange={handleInputChange} placeholder="+91 98765 43210" required />
                 </div>
               </div>
-              
+
               <div className="form-group">
-                <label>Delivery Address</label>
-                <input
-                  type="text"
-                  name="address"
-                  value={formData.address}
-                  onChange={handleInputChange}
-                  required
-                />
+                <label htmlFor="address">Delivery Address</label>
+                <input id="address" name="address" value={formData.address} onChange={handleInputChange} required />
               </div>
-              
+
               <div className="form-grid">
                 <div className="form-group">
-                  <label>City</label>
-                  <input
-                    type="text"
-                    name="city"
-                    value={formData.city}
-                    onChange={handleInputChange}
-                    required
-                  />
+                  <label htmlFor="city">City</label>
+                  <input id="city" name="city" value={formData.city} onChange={handleInputChange} required />
                 </div>
+
                 <div className="form-group">
-                  <label>State</label>
-                  <input
-                    type="text"
-                    name="state"
-                    value={formData.state}
-                    onChange={handleInputChange}
-                    required
-                  />
+                  <label htmlFor="state">State</label>
+                  <input id="state" name="state" value={formData.state} onChange={handleInputChange} required />
                 </div>
+
                 <div className="form-group">
-                  <label>ZIP Code</label>
-                  <input
-                    type="text"
-                    name="zipCode"
-                    value={formData.zipCode}
-                    onChange={handleInputChange}
-                    required
-                  />
+                  <label htmlFor="zipCode">ZIP Code</label>
+                  <input id="zipCode" name="zipCode" value={formData.zipCode} onChange={handleInputChange} required />
                 </div>
               </div>
             </section>
 
-            {/* Payment Method */}
-            <section className="form-section">
-              <h2>Payment Method</h2>
-              <div className="payment-options">
+            <section className="form-section" aria-labelledby="payment-heading">
+              <h2 id="payment-heading">Payment Method</h2>
+
+              <div className="payment-options" role="radiogroup" aria-label="Payment method">
                 <label className="payment-option">
-                  <input
-                    type="radio"
-                    name="paymentMethod"
-                    value="cod"
-                    checked={formData.paymentMethod === 'cod'}
-                    onChange={handleInputChange}
-                  />
+                  <input type="radio" name="paymentMethod" value="cod" checked={formData.paymentMethod === 'cod'} onChange={handleInputChange} />
                   <span>Cash on Delivery</span>
                 </label>
+
                 <label className="payment-option">
-                  <input
-                    type="radio"
-                    name="paymentMethod"
-                    value="card"
-                    checked={formData.paymentMethod === 'card'}
-                    onChange={handleInputChange}
-                  />
-                  <span>Credit/Debit Card</span>
+                  <input type="radio" name="paymentMethod" value="card" checked={formData.paymentMethod === 'card'} onChange={handleInputChange} />
+                  <span>Credit / Debit Card</span>
                 </label>
+
                 <label className="payment-option">
-                  <input
-                    type="radio"
-                    name="paymentMethod"
-                    value="upi"
-                    checked={formData.paymentMethod === 'upi'}
-                    onChange={handleInputChange}
-                  />
+                  <input type="radio" name="paymentMethod" value="upi" checked={formData.paymentMethod === 'upi'} onChange={handleInputChange} />
                   <span>UPI Payment</span>
                 </label>
               </div>
@@ -237,49 +232,33 @@ const CheckoutPage = () => {
               {formData.paymentMethod === 'card' && (
                 <div className="card-details">
                   <div className="form-group">
-                    <label>Card Number</label>
+                    <label htmlFor="cardNumber">Card Number</label>
                     <input
-                      type="text"
+                      id="cardNumber"
                       name="cardNumber"
+                      inputMode="numeric"
+                      autoComplete="cc-number"
                       value={formData.cardNumber}
                       onChange={handleInputChange}
                       placeholder="1234 5678 9012 3456"
                       required
                     />
                   </div>
+
                   <div className="form-group">
-                    <label>Cardholder Name</label>
-                    <input
-                      type="text"
-                      name="cardName"
-                      value={formData.cardName}
-                      onChange={handleInputChange}
-                      placeholder="John Doe"
-                      required
-                    />
+                    <label htmlFor="cardName">Cardholder Name</label>
+                    <input id="cardName" name="cardName" value={formData.cardName} onChange={handleInputChange} placeholder="John Doe" required />
                   </div>
+
                   <div className="form-grid">
                     <div className="form-group">
-                      <label>Expiry Date</label>
-                      <input
-                        type="text"
-                        name="expiryDate"
-                        value={formData.expiryDate}
-                        onChange={handleInputChange}
-                        placeholder="MM/YY"
-                        required
-                      />
+                      <label htmlFor="expiryDate">Expiry Date</label>
+                      <input id="expiryDate" name="expiryDate" value={formData.expiryDate} onChange={handleInputChange} placeholder="MM/YY" required />
                     </div>
+
                     <div className="form-group">
-                      <label>CVV</label>
-                    <input
-                        type="text"
-                        name="cvv"
-                        value={formData.cvv}
-                        onChange={handleInputChange}
-                        placeholder="123"
-                        required
-                      />
+                      <label htmlFor="cvv">CVV</label>
+                      <input id="cvv" name="cvv" inputMode="numeric" value={formData.cvv} onChange={handleInputChange} placeholder="123" required />
                     </div>
                   </div>
                 </div>
@@ -288,61 +267,77 @@ const CheckoutPage = () => {
               {formData.paymentMethod === 'upi' && (
                 <div className="upi-details">
                   <div className="form-group">
-                    <label>UPI ID</label>
-                    <input
-                      type="text"
-                      placeholder="username@upi"
-                      required
-                    />
+                    <label htmlFor="upiId">UPI ID</label>
+                    <input id="upiId" name="upiId" value={formData.upiId} onChange={handleInputChange} placeholder="username@upi" required />
                   </div>
                 </div>
               )}
             </section>
 
-            {/* Place Order Button */}
-            <button type="submit" className="place-order-btn">
-              Place Order • ₹{total.toFixed(2)}
-            </button>
+            <div className="form-actions">
+              <button type="submit" className="place-order-btn" disabled={cartItems.length === 0}>
+                Place Order • {inr(total)}
+              </button>
+            </div>
           </form>
         </main>
 
-        {/* Order Summary Sidebar */}
-        <aside className="order-summary">
-          <h2>Order Summary</h2>
-          
-          <div className="order-items">
+        {/* Desktop sidebar or mobile toggle */}
+        <aside className={`order-summary ${showSummary ? 'open' : ''}`} aria-labelledby="summary-heading">
+          <div className="summary-top">
+            <h2 id="summary-heading">Order Summary</h2>
+
+            {/* Mobile toggle button */}
+            <button
+              className="summary-toggle"
+              type="button"
+              aria-expanded={showSummary}
+              onClick={() => setShowSummary((s) => !s)}
+            >
+              {showSummary ? 'Hide' : 'View'}
+            </button>
+          </div>
+
+          <div className="order-items" role="list">
+            {cartItems.length === 0 && (
+              <div className="empty-cart">
+                <p>Your cart is empty.</p>
+                <button type="button" className="cta" onClick={() => navigate('/menu')}>Browse Menu</button>
+              </div>
+            )}
+
             {cartItems.map((item) => (
-              <div key={item.id} className="order-item">
+              <div key={item.id} className="order-item" role="listitem">
                 <div className="item-info">
-                  <span className="item-icon">{item.icon}</span>
+                  <span className="item-icon" aria-hidden>{item.icon}</span>
                   <div className="item-details">
                     <h4>{item.name}</h4>
-                    <span className="item-price">₹{item.price.toFixed(2)}</span>
+                    <span className="item-price">{inr(item.price)}</span>
                   </div>
                 </div>
+
                 <div className="item-controls">
-                  <div className="quantity-controls">
-                    <button 
+                  <div className="quantity-controls" aria-label={`Quantity for ${item.name}`}>
+                    <button
                       type="button"
-                      onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                      onClick={() => updateQuantity(item.id, Math.max(0, (item.quantity || 1) - 1))}
                       className="quantity-btn"
+                      aria-label={`Decrease ${item.name} quantity`}
                     >
-                      -
+                      −
                     </button>
-                    <span className="quantity">{item.quantity}</span>
-                    <button 
+                    <span className="quantity" aria-live="polite">{item.quantity}</span>
+                    <button
                       type="button"
-                      onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                      onClick={() => updateQuantity(item.id, (item.quantity || 0) + 1)}
                       className="quantity-btn"
+                      aria-label={`Increase ${item.name} quantity`}
                     >
                       +
                     </button>
                   </div>
-                  <button 
-                    type="button"
-                    onClick={() => removeItem(item.id)}
-                    className="remove-btn"
-                  >
+
+                  <button type="button" onClick={() => removeItem(item.id)} className="remove-btn" aria-label={`Remove ${item.name}`}>
                     ×
                   </button>
                 </div>
@@ -353,19 +348,19 @@ const CheckoutPage = () => {
           <div className="price-breakdown">
             <div className="price-row">
               <span>Subtotal</span>
-              <span>₹{subtotal.toFixed(2)}</span>
+              <span>{inr(subtotal)}</span>
             </div>
             <div className="price-row">
               <span>Delivery Fee</span>
-              <span>₹{deliveryFee.toFixed(2)}</span>
+              <span>{inr(deliveryFee)}</span>
             </div>
             <div className="price-row">
               <span>Tax (5%)</span>
-              <span>₹{tax.toFixed(2)}</span>
+              <span>{inr(tax)}</span>
             </div>
             <div className="price-row total">
               <span>Total</span>
-              <span>₹{total.toFixed(2)}</span>
+              <span>{inr(total)}</span>
             </div>
           </div>
 
