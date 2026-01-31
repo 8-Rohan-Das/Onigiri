@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useCart } from '../context/CartContext';
+import HoveringCart from '../components/HoveringCart';
 import './homepage.css';
 import logo from '../assets/logo.png';
 import restaurantImage from '../assets/restaurant.png';
@@ -14,6 +16,7 @@ import userImage from '../assets/user.png';
 
 const FavoritePage = () => {
   const navigate = useNavigate();
+  const { addToCart } = useCart();
   const [activeNav, setActiveNav] = useState('favorite');
   
   // Get user data from localStorage
@@ -31,11 +34,11 @@ const FavoritePage = () => {
 
   // Favorite items
   const [favoriteItems, setFavoriteItems] = useState([
-    { id: 1, name: 'Butter Chicken', price: '₹189', discount: '15% Off', image: butterChickenImage, category: 'Indian' },
-    { id: 2, name: 'Sushi Platter', price: '₹259', discount: '10% Off', image: sushiPlatterImage, category: 'Japanese' },
-    { id: 3, name: 'Spring Rolls', price: '₹149', discount: '20% Off', image: springRollsImage, category: 'Chinese' },
-    { id: 4, name: 'Pepperoni Pizza', price: '₹180', category: 'Italian' },
-    { id: 5, name: 'Fish Burger', price: '₹150', category: 'American' },
+    { id: 'fav-1', name: 'Butter Chicken', price: '₹189', discount: '15% Off', image: butterChickenImage, category: 'Indian' },
+    { id: 'fav-2', name: 'Sushi Platter', price: '₹259', discount: '10% Off', image: sushiPlatterImage, category: 'Japanese' },
+    { id: 'fav-3', name: 'Spring Rolls', price: '₹149', discount: '20% Off', image: springRollsImage, category: 'Chinese' },
+    { id: 'fav-4', name: 'Pepperoni Pizza', price: '₹180', category: 'Italian' },
+    { id: 'fav-5', name: 'Fish Burger', price: '₹150', category: 'American' },
   ]);
 
   const handleRemoveFavorite = (id) => {
@@ -43,7 +46,13 @@ const FavoritePage = () => {
   };
 
   const handleAddToCart = (item) => {
-    alert(`Added ${item.name} to cart!`);
+    const cartItem = {
+      id: item.id,
+      name: item.name,
+      price: parseFloat(item.price.replace('₹', '')),
+      icon: item.image ? '🍽️' : item.icon || '❤️' 
+    };
+    addToCart(cartItem);
   };
 
   const handleLogout = () => {
@@ -178,6 +187,7 @@ const FavoritePage = () => {
           </button>
         </footer>
       </main>
+      <HoveringCart />
     </div>
   );
 };

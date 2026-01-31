@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import HoveringCart from '../components/HoveringCart';
 import './homepage.css';
 import './OthersPage.css';
 import logo from '../assets/logo.png';

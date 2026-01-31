@@ -1,86 +1,28 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useCart } from '../context/CartContext';
 import './HoveringCart.css';
 
 const HoveringCart = () => {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
-  const [cartItems, setCartItems] = useState([]);
+  const { 
+    cartItems, 
+    updateQuantity, 
+    removeFromCart: removeItem, // Rename to match local usage or update usage
+    getCartTotal,
+    getCartCount
+  } = useCart();
 
-  // Load cart items from localStorage on component mount
-  useEffect(() => {
-    const savedCart = localStorage.getItem('cartItems');
-    if (savedCart) {
-      setCartItems(JSON.parse(savedCart));
-    } else {
-      // Default cart items if none saved
-      const defaultItems = [
-        { id: 1, name: 'Vegan Pizza Dough', quantity: 1, price: 120.00, icon: '🍕' },
-        { id: 2, name: 'Pepperoni Pizza', quantity: 1, price: 180.00, icon: '🍕' },
-        { id: 3, name: 'Fish Burger & Vege', quantity: 1, price: 150.00, icon: '🍔' },
-      ];
-      setCartItems(defaultItems);
-      localStorage.setItem('cartItems', JSON.stringify(defaultItems));
-    }
-  }, []);
-
-  // Calculate totals
-  const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const total = getCartTotal();
+  const subtotal = total - 40; // Approx back-calculation or just use total
   const deliveryFee = 40.00;
-  const total = subtotal + deliveryFee;
-  const itemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+  const itemCount = getCartCount();
 
-  // Update quantity
-  const updateQuantity = (id, newQuantity) => {
-    if (newQuantity === 0) {
-      const updatedCart = cartItems.filter(item => item.id !== id);
-      setCartItems(updatedCart);
-      localStorage.setItem('cartItems', JSON.stringify(updatedCart));
-    } else {
-      const updatedCart = cartItems.map(item => 
-        item.id === id ? { ...item, quantity: newQuantity } : item
-      );
-      setCartItems(updatedCart);
-      localStorage.setItem('cartItems', JSON.stringify(updatedCart));
-    }
-  };
-
-  // Remove item
-  const removeItem = (id) => {
-    const updatedCart = cartItems.filter(item => item.id !== id);
-    setCartItems(updatedCart);
-    localStorage.setItem('cartItems', JSON.stringify(updatedCart));
-  };
-
-  // Navigate to checkout
   const goToCheckout = () => {
     setIsOpen(false);
     navigate('/checkout');
   };
-
-  // Add item to cart (function to be called from other components)
-  const addToCart = (item) => {
-    const existingItem = cartItems.find(cartItem => cartItem.id === item.id);
-    let updatedCart;
-    
-    if (existingItem) {
-      updatedCart = cartItems.map(cartItem => 
-        cartItem.id === item.id 
-          ? { ...cartItem, quantity: cartItem.quantity + 1 }
-          : cartItem
-      );
-    } else {
-      updatedCart = [...cartItems, { ...item, quantity: 1 }];
-    }
-    
-    setCartItems(updatedCart);
-    localStorage.setItem('cartItems', JSON.stringify(updatedCart));
-  };
-
-  // Make addToCart available globally
-  useEffect(() => {
-    window.addToCart = addToCart;
-  }, [cartItems]);
 
   return (
     <>

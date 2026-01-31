@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useCart } from '../context/CartContext';
 import './CheckoutPage.css';
 import logo from '../assets/logo.png';
 import userImage from '../assets/user.png';
@@ -14,21 +15,13 @@ const CheckoutPage = () => {
   const userData = JSON.parse(localStorage.getItem('user')) || {};
   const userName = userData.name || 'Guest';
 
-  // cart items: load from localStorage or defaults
-  const [cartItems, setCartItems] = useState(() => {
-    const saved = localStorage.getItem('cartItems');
-    if (saved) return JSON.parse(saved);
-    return [
-      { id: 1, name: 'Vegan Pizza Dough', quantity: 1, price: 120.0, icon: '🍕' },
-      { id: 2, name: 'Pepperoni Pizza', quantity: 1, price: 180.0, icon: '🍕' },
-      { id: 3, name: 'Fish Burger & Vege', quantity: 1, price: 150.0, icon: '🍔' },
-    ];
-  });
-
-  // persist cart to localStorage whenever it changes
-  useEffect(() => {
-    localStorage.setItem('cartItems', JSON.stringify(cartItems));
-  }, [cartItems]);
+  const { 
+    cartItems, 
+    updateQuantity, 
+    removeFromCart, 
+    clearCart,
+    getCartTotal 
+  } = useCart();
 
   // mobile summary drawer toggle
   const [showSummary, setShowSummary] = useState(false);
@@ -52,8 +45,8 @@ const CheckoutPage = () => {
 
   // derived totals
   const subtotal = useMemo(
-    () => cartItems.reduce((s, it) => s + it.price * (it.quantity || 0), 0),
-    [cartItems]
+    () => getCartTotal(),
+    [cartItems, getCartTotal]
   );
   const deliveryFee = 40.0;
   const tax = +(subtotal * 0.05).toFixed(2); // 5% tax
@@ -66,17 +59,9 @@ const CheckoutPage = () => {
   };
 
   // quantity updates (guard against negatives)
-  const updateQuantity = (id, newQuantity) => {
-    if (newQuantity <= 0) {
-      // remove after confirmation-like UX (for now immediate)
-      setCartItems((prev) => prev.filter((it) => it.id !== id));
-    } else {
-      setCartItems((prev) => prev.map((it) => (it.id === id ? { ...it, quantity: newQuantity } : it)));
-    }
-  };
-
-  const removeItem = (id) => setCartItems((prev) => prev.filter((it) => it.id !== id));
-
+  // Context handles the logic, just call context methods
+  // updateQuantity(id, newQuantity) and removeFromCart(id)
+  
   // basic client-side validation for card fields only when card selected
   const validatePayment = () => {
     if (formData.paymentMethod === 'card') {
@@ -128,9 +113,15 @@ const CheckoutPage = () => {
     };
 
     // save last order and clear cart
+    // save last order for confirmation page
     localStorage.setItem('lastOrder', JSON.stringify(orderPayload));
-    localStorage.removeItem('cartItems');
-    setCartItems([]);
+
+    // save to persistent history
+    const currentHistory = JSON.parse(localStorage.getItem('orderHistory') || '[]');
+    const updatedHistory = [orderPayload, ...currentHistory]; // Newest first
+    localStorage.setItem('orderHistory', JSON.stringify(updatedHistory));
+
+    clearCart();
 
     // navigate to a confirmation page (keep history)
     navigate('/order-confirmation', { state: { orderNumber } });
@@ -316,31 +307,31 @@ const CheckoutPage = () => {
                   </div>
                 </div>
 
-                <div className="item-controls">
-                  <div className="quantity-controls" aria-label={`Quantity for ${item.name}`}>
-                    <button
-                      type="button"
-                      onClick={() => updateQuantity(item.id, Math.max(0, (item.quantity || 1) - 1))}
-                      className="quantity-btn"
-                      aria-label={`Decrease ${item.name} quantity`}
-                    >
-                      −
-                    </button>
-                    <span className="quantity" aria-live="polite">{item.quantity}</span>
-                    <button
-                      type="button"
-                      onClick={() => updateQuantity(item.id, (item.quantity || 0) + 1)}
-                      className="quantity-btn"
-                      aria-label={`Increase ${item.name} quantity`}
-                    >
-                      +
-                    </button>
-                  </div>
+                    <div className="item-controls">
+                      <div className="quantity-controls" aria-label={`Quantity for ${item.name}`}>
+                        <button
+                          type="button"
+                          onClick={() => updateQuantity(item.id, Math.max(0, (item.quantity || 1) - 1))}
+                          className="quantity-btn"
+                          aria-label={`Decrease ${item.name} quantity`}
+                        >
+                          −
+                        </button>
+                        <span className="quantity" aria-live="polite">{item.quantity}</span>
+                        <button
+                          type="button"
+                          onClick={() => updateQuantity(item.id, (item.quantity || 0) + 1)}
+                          className="quantity-btn"
+                          aria-label={`Increase ${item.name} quantity`}
+                        >
+                          +
+                        </button>
+                      </div>
 
-                  <button type="button" onClick={() => removeItem(item.id)} className="remove-btn" aria-label={`Remove ${item.name}`}>
-                    ×
-                  </button>
-                </div>
+                      <button type="button" onClick={() => removeFromCart(item.id)} className="remove-btn" aria-label={`Remove ${item.name}`}>
+                        ×
+                      </button>
+                    </div>
               </div>
             ))}
           </div>

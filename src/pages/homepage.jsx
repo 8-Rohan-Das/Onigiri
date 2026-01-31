@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useCart } from '../context/CartContext';
 import './homepage.css';
 import HoveringCart from '../components/HoveringCart';
 import logo from '../assets/logo.png';
@@ -30,18 +31,13 @@ import userImage from '../assets/user.png';
 
 const Homepage = () => {
   const navigate = useNavigate();
+  const { cartItems, addToCart } = useCart();
   const [activeNav, setActiveNav] = useState('food-order');
   const [activeCategory, setActiveCategory] = useState('all');
   
   // Get user data from localStorage
   const userData = JSON.parse(localStorage.getItem('user')) || {};
   const userName = userData.name || 'Guest';
-  
-  const [cartItems, setCartItems] = useState([
-    { id: 1, name: 'Vegan Pizza Dough', quantity: 1, price: 120.00, icon: '🍕' },
-    { id: 2, name: 'Pepperoni Pizza', quantity: 1, price: 180.00, icon: '🍕' },
-    { id: 3, name: 'Fish Burger & Vege', quantity: 1, price: 150.00, icon: '🍔' },
-  ]);
 
   // Navigation items
   const navItems = [
@@ -66,15 +62,15 @@ const Homepage = () => {
 
   // Popular dishes
   const popularDishes = [
-    { id: 1, name: 'Butter Chicken', price: '₹189', discount: '15% Off', image: butterChickenImage },
-    { id: 2, name: 'Sushi Platter', price: '₹259', discount: '10% Off', image: sushiPlatterImage },
-    { id: 3, name: 'Spring Rolls', price: '₹149', discount: '20% Off', image: springRollsImage },
-    { id: 4, name: 'Manchurian Soup', price: '₹119', discount: '25% Off', image: manchurianSoupImage },
-    { id: 5, name: 'Dim Sum', price: '₹289', discount: '25% Off', image: dimSumImage },
-    { id: 6, name: 'Peking Duck', price: '₹329', discount: '15% Off', image: pekingDuckImage },
-    { id: 7, name: 'Kung Pao', price: '₹179', image: kungPaoImage },
-    { id: 8, name: 'Tempura', price: '₹99', discount: 'Buy 2 Get 1', image: tempuraImage },
-    { id: 9, name: 'Biryani', price: '₹349', discount: 'Special', image: biryaniImage },
+    { id: 'home-1', name: 'Butter Chicken', price: '₹189', discount: '15% Off', image: butterChickenImage },
+    { id: 'home-2', name: 'Sushi Platter', price: '₹259', discount: '10% Off', image: sushiPlatterImage },
+    { id: 'home-3', name: 'Spring Rolls', price: '₹149', discount: '20% Off', image: springRollsImage },
+    { id: 'home-4', name: 'Manchurian Soup', price: '₹119', discount: '25% Off', image: manchurianSoupImage },
+    { id: 'home-5', name: 'Dim Sum', price: '₹289', discount: '25% Off', image: dimSumImage },
+    { id: 'home-6', name: 'Peking Duck', price: '₹329', discount: '15% Off', image: pekingDuckImage },
+    { id: 'home-7', name: 'Kung Pao', price: '₹179', image: kungPaoImage },
+    { id: 'home-8', name: 'Tempura', price: '₹99', discount: 'Buy 2 Get 1', image: tempuraImage },
+    { id: 'home-9', name: 'Biryani', price: '₹349', discount: 'Special', image: biryaniImage },
   ];
 
   // Recent orders
@@ -91,18 +87,13 @@ const Homepage = () => {
 
   // Handlers
   const handleAddToCart = (dish) => {
-    // Use global addToCart function if available
-    if (window.addToCart) {
-      const cartItem = {
-        id: dish.id || Date.now(),
-        name: dish.name,
-        price: parseFloat(dish.price.replace('₹', '')),
-        icon: dish.icon || '🍽️'
-      };
-      window.addToCart(cartItem);
-    } else {
-      alert(`Added ${dish.name} to cart!`);
-    }
+    const cartItem = {
+      id: dish.id || Date.now(),
+      name: dish.name,
+      price: parseFloat(dish.price.replace('₹', '')),
+      icon: dish.icon || '🍽️'
+    };
+    addToCart(cartItem);
   };
 
   const handleCheckout = () => {

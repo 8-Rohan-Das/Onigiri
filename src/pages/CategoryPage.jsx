@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useCart } from '../context/CartContext';
+import HoveringCart from '../components/HoveringCart';
 import './homepage.css';
 import './CategoryPage.css';
 
@@ -34,6 +36,8 @@ const CategoryPage = () => {
   const navigate = useNavigate();
   const [activeNav, setActiveNav] = useState('food-order');
   const [selectedSubCategory, setSelectedSubCategory] = useState('all');
+  
+  const { addToCart } = useCart();
   
   // Get user data
   const userData = JSON.parse(localStorage.getItem('user')) || {};
@@ -152,36 +156,36 @@ const CategoryPage = () => {
   const generateMenuItems = (categoryType) => {
     const baseItems = {
       biryani: [
-        { id: 1, name: 'Hyderabadi Chicken Biryani', price: '₹349', discount: '20% Off', image: biryaniImage, rating: 4.8, time: '30 min' },
-        { id: 2, name: 'Lucknowi Mutton Biryani', price: '₹429', discount: '15% Off', image: biryaniImage, rating: 4.7, time: '35 min' },
-        { id: 3, name: 'Veg Dum Biryani', price: '₹289', discount: '10% Off', image: biryaniImage, rating: 4.6, time: '25 min' },
-        { id: 4, name: 'Kolkata Biryani', price: '₹319', discount: 'Special', image: biryaniImage, rating: 4.5, time: '30 min' },
-        { id: 5, name: 'Andhra Biryani', price: '₹299', discount: 'Buy 1 Get 1', image: biryaniImage, rating: 4.7, time: '28 min' },
-        { id: 6, name: 'Malabar Biryani', price: '₹379', discount: '12% Off', image: biryaniImage, rating: 4.6, time: '32 min' }
+        { id: 'biryani-1', name: 'Hyderabadi Chicken Biryani', price: '₹349', discount: '20% Off', image: biryaniImage, rating: 4.8, time: '30 min' },
+        { id: 'biryani-2', name: 'Lucknowi Mutton Biryani', price: '₹429', discount: '15% Off', image: biryaniImage, rating: 4.7, time: '35 min' },
+        { id: 'biryani-3', name: 'Veg Dum Biryani', price: '₹289', discount: '10% Off', image: biryaniImage, rating: 4.6, time: '25 min' },
+        { id: 'biryani-4', name: 'Kolkata Biryani', price: '₹319', discount: 'Special', image: biryaniImage, rating: 4.5, time: '30 min' },
+        { id: 'biryani-5', name: 'Andhra Biryani', price: '₹299', discount: 'Buy 1 Get 1', image: biryaniImage, rating: 4.7, time: '28 min' },
+        { id: 'biryani-6', name: 'Malabar Biryani', price: '₹379', discount: '12% Off', image: biryaniImage, rating: 4.6, time: '32 min' }
       ],
       burger: [
-        { id: 1, name: 'Classic Beef Burger', price: '₹189', discount: '15% Off', image: burgerImage, rating: 4.5, time: '15 min' },
-        { id: 2, name: 'Cheese Burst Burger', price: '₹229', discount: '20% Off', image: burgerImage, rating: 4.7, time: '18 min' },
-        { id: 3, name: 'Veggie Delight Burger', price: '₹159', discount: '10% Off', image: burgerImage, rating: 4.4, time: '12 min' },
-        { id: 4, name: 'Chicken BBQ Burger', price: '₹249', discount: 'Special', image: burgerImage, rating: 4.8, time: '20 min' },
-        { id: 5, name: 'Mushroom Swiss Burger', price: '₹199', discount: 'Buy 2 Get 1', image: burgerImage, rating: 4.6, time: '16 min' },
-        { id: 6, name: 'Spicy Paneer Burger', price: '₹179', discount: '12% Off', image: burgerImage, rating: 4.5, time: '14 min' }
+        { id: 'burger-1', name: 'Classic Beef Burger', price: '₹189', discount: '15% Off', image: burgerImage, rating: 4.5, time: '15 min' },
+        { id: 'burger-2', name: 'Cheese Burst Burger', price: '₹229', discount: '20% Off', image: burgerImage, rating: 4.7, time: '18 min' },
+        { id: 'burger-3', name: 'Veggie Delight Burger', price: '₹159', discount: '10% Off', image: burgerImage, rating: 4.4, time: '12 min' },
+        { id: 'burger-4', name: 'Chicken BBQ Burger', price: '₹249', discount: 'Special', image: burgerImage, rating: 4.8, time: '20 min' },
+        { id: 'burger-5', name: 'Mushroom Swiss Burger', price: '₹199', discount: 'Buy 2 Get 1', image: burgerImage, rating: 4.6, time: '16 min' },
+        { id: 'burger-6', name: 'Spicy Paneer Burger', price: '₹179', discount: '12% Off', image: burgerImage, rating: 4.5, time: '14 min' }
       ],
       pizza: [
-        { id: 1, name: 'Margherita Pizza', price: '₹249', discount: '15% Off', image: pizzaImage, rating: 4.6, time: '20 min' },
-        { id: 2, name: 'Pepperoni Feast', price: '₹329', discount: '20% Off', image: pizzaImage, rating: 4.8, time: '25 min' },
-        { id: 3, name: 'Veggie Supreme', price: '₹289', discount: '10% Off', image: pizzaImage, rating: 4.5, time: '22 min' },
-        { id: 4, name: 'BBQ Chicken Pizza', price: '₹359', discount: 'Special', image: pizzaImage, rating: 4.7, time: '28 min' },
-        { id: 5, name: 'Four Cheese Pizza', price: '₹299', discount: 'Buy 1 Get 1', image: pizzaImage, rating: 4.6, time: '24 min' },
-        { id: 6, name: 'Tandoori Paneer Pizza', price: '₹319', discount: '12% Off', image: pizzaImage, rating: 4.5, time: '26 min' }
+        { id: 'pizza-1', name: 'Margherita Pizza', price: '₹249', discount: '15% Off', image: pizzaImage, rating: 4.6, time: '20 min' },
+        { id: 'pizza-2', name: 'Pepperoni Feast', price: '₹329', discount: '20% Off', image: pizzaImage, rating: 4.8, time: '25 min' },
+        { id: 'pizza-3', name: 'Veggie Supreme', price: '₹289', discount: '10% Off', image: pizzaImage, rating: 4.5, time: '22 min' },
+        { id: 'pizza-4', name: 'BBQ Chicken Pizza', price: '₹359', discount: 'Special', image: pizzaImage, rating: 4.7, time: '28 min' },
+        { id: 'pizza-5', name: 'Four Cheese Pizza', price: '₹299', discount: 'Buy 1 Get 1', image: pizzaImage, rating: 4.6, time: '24 min' },
+        { id: 'pizza-6', name: 'Tandoori Paneer Pizza', price: '₹319', discount: '12% Off', image: pizzaImage, rating: 4.5, time: '26 min' }
       ]
     };
 
     // Default items for other categories
     const defaultItems = [
-      { id: 1, name: `Classic ${categoryConfig[categoryType]?.title || 'Dish'}`, price: '₹199', discount: '15% Off', image: categoryConfig[categoryType]?.image || burgerImage, rating: 4.5, time: '20 min' },
-      { id: 2, name: `Special ${categoryConfig[categoryType]?.title || 'Dish'}`, price: '₹249', discount: '20% Off', image: categoryConfig[categoryType]?.image || burgerImage, rating: 4.7, time: '25 min' },
-      { id: 3, name: `Deluxe ${categoryConfig[categoryType]?.title || 'Dish'}`, price: '₹299', discount: '10% Off', image: categoryConfig[categoryType]?.image || burgerImage, rating: 4.6, time: '22 min' }
+      { id: `${categoryType}-1`, name: `Classic ${categoryConfig[categoryType]?.title || 'Dish'}`, price: '₹199', discount: '15% Off', image: categoryConfig[categoryType]?.image || burgerImage, rating: 4.5, time: '20 min' },
+      { id: `${categoryType}-2`, name: `Special ${categoryConfig[categoryType]?.title || 'Dish'}`, price: '₹249', discount: '20% Off', image: categoryConfig[categoryType]?.image || burgerImage, rating: 4.7, time: '25 min' },
+      { id: `${categoryType}-3`, name: `Deluxe ${categoryConfig[categoryType]?.title || 'Dish'}`, price: '₹299', discount: '10% Off', image: categoryConfig[categoryType]?.image || burgerImage, rating: 4.6, time: '22 min' }
     ];
 
     return baseItems[categoryType] || defaultItems;
@@ -201,7 +205,13 @@ const CategoryPage = () => {
   };
 
   const handleAddToCart = (item) => {
-    alert(`Added ${item.name} to cart!`);
+    const cartItem = {
+      id: item.id,
+      name: item.name,
+      price: parseFloat(item.price.replace('₹', '')),
+      icon: item.image ? '🍽️' : '🍱'
+    };
+    addToCart(cartItem);
   };
 
   const handleSubCategoryClick = (subCategoryId) => {
@@ -373,6 +383,7 @@ const CategoryPage = () => {
           </div>
         </section>
       </main>
+      <HoveringCart />
     </div>
   );
 };

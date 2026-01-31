@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import HoveringCart from '../components/HoveringCart';
 import './homepage.css';
+import './OrderHistoryPage.css'; // Import dedicated CSS
 import logo from '../assets/logo.png';
 import restaurantImage from '../assets/restaurant.png';
 import heartImage from '../assets/heart.png';
@@ -29,64 +31,30 @@ const OrderHistoryPage = () => {
   ];
 
   // Order history data
-  const [orders, setOrders] = useState([
-    {
-      id: '#12345',
-      date: '2024-01-20',
-      time: '7:30 PM',
-      status: 'delivered',
-      items: [
-        { name: 'Butter Chicken', quantity: 1, price: 189, image: butterChickenImage },
-        { name: 'Naan Bread', quantity: 2, price: 40, icon: '🫓' }
-      ],
-      subtotal: 269,
-      deliveryFee: 40,
-      total: 309,
-      restaurant: 'Spice Garden'
-    },
-    {
-      id: '#12344',
-      date: '2024-01-18',
-      time: '1:15 PM',
-      status: 'delivered',
-      items: [
-        { name: 'Sushi Platter', quantity: 1, price: 259, image: sushiPlatterImage },
-        { name: 'Miso Soup', quantity: 1, price: 89, icon: '🍜' }
-      ],
-      subtotal: 348,
-      deliveryFee: 40,
-      total: 388,
-      restaurant: 'Sakura Sushi'
-    },
-    {
-      id: '#12343',
-      date: '2024-01-15',
-      time: '8:45 PM',
-      status: 'cancelled',
-      items: [
-        { name: 'Pepperoni Pizza', quantity: 1, price: 180 },
-        { name: 'Garlic Bread', quantity: 1, price: 60, icon: '🍞' }
-      ],
-      subtotal: 240,
-      deliveryFee: 40,
-      total: 280,
-      restaurant: 'Pizza Palace'
-    },
-    {
-      id: '#12342',
-      date: '2024-01-12',
-      time: '6:00 PM',
-      status: 'delivered',
-      items: [
-        { name: 'Spring Rolls', quantity: 2, price: 149, icon: '🍱' },
-        { name: 'Manchurian', quantity: 1, price: 119, icon: '🥟' }
-      ],
-      subtotal: 417,
-      deliveryFee: 40,
-      total: 457,
-      restaurant: 'Dragon Wok'
-    }
-  ]);
+  const [orders, setOrders] = useState([]);
+
+  useEffect(() => {
+    const savedHistory = JSON.parse(localStorage.getItem('orderHistory') || '[]');
+    
+    // Map saved orders to display format
+    const formattedOrders = savedHistory.map(order => {
+      const dateDate = new Date(order.timestamp);
+      return {
+        id: '#' + (order.orderNumber || Date.now()).toString().slice(-6), // Shorten ID for display
+        fullId: order.orderNumber,
+        date: dateDate.toLocaleDateString(),
+        time: dateDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        status: 'pending', // Default status for new orders
+        items: order.items || [],
+        subtotal: order.subtotal,
+        deliveryFee: order.deliveryFee,
+        total: order.total,
+        restaurant: 'Onigiri' // Default restaurant name
+      };
+    });
+    
+    setOrders(formattedOrders);
+  }, []);
 
   const [filterStatus, setFilterStatus] = useState('all');
 
@@ -104,10 +72,6 @@ const OrderHistoryPage = () => {
 
   const handleLogout = () => {
     navigate('/login');
-  };
-
-  const handleNavigateHome = () => {
-    navigate('/home');
   };
 
   const getStatusColor = (status) => {
@@ -185,24 +149,24 @@ const OrderHistoryPage = () => {
               className={`filter-btn ${filterStatus === 'all' ? 'active' : ''}`}
               onClick={() => setFilterStatus('all')}
             >
-              All Orders ({orders.length})
+              All
             </button>
             <button 
               className={`filter-btn ${filterStatus === 'delivered' ? 'active' : ''}`}
               onClick={() => setFilterStatus('delivered')}
             >
-              Delivered ({orders.filter(o => o.status === 'delivered').length})
+              Delivered
             </button>
             <button 
               className={`filter-btn ${filterStatus === 'cancelled' ? 'active' : ''}`}
               onClick={() => setFilterStatus('cancelled')}
             >
-              Cancelled ({orders.filter(o => o.status === 'cancelled').length})
+              Cancelled
             </button>
           </div>
         </section>
 
-        {/* Orders List */}
+        {/* Orders Grid */}
         <section className="orders-history-section">
           {filteredOrders.length > 0 ? (
             <div className="orders-list">
@@ -210,18 +174,18 @@ const OrderHistoryPage = () => {
                 <div key={order.id} className="order-card">
                   <div className="order-header">
                     <div className="order-info">
+                      <span className="restaurant-name">{order.restaurant}</span>
                       <h3>{order.id}</h3>
-                      <p>{order.restaurant}</p>
-                      <p>{order.date} at {order.time}</p>
+                      <span className="order-date">{order.date} • {order.time}</span>
                     </div>
                     <div className="order-status">
                       <span 
                         className="status-badge"
                         style={{ backgroundColor: getStatusColor(order.status) }}
                       >
-                        {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                        {order.status}
                       </span>
-                      <div className="order-total">₹{order.total}</div>
+                      <span className="order-total-badge">₹{order.total}</span>
                     </div>
                   </div>
                   
@@ -230,43 +194,30 @@ const OrderHistoryPage = () => {
                       <div key={index} className="order-item">
                         <span className="item-icon">
                           {item.image ? (
-                            <img src={item.image} alt={item.name} style={{width: '20px', height: '20px', objectFit: 'cover'}} />
+                            <img src={item.image} alt={item.name} style={{width: '100%', height: '100%', objectFit: 'cover'}} />
                           ) : (
                             item.icon
                           )}
                         </span>
                         <span className="item-name">{item.name}</span>
-                        <span className="item-quantity">x{item.quantity}</span>
-                        <span className="item-price">₹{item.price}</span>
+                        <div style={{ marginLeft: 'auto', display: 'flex', gap: '8px', alignItems: 'center' }}>
+                          <span className="item-quantity">x{item.quantity}</span>
+                          <span className="item-price">₹{item.price}</span>
+                        </div>
                       </div>
                     ))}
                   </div>
                   
-                  <div className="order-summary">
-                    <div className="summary-row">
-                      <span>Subtotal:</span>
-                      <span>₹{order.subtotal}</span>
-                    </div>
-                    <div className="summary-row">
-                      <span>Delivery Fee:</span>
-                      <span>₹{order.deliveryFee}</span>
-                    </div>
-                    <div className="summary-row total-row">
-                      <span>Total:</span>
-                      <span>₹{order.total}</span>
-                    </div>
-                  </div>
-                  
                   <div className="order-actions">
                     <button 
-                      className="order-btn"
+                      className="order-btn btn-secondary"
                       onClick={() => handleViewDetails(order)}
                     >
-                      View Details
+                      Details
                     </button>
                     {order.status === 'delivered' && (
                       <button 
-                        className="order-btn"
+                        className="order-btn btn-primary"
                         onClick={() => handleReorder(order)}
                       >
                         Reorder
@@ -281,8 +232,8 @@ const OrderHistoryPage = () => {
               <div className="empty-icon">📋</div>
               <h3>No orders found</h3>
               <p>No orders match the selected filter</p>
-              <button className="order-btn" onClick={() => navigate('/home')}>
-                Order Food
+              <button className="order-btn btn-primary" onClick={() => navigate('/home')}>
+                Browse Menu
               </button>
             </div>
           )}
@@ -296,6 +247,8 @@ const OrderHistoryPage = () => {
           </button>
         </footer>
       </main>
+
+      <HoveringCart />
     </div>
   );
 };
