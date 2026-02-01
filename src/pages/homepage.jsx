@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { useNotifications } from '../context/NotificationContext';
 import './homepage.css';
 import HoveringCart from '../components/HoveringCart';
+import NotificationButton from '../components/NotificationButton';
 import logo from '../assets/logo.png';
 import butterChickenImage from '../assets/vecteezy_butter-chicken-with_25270174.png';
 import sushiPlatterImage from '../assets/vecteezy_sushi-platter-with-different-types-of-sushi_27735645.png';
@@ -225,9 +227,7 @@ const Homepage = () => {
               <p>Ready to order delicious food?</p>
             </div>
           </div>
-          <button className="notification-btn">
-            <img src={notificationImage} alt="Notifications" style={{width: '30px', height: '30px', objectFit: 'cover'}} />
-          </button>
+          <NotificationButton onClick={() => navigate('/notifications')} />
         </header>
 
         {/* Discount Banner */}

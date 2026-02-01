@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useNotifications } from '../context/NotificationContext';
+import NotificationButton from '../components/NotificationButton';
 import { useCart } from '../context/CartContext';
 import HoveringCart from '../components/HoveringCart';
 import './homepage.css';
@@ -16,6 +18,7 @@ import userImage from '../assets/user.png';
 
 const FavoritePage = () => {
   const navigate = useNavigate();
+  const { addNotification } = useNotifications();
   const { addToCart } = useCart();
   const [activeNav, setActiveNav] = useState('favorite');
   
@@ -42,7 +45,16 @@ const FavoritePage = () => {
   ]);
 
   const handleRemoveFavorite = (id) => {
+    const item = favoriteItems.find(item => item.id === id);
     setFavoriteItems(favoriteItems.filter(item => item.id !== id));
+    
+    addNotification({
+      type: 'favorite',
+      title: 'Removed from Favorites',
+      message: `${item.name} has been removed from your favorites.`,
+      icon: '💔',
+      action: '/favorite'
+    });
   };
 
   const handleAddToCart = (item) => {
@@ -50,9 +62,18 @@ const FavoritePage = () => {
       id: item.id,
       name: item.name,
       price: parseFloat(item.price.replace('₹', '')),
-      icon: item.image ? '🍽️' : item.icon || '❤️' 
+      icon: item.icon || '🍽️'
     };
+    
     addToCart(cartItem);
+    
+    addNotification({
+      type: 'order',
+      title: 'Added to Cart',
+      message: `${item.name} has been added to your cart.`,
+      icon: '🛒',
+      action: '/home'
+    });
   };
 
   const handleLogout = () => {
@@ -118,7 +139,7 @@ const FavoritePage = () => {
               <p>Quick access to your loved dishes</p>
             </div>
           </div>
-          <button className="notification-btn">🔔</button>
+          <NotificationButton onClick={() => navigate('/notifications')} />
         </header>
 
         {/* Favorites Section */}

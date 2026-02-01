@@ -1,10 +1,12 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useNotifications } from './NotificationContext';
 
 const CartContext = createContext();
 
 export const useCart = () => useContext(CartContext);
 
 export const CartProvider = ({ children }) => {
+  const { addNotification } = useNotifications();
   const [cartItems, setCartItems] = useState(() => {
     try {
       const savedCart = localStorage.getItem('cartItems');
@@ -50,6 +52,46 @@ export const CartProvider = ({ children }) => {
     setCartItems([]);
   };
 
+  const checkout = (orderDetails) => {
+    const orderId = 'ORD' + Date.now();
+    const total = getCartTotal();
+    
+    // Add order placed notification
+    addNotification({
+      type: 'order',
+      title: 'Order Placed Successfully!',
+      message: `Your order #${orderId} for ₹${total.toFixed(2)} has been placed and will be delivered soon.`,
+      icon: '📦',
+      action: '/order-history'
+    });
+
+    // Simulate order status updates
+    setTimeout(() => {
+      addNotification({
+        type: 'order',
+        title: 'Order Confirmed',
+        message: `Your order #${orderId} has been confirmed by the restaurant.`,
+        icon: '✅',
+        action: '/order-history'
+      });
+    }, 2000);
+
+    setTimeout(() => {
+      addNotification({
+        type: 'order',
+        title: 'Order Out for Delivery',
+        message: `Your order #${orderId} is on the way and will arrive soon.`,
+        icon: '🚚',
+        action: '/order-history'
+      });
+    }, 10000);
+
+    // Clear cart after checkout
+    setCartItems([]);
+    
+    return { orderId, total };
+  };
+
   const getCartTotal = () => {
     return cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
   };
@@ -65,6 +107,7 @@ export const CartProvider = ({ children }) => {
       removeFromCart,
       updateQuantity,
       clearCart,
+      checkout,
       getCartTotal,
       getCartCount
     }}>

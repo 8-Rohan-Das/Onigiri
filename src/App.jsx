@@ -12,13 +12,16 @@ import OrderHistoryPage from './pages/OrderHistoryPage';
 import OthersPage from './pages/OthersPage';
 import CheckoutPage from './pages/CheckoutPage';
 import OrderConfirmationPage from './pages/OrderConfirmationPage';
+import NotificationPage from './pages/NotificationPage';
 
 import { CartProvider } from './context/CartContext';
+import { NotificationProvider } from './context/NotificationContext';
 
 function App() {
   return (
-    <CartProvider>
-      <BrowserRouter>
+    <NotificationProvider>
+      <CartProvider>
+        <BrowserRouter>
         <Routes>
           <Route path="/" element={<LoginPage />} />
           <Route path="/login" element={<LoginPage />} />
@@ -31,9 +34,11 @@ function App() {
           <Route path="/others" element={<OthersPage />} />
           <Route path="/checkout" element={<CheckoutPage />} />
           <Route path="/order-confirmation" element={<OrderConfirmationPage />} />
+          <Route path="/notifications" element={<NotificationPage />} />
         </Routes>
       </BrowserRouter>
     </CartProvider>
+    </NotificationProvider>
   );
 }
 

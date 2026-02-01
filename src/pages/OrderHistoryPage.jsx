@@ -1,5 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useNotifications } from '../context/NotificationContext';
+import NotificationButton from '../components/NotificationButton';
 import HoveringCart from '../components/HoveringCart';
 import './homepage.css';
 import './OrderHistoryPage.css'; // Import dedicated CSS
@@ -170,7 +172,7 @@ const OrderHistoryPage = () => {
               <p>View and track your past orders</p>
             </div>
           </div>
-          <button className="notification-btn">🔔</button>
+          <NotificationButton onClick={() => navigate('/notifications')} />
         </header>
 
         {/* Filter Section */}
