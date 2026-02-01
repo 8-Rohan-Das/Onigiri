@@ -34,26 +34,58 @@ const OrderHistoryPage = () => {
   const [orders, setOrders] = useState([]);
 
   useEffect(() => {
-    const savedHistory = JSON.parse(localStorage.getItem('orderHistory') || '[]');
-    
-    // Map saved orders to display format
-    const formattedOrders = savedHistory.map(order => {
-      const dateDate = new Date(order.timestamp);
-      return {
-        id: '#' + (order.orderNumber || Date.now()).toString().slice(-6), // Shorten ID for display
-        fullId: order.orderNumber,
-        date: dateDate.toLocaleDateString(),
-        time: dateDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        status: 'pending', // Default status for new orders
-        items: order.items || [],
-        subtotal: order.subtotal,
-        deliveryFee: order.deliveryFee,
-        total: order.total,
-        restaurant: 'Onigiri' // Default restaurant name
-      };
-    });
-    
-    setOrders(formattedOrders);
+    try {
+      // Get order history from localStorage
+      const savedHistory = JSON.parse(localStorage.getItem('orderHistory') || '[]');
+      
+      // Also check for lastOrder and add it to history if not already there
+      const lastOrder = JSON.parse(localStorage.getItem('lastOrder') || 'null');
+      
+      let allOrders = [...savedHistory];
+      
+      // Add lastOrder to history if it exists and isn't already included
+      if (lastOrder && !allOrders.find(order => order.orderNumber === lastOrder.orderNumber)) {
+        allOrders.unshift(lastOrder);
+        // Update localStorage to include this order
+        localStorage.setItem('orderHistory', JSON.stringify(allOrders));
+        // Clear lastOrder since it's now in history
+        localStorage.removeItem('lastOrder');
+      }
+      
+      // Map saved orders to display format with error handling
+      const formattedOrders = allOrders.map(order => {
+        try {
+          const dateDate = order.timestamp ? new Date(order.timestamp) : new Date();
+          
+          // Validate date
+          if (isNaN(dateDate.getTime())) {
+            console.warn('Invalid timestamp for order:', order.orderNumber);
+            return null;
+          }
+          
+          return {
+            id: '#' + (order.orderNumber || Date.now()).toString().slice(-6),
+            fullId: order.orderNumber,
+            date: dateDate.toLocaleDateString(),
+            time: dateDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            status: order.status || 'pending',
+            items: Array.isArray(order.items) ? order.items : [],
+            subtotal: order.subtotal || 0,
+            deliveryFee: order.deliveryFee || 0,
+            total: order.total || 0,
+            restaurant: order.restaurant || 'Onigiri'
+          };
+        } catch (error) {
+          console.error('Error processing order:', order, error);
+          return null;
+        }
+      }).filter(order => order !== null); // Remove any null entries
+      
+      setOrders(formattedOrders);
+    } catch (error) {
+      console.error('Error loading order history:', error);
+      setOrders([]); // Set empty array on error
+    }
   }, []);
 
   const [filterStatus, setFilterStatus] = useState('all');
@@ -181,31 +213,45 @@ const OrderHistoryPage = () => {
                     <div className="order-status">
                       <span 
                         className="status-badge"
-                        style={{ backgroundColor: getStatusColor(order.status) }}
+                        style={{ backgroundColor: getStatusColor(order.status || 'pending') }}
                       >
-                        {order.status}
+                        {order.status || 'pending'}
                       </span>
-                      <span className="order-total-badge">₹{order.total}</span>
+                      <span className="order-total-badge">₹{(order.total || 0).toFixed(2)}</span>
                     </div>
                   </div>
                   
                   <div className="order-items">
-                    {order.items.map((item, index) => (
-                      <div key={index} className="order-item">
-                        <span className="item-icon">
-                          {item.image ? (
-                            <img src={item.image} alt={item.name} style={{width: '100%', height: '100%', objectFit: 'cover'}} />
-                          ) : (
-                            item.icon
-                          )}
-                        </span>
-                        <span className="item-name">{item.name}</span>
-                        <div style={{ marginLeft: 'auto', display: 'flex', gap: '8px', alignItems: 'center' }}>
-                          <span className="item-quantity">x{item.quantity}</span>
-                          <span className="item-price">₹{item.price}</span>
+                    {order.items && order.items.length > 0 ? (
+                      order.items.map((item, index) => (
+                        <div key={item.id || index} className="order-item">
+                          <span className="item-icon">
+                            {item.image ? (
+                              <img 
+                                src={item.image} 
+                                alt={item.name || 'Item'} 
+                                style={{width: '100%', height: '100%', objectFit: 'cover'}} 
+                                onError={(e) => {
+                                  e.target.style.display = 'none';
+                                  e.target.parentElement.innerHTML = item.icon || '🍽️';
+                                }}
+                              />
+                            ) : (
+                              item.icon || '🍽️'
+                            )}
+                          </span>
+                          <span className="item-name">{item.name || 'Unknown Item'}</span>
+                          <div style={{ marginLeft: 'auto', display: 'flex', gap: '8px', alignItems: 'center' }}>
+                            <span className="item-quantity">x{item.quantity || 1}</span>
+                            <span className="item-price">₹{(item.price || 0).toFixed(2)}</span>
+                          </div>
                         </div>
+                      ))
+                    ) : (
+                      <div className="order-item">
+                        <span className="item-name">No items details available</span>
                       </div>
-                    ))}
+                    )}
                   </div>
                   
                   <div className="order-actions">
