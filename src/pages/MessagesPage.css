@@ -20,16 +20,16 @@
   align-items: center;
   margin-bottom: 20px;
   padding: 16px 20px;
-  background: white;
+  background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
   border-radius: 12px;
-  color: var(--text-dark);
-  box-shadow: var(--shadow-light);
+  color: white;
 }
 
 .inbox-header .section-title {
   margin: 0;
   font-size: 24px;
   font-weight: 600;
+  color: white;
 }
 
 .inbox-actions {
@@ -49,21 +49,21 @@
 }
 
 .mark-all-read-btn {
-  background: var(--primary-gradient-start);
+  background: rgba(255, 255, 255, 0.2);
   color: white;
 }
 
 .mark-all-read-btn:hover {
-  background: var(--primary-gradient-end);
+  background: rgba(255, 255, 255, 0.3);
 }
 
 .clear-inbox-btn {
-  background: #dc3545;
+  background: rgba(255, 67, 54, 0.8);
   color: white;
 }
 
 .clear-inbox-btn:hover {
-  background: #c82333;
+  background: rgba(255, 67, 54, 1);
 }
 
 /* Empty Inbox */

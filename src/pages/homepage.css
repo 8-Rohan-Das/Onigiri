@@ -157,15 +157,14 @@
 
 
 .nav-item.active {
-
   background: linear-gradient(90deg, var(--primary-gradient-start), var(--primary-gradient-end));
-
   color: white;
-
   box-shadow: 0 4px 15px rgba(139, 30, 63, 0.3);
-
 }
 
+.nav-item.active .nav-icon img {
+  filter: brightness(0) invert(1);
+}
 
 
 .nav-icon {
