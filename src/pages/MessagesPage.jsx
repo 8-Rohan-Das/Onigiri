@@ -144,6 +144,8 @@ const MessagesPage = () => {
   };
 
   const handleLogout = () => {
+    // Clear user data from localStorage
+    localStorage.removeItem('user');
     navigate('/login');
   };
 

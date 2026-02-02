@@ -98,6 +98,16 @@ const LoginPage = () => {
     setTimeout(() => {
       if (formData.email === 'user@onigiri.com' && formData.password === 'password') {
         console.log('Login successful!');
+        
+        // Store user data in localStorage
+        const userData = {
+          email: formData.email,
+          name: 'John Doe', // Default name for demo
+          id: 'user123',
+          loginTime: new Date().toISOString()
+        };
+        localStorage.setItem('user', JSON.stringify(userData));
+        
         navigate('/home'); // Redirect to homepage after successful login
       } else {
         setError('Invalid email or password. Try user@onigiri.com / password');
