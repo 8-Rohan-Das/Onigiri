@@ -1,7 +1,21 @@
-/* Order History specific styles */
+/* Order History specific styles - Matching Homepage Theme */
+
+:root {
+  --primary-gradient-start: #8B1E3F;
+  --primary-gradient-end: #F2542D;
+  --accent-gold: #F6AE2D;
+  --global-bg: #FFFFFF;
+  --card-bg: #FFFFFF;
+  --text-dark: #2D3436;
+  --text-light: #636E72;
+  --border-light: #F0F0F0;
+  --shadow-light: rgba(0, 0, 0, 0.05);
+  --shadow-medium: rgba(0, 0, 0, 0.1);
+}
+
 .order-history-container {
   padding: 30px;
-  background-color: var(--bg-color, #f5f7fa);
+  background-color: var(--global-bg);
   min-height: 100vh;
 }
 

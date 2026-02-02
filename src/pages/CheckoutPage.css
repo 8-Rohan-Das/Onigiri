@@ -21,10 +21,16 @@ body {
 
 
 :root{
-  --bg:#F5F7FA;
-  --accent:#FF6B35;
-  --muted:#636E72;
-  --card:#FFFFFF;
+  --primary-gradient-start: #8B1E3F;
+  --primary-gradient-end: #F2542D;
+  --accent-gold: #F6AE2D;
+  --global-bg: #FFFFFF;
+  --card-bg: #FFFFFF;
+  --text-dark: #2D3436;
+  --text-light: #636E72;
+  --border-light: #F0F0F0;
+  --shadow-light: rgba(0, 0, 0, 0.05);
+  --shadow-medium: rgba(0, 0, 0, 0.1);
   --shadow: 0 5px 15px rgba(0,0,0,0.06);
   --radius: 12px;
   --max-width: 1400px;

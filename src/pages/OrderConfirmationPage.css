@@ -1,6 +1,20 @@
-/* ORDER CONFIRMATION PAGE STYLES */
+/* ORDER CONFIRMATION PAGE STYLES - Matching Homepage Theme */
+
+:root {
+  --primary-gradient-start: #8B1E3F;
+  --primary-gradient-end: #F2542D;
+  --accent-gold: #F6AE2D;
+  --global-bg: #FFFFFF;
+  --card-bg: #FFFFFF;
+  --text-dark: #2D3436;
+  --text-light: #636E72;
+  --border-light: #F0F0F0;
+  --shadow-light: rgba(0, 0, 0, 0.05);
+  --shadow-medium: rgba(0, 0, 0, 0.1);
+}
+
 .confirmation-container {
-  background: linear-gradient(135deg, #F5F7FA 0%, #E8F0FE 100%);
+  background: var(--global-bg);
   font-family: 'Poppins', sans-serif;
   min-height: 100vh;
   display: flex;

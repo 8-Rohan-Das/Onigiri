@@ -1,4 +1,17 @@
-/* Enhanced Inbox Styles */
+/* Enhanced Inbox Styles - Matching Homepage Theme */
+
+:root {
+  --primary-gradient-start: #8B1E3F;
+  --primary-gradient-end: #F2542D;
+  --accent-gold: #F6AE2D;
+  --global-bg: #FFFFFF;
+  --card-bg: #FFFFFF;
+  --text-dark: #2D3436;
+  --text-light: #636E72;
+  --border-light: #F0F0F0;
+  --shadow-light: rgba(0, 0, 0, 0.05);
+  --shadow-medium: rgba(0, 0, 0, 0.1);
+}
 
 /* Inbox Header */
 .inbox-header {
@@ -7,7 +20,7 @@
   align-items: center;
   margin-bottom: 20px;
   padding: 16px 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
   border-radius: 12px;
   color: white;
 }
