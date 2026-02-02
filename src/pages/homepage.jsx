@@ -143,35 +143,43 @@ const Homepage = () => {
 
   const scrollDishes = (direction) => {
     const grid = document.getElementById('dishesGrid');
-    if (grid) {
-      const scrollAmount = 300;
-      const startScroll = grid.scrollLeft;
-      const targetScroll = direction === 'left' 
-        ? Math.max(0, startScroll - scrollAmount)
-        : startScroll + scrollAmount;
-      
-      // Smooth animation
-      const duration = 300;
-      const startTime = performance.now();
-      
-      const animateScroll = (currentTime) => {
-        const elapsed = currentTime - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-        
-        // Easing function for smooth animation
-        const easeInOutCubic = progress < 0.5
-          ? 4 * progress * progress * progress
-          : 1 - Math.pow(-2 * progress + 2, 3) / 2;
-        
-        grid.scrollLeft = startScroll + (targetScroll - startScroll) * easeInOutCubic;
-        
-        if (progress < 1) {
-          requestAnimationFrame(animateScroll);
-        }
-      };
-      
-      requestAnimationFrame(animateScroll);
+    if (!grid) return;
+    
+    // Cancel any existing scroll animation
+    if (grid.scrollAnimationId) {
+      cancelAnimationFrame(grid.scrollAnimationId);
     }
+    
+    const scrollAmount = 320; // Slightly larger for better feel
+    const startScroll = grid.scrollLeft;
+    const targetScroll = direction === 'left' 
+      ? Math.max(0, startScroll - scrollAmount)
+      : Math.min(grid.scrollWidth - grid.clientWidth, startScroll + scrollAmount);
+    
+    // Don't scroll if already at the edge
+    if (targetScroll === startScroll) return;
+    
+    // Optimized smooth animation with better easing
+    const duration = 250; // Slightly faster
+    const startTime = performance.now();
+    
+    const animateScroll = (currentTime) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      
+      // Optimized easing function - less expensive calculation
+      const easeOutCubic = 1 - Math.pow(1 - progress, 3);
+      
+      grid.scrollLeft = startScroll + (targetScroll - startScroll) * easeOutCubic;
+      
+      if (progress < 1) {
+        grid.scrollAnimationId = requestAnimationFrame(animateScroll);
+      } else {
+        grid.scrollAnimationId = null;
+      }
+    };
+    
+    grid.scrollAnimationId = requestAnimationFrame(animateScroll);
   };
 
   return (
@@ -264,7 +272,13 @@ const Homepage = () => {
               >
                 <div className="category-icon">
                   {category.image ? (
-                    <img src={category.image} alt={category.name} style={{width: '50px', height: '50px', objectFit: 'cover'}} />
+                    <img 
+                      src={category.image} 
+                      alt={category.name} 
+                      style={{width: '50px', height: '50px', objectFit: 'cover'}}
+                      loading="lazy"
+                      decoding="async"
+                    />
                   ) : (
                     category.icon
                   )}
@@ -294,7 +308,14 @@ const Homepage = () => {
                     <div className="dish-image">
                       <span className="dish-badge">{dish.discount}</span>
                       {dish.image ? (
-                        <img src={dish.image} alt={dish.name} className="dish-emoji" style={{width: '100%', height: '100%', objectFit: 'cover'}} />
+                        <img 
+                          src={dish.image} 
+                          alt={dish.name} 
+                          className="dish-emoji" 
+                          style={{width: '100%', height: '100%', objectFit: 'cover'}}
+                          loading="lazy"
+                          decoding="async"
+                        />
                       ) : (
                         <span className="dish-emoji">{dish.icon}</span>
                       )}

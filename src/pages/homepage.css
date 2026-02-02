@@ -627,25 +627,22 @@
 
 
 .dishes-grid {
-
   display: flex;
-
   gap: 20px;
-
   overflow-x: auto;
-
-  scroll-behavior: smooth;
-
+  scroll-behavior: auto; /* Remove smooth to use our custom animation */
   scrollbar-width: none; /* Firefox */
-
   -ms-overflow-style: none; /* IE and Edge */
-
   padding: 10px 0;
-
   width: 100%;
-
   flex-wrap: nowrap;
-
+  /* Performance optimizations */
+  will-change: transform;
+  contain: layout style paint;
+  /* Hardware acceleration */
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
 }
 
 
@@ -666,11 +663,18 @@
   min-width: 280px;
   max-width: 280px;
   flex-shrink: 0;
+  /* Performance optimizations */
+  will-change: transform;
+  contain: layout style paint;
+  /* Hardware acceleration */
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
 }
 
 .dish-card:hover {
   background-color: #e8eaed;
-  transform: translateY(-2px);
+  transform: translateY(-2px) translateZ(0);
 }
 
 .dish-badge {
