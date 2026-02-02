@@ -1,13 +1,18 @@
 /* Import Poppins, Montserrat, Inter, Yellowtail, and Nunito fonts */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Montserrat:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700&family=Yellowtail&family=Nunito:wght@400;500;600;700;800&display=swap');
 
-/* CSS Variables */
+/* CSS Variables - Matching Homepage Theme */
 :root {
-  --primary: #FF6B35; /* Appetite orange */
-  --accent: #2A9D8F;  /* Fresh green */
-  --dark: #1D3557;    /* Trust blue */
-  --light: #F8F7F3;   /* Clean cream */
-  --cta: #E63946;     /* Urgency red */
+  --primary-gradient-start: #8B1E3F;
+  --primary-gradient-end: #F2542D;
+  --accent-gold: #F6AE2D;
+  --global-bg: #FFFFFF;
+  --card-bg: #FFFFFF;
+  --text-dark: #2D3436;
+  --text-light: #636E72;
+  --border-light: #F0F0F0;
+  --shadow-light: rgba(0, 0, 0, 0.05);
+  --shadow-medium: rgba(0, 0, 0, 0.1);
 }
 
 * {
@@ -18,7 +23,7 @@
 
 body {
   font-family: 'Poppins', sans-serif;
-  background: var(--light);
+  background: var(--global-bg);
   overflow: hidden;
 }
 
@@ -30,7 +35,7 @@ body {
 
 /* LEFT SECTION */
 .welcome-section {
-  background: linear-gradient(135deg, #ff6b35, #f7931e);
+  background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
   color: white;
   overflow: hidden;
   flex: 1;
@@ -555,7 +560,7 @@ body {
 
 /* RIGHT SECTION */
 .login-section {
-  background: #fffbf5;
+  background: var(--global-bg);
   position: relative;
   flex: 1;
   display: flex;
@@ -566,24 +571,24 @@ body {
 }
 
 .title {
-  color: #2a7f62;
+  color: var(--primary-gradient-start);
   font-weight: 600;
 }
 
 .subtitle {
-  color: #666;
+  color: var(--text-light);
   margin-bottom: 30px;
 }
 
 .input-custom {
   width: 100%;
   padding: 12px 16px;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--border-light);
   border-radius: 8px;
   font-size: 16px;
   transition: all 0.3s ease;
-  background-color: #fff;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  background-color: var(--card-bg);
+  box-shadow: var(--shadow-light);
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
@@ -597,30 +602,20 @@ body {
 .btn-login {
   width: 100%;
   padding: 16px;
-  background: var(--primary);
+  background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
   color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: 12px;
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  margin-top: 10px;
-  -webkit-tap-highlight-color: transparent;
-  
-  @media (max-width: 480px) {
-    padding: 14px;
-    font-size: 15px;
-  }
-  
-  &:active {
-    transform: scale(0.98);
-  }
+  font-family: 'Poppins', sans-serif;
 }
 
 .btn-login:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(30, 126, 52, 0.4);
+  box-shadow: 0 8px 25px rgba(139, 30, 63, 0.3);
 }
 
 .divider {
@@ -640,15 +635,15 @@ body {
 }
 
 .divider span {
-  background: #fffbf5;
+  background: var(--global-bg);
   padding: 0 15px;
-  color: #999;
+  color: var(--text-light);
   position: relative;
   z-index: 1;
 }
 
 .forgot {
-  color: #ff6b35;
+  color: var(--primary-gradient-start);
   text-decoration: none;
   font-weight: 500;
 }
@@ -658,7 +653,7 @@ body {
 }
 
 .signup {
-  color: #ff6b35;
+  color: var(--primary-gradient-start);
   font-weight: 600;
   cursor: pointer;
   text-decoration: none;
