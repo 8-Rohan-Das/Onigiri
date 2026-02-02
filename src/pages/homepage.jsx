@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useCart } from '../context/CartContext';
+import { useNotifications } from '../context/NotificationContext';
 import './homepage.css';
+import HoveringCart from '../components/HoveringCart';
+import NotificationButton from '../components/NotificationButton';
 import logo from '../assets/logo.png';
 import butterChickenImage from '../assets/vecteezy_butter-chicken-with_25270174.png';
 import sushiPlatterImage from '../assets/vecteezy_sushi-platter-with-different-types-of-sushi_27735645.png';
@@ -29,18 +33,13 @@ import userImage from '../assets/user.png';
 
 const Homepage = () => {
   const navigate = useNavigate();
+  const { cartItems, addToCart } = useCart();
   const [activeNav, setActiveNav] = useState('food-order');
   const [activeCategory, setActiveCategory] = useState('all');
   
   // Get user data from localStorage
   const userData = JSON.parse(localStorage.getItem('user')) || {};
   const userName = userData.name || 'Guest';
-  
-  const [cartItems, setCartItems] = useState([
-    { id: 1, name: 'Vegan Pizza Dough', quantity: 1, price: 120.00, icon: '🍕' },
-    { id: 2, name: 'Pepperoni Pizza', quantity: 1, price: 180.00, icon: '🍕' },
-    { id: 3, name: 'Fish Burger & Vege', quantity: 1, price: 150.00, icon: '🍔' },
-  ]);
 
   // Navigation items
   const navItems = [
@@ -65,15 +64,15 @@ const Homepage = () => {
 
   // Popular dishes
   const popularDishes = [
-    { id: 1, name: 'Butter Chicken', price: '₹189', discount: '15% Off', image: butterChickenImage },
-    { id: 2, name: 'Sushi Platter', price: '₹259', discount: '10% Off', image: sushiPlatterImage },
-    { id: 3, name: 'Spring Rolls', price: '₹149', discount: '20% Off', image: springRollsImage },
-    { id: 4, name: 'Manchurian Soup', price: '₹119', discount: '25% Off', image: manchurianSoupImage },
-    { id: 5, name: 'Dim Sum', price: '₹289', discount: '25% Off', image: dimSumImage },
-    { id: 6, name: 'Peking Duck', price: '₹329', discount: '15% Off', image: pekingDuckImage },
-    { id: 7, name: 'Kung Pao', price: '₹179', image: kungPaoImage },
-    { id: 8, name: 'Tempura', price: '₹99', discount: 'Buy 2 Get 1', image: tempuraImage },
-    { id: 9, name: 'Biryani', price: '₹349', discount: 'Special', image: biryaniImage },
+    { id: 'home-1', name: 'Butter Chicken', price: '₹189', discount: '15% Off', image: butterChickenImage },
+    { id: 'home-2', name: 'Sushi Platter', price: '₹259', discount: '10% Off', image: sushiPlatterImage },
+    { id: 'home-3', name: 'Spring Rolls', price: '₹149', discount: '20% Off', image: springRollsImage },
+    { id: 'home-4', name: 'Manchurian Soup', price: '₹119', discount: '25% Off', image: manchurianSoupImage },
+    { id: 'home-5', name: 'Dim Sum', price: '₹289', discount: '25% Off', image: dimSumImage },
+    { id: 'home-6', name: 'Peking Duck', price: '₹329', discount: '15% Off', image: pekingDuckImage },
+    { id: 'home-7', name: 'Kung Pao', price: '₹179', image: kungPaoImage },
+    { id: 'home-8', name: 'Tempura', price: '₹99', discount: 'Buy 2 Get 1', image: tempuraImage },
+    { id: 'home-9', name: 'Biryani', price: '₹349', discount: 'Special', image: biryaniImage },
   ];
 
   // Recent orders
@@ -90,11 +89,17 @@ const Homepage = () => {
 
   // Handlers
   const handleAddToCart = (dish) => {
-    alert(`Added ${dish.name} to cart!`);
+    const cartItem = {
+      id: dish.id || Date.now(),
+      name: dish.name,
+      price: parseFloat(dish.price.replace('₹', '')),
+      icon: dish.icon || '🍽️'
+    };
+    addToCart(cartItem);
   };
 
   const handleCheckout = () => {
-    alert(`Proceeding to checkout! Total: ₹${total.toFixed(2)}`);
+    navigate('/checkout');
   };
 
   const handleLogout = () => {
@@ -105,11 +110,32 @@ const Homepage = () => {
     const grid = document.getElementById('categoriesGrid');
     if (grid) {
       const scrollAmount = 200;
-      if (direction === 'left') {
-        grid.scrollLeft -= scrollAmount;
-      } else {
-        grid.scrollLeft += scrollAmount;
-      }
+      const startScroll = grid.scrollLeft;
+      const targetScroll = direction === 'left' 
+        ? Math.max(0, startScroll - scrollAmount)
+        : startScroll + scrollAmount;
+      
+      // Smooth animation
+      const duration = 300;
+      const startTime = performance.now();
+      
+      const animateScroll = (currentTime) => {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        
+        // Easing function for smooth animation
+        const easeInOutCubic = progress < 0.5
+          ? 4 * progress * progress * progress
+          : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+        
+        grid.scrollLeft = startScroll + (targetScroll - startScroll) * easeInOutCubic;
+        
+        if (progress < 1) {
+          requestAnimationFrame(animateScroll);
+        }
+      };
+      
+      requestAnimationFrame(animateScroll);
     }
   };
 
@@ -117,11 +143,32 @@ const Homepage = () => {
     const grid = document.getElementById('dishesGrid');
     if (grid) {
       const scrollAmount = 300;
-      if (direction === 'left') {
-        grid.scrollLeft -= scrollAmount;
-      } else {
-        grid.scrollLeft += scrollAmount;
-      }
+      const startScroll = grid.scrollLeft;
+      const targetScroll = direction === 'left' 
+        ? Math.max(0, startScroll - scrollAmount)
+        : startScroll + scrollAmount;
+      
+      // Smooth animation
+      const duration = 300;
+      const startTime = performance.now();
+      
+      const animateScroll = (currentTime) => {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        
+        // Easing function for smooth animation
+        const easeInOutCubic = progress < 0.5
+          ? 4 * progress * progress * progress
+          : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+        
+        grid.scrollLeft = startScroll + (targetScroll - startScroll) * easeInOutCubic;
+        
+        if (progress < 1) {
+          requestAnimationFrame(animateScroll);
+        }
+      };
+      
+      requestAnimationFrame(animateScroll);
     }
   };
 
@@ -180,9 +227,7 @@ const Homepage = () => {
               <p>Ready to order delicious food?</p>
             </div>
           </div>
-          <button className="notification-btn">
-            <img src={notificationImage} alt="Notifications" style={{width: '30px', height: '30px', objectFit: 'cover'}} />
-          </button>
+          <NotificationButton onClick={() => navigate('/notifications')} />
         </header>
 
         {/* Discount Banner */}
@@ -368,12 +413,15 @@ const Homepage = () => {
 
         {/* Footer */}
         <footer className="homepage-footer">
-          <p>© 2026 Onigiri - Delicious Food Delivery</p>
+          <p> 2026 Onigiri - Delicious Food Delivery</p>
           <button className="logout-btn" onClick={handleLogout}>
             Logout
           </button>
         </footer>
       </main>
+      
+      {/* Hovering Cart */}
+      <HoveringCart />
     </div>
   );
 };

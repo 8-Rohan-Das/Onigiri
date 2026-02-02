@@ -1,5 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useNotifications } from '../context/NotificationContext';
+import NotificationButton from '../components/NotificationButton';
+import HoveringCart from '../components/HoveringCart';
 import './homepage.css';
 import './OthersPage.css';
 import logo from '../assets/logo.png';
@@ -12,6 +15,7 @@ import userImage from '../assets/user.png';
 
 const OthersPage = () => {
   const navigate = useNavigate();
+  const { addNotification } = useNotifications();
   const [activeNav, setActiveNav] = useState('others');
   
   // Get user data from localStorage
@@ -68,6 +72,14 @@ const OthersPage = () => {
       ...userData,
       ...profile
     }));
+    
+    addNotification({
+      type: 'settings',
+      title: 'Profile Updated',
+      message: 'Your profile information has been successfully updated.',
+      icon: '⚙️',
+      action: '/others'
+    });
     alert('Profile updated successfully!');
   };
 
@@ -146,7 +158,7 @@ const OthersPage = () => {
               <p>Manage your account and preferences</p>
             </div>
           </div>
-          <button className="notification-btn">🔔</button>
+          <NotificationButton onClick={() => navigate('/notifications')} />
         </header>
 
         <div className="settings-container">

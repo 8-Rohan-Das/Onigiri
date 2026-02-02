@@ -1,6 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useNotifications } from '../context/NotificationContext';
+import NotificationButton from '../components/NotificationButton';
+import HoveringCart from '../components/HoveringCart';
 import './homepage.css';
+import './OrderHistoryPage.css'; // Import dedicated CSS
 import logo from '../assets/logo.png';
 import restaurantImage from '../assets/restaurant.png';
 import heartImage from '../assets/heart.png';
@@ -29,64 +33,62 @@ const OrderHistoryPage = () => {
   ];
 
   // Order history data
-  const [orders, setOrders] = useState([
-    {
-      id: '#12345',
-      date: '2024-01-20',
-      time: '7:30 PM',
-      status: 'delivered',
-      items: [
-        { name: 'Butter Chicken', quantity: 1, price: 189, image: butterChickenImage },
-        { name: 'Naan Bread', quantity: 2, price: 40, icon: '🫓' }
-      ],
-      subtotal: 269,
-      deliveryFee: 40,
-      total: 309,
-      restaurant: 'Spice Garden'
-    },
-    {
-      id: '#12344',
-      date: '2024-01-18',
-      time: '1:15 PM',
-      status: 'delivered',
-      items: [
-        { name: 'Sushi Platter', quantity: 1, price: 259, image: sushiPlatterImage },
-        { name: 'Miso Soup', quantity: 1, price: 89, icon: '🍜' }
-      ],
-      subtotal: 348,
-      deliveryFee: 40,
-      total: 388,
-      restaurant: 'Sakura Sushi'
-    },
-    {
-      id: '#12343',
-      date: '2024-01-15',
-      time: '8:45 PM',
-      status: 'cancelled',
-      items: [
-        { name: 'Pepperoni Pizza', quantity: 1, price: 180 },
-        { name: 'Garlic Bread', quantity: 1, price: 60, icon: '🍞' }
-      ],
-      subtotal: 240,
-      deliveryFee: 40,
-      total: 280,
-      restaurant: 'Pizza Palace'
-    },
-    {
-      id: '#12342',
-      date: '2024-01-12',
-      time: '6:00 PM',
-      status: 'delivered',
-      items: [
-        { name: 'Spring Rolls', quantity: 2, price: 149, icon: '🍱' },
-        { name: 'Manchurian', quantity: 1, price: 119, icon: '🥟' }
-      ],
-      subtotal: 417,
-      deliveryFee: 40,
-      total: 457,
-      restaurant: 'Dragon Wok'
+  const [orders, setOrders] = useState([]);
+
+  useEffect(() => {
+    try {
+      // Get order history from localStorage
+      const savedHistory = JSON.parse(localStorage.getItem('orderHistory') || '[]');
+      
+      // Also check for lastOrder and add it to history if not already there
+      const lastOrder = JSON.parse(localStorage.getItem('lastOrder') || 'null');
+      
+      let allOrders = [...savedHistory];
+      
+      // Add lastOrder to history if it exists and isn't already included
+      if (lastOrder && !allOrders.find(order => order.orderNumber === lastOrder.orderNumber)) {
+        allOrders.unshift(lastOrder);
+        // Update localStorage to include this order
+        localStorage.setItem('orderHistory', JSON.stringify(allOrders));
+        // Clear lastOrder since it's now in history
+        localStorage.removeItem('lastOrder');
+      }
+      
+      // Map saved orders to display format with error handling
+      const formattedOrders = allOrders.map(order => {
+        try {
+          const dateDate = order.timestamp ? new Date(order.timestamp) : new Date();
+          
+          // Validate date
+          if (isNaN(dateDate.getTime())) {
+            console.warn('Invalid timestamp for order:', order.orderNumber);
+            return null;
+          }
+          
+          return {
+            id: '#' + (order.orderNumber || Date.now()).toString().slice(-6),
+            fullId: order.orderNumber,
+            date: dateDate.toLocaleDateString(),
+            time: dateDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            status: order.status || 'pending',
+            items: Array.isArray(order.items) ? order.items : [],
+            subtotal: order.subtotal || 0,
+            deliveryFee: order.deliveryFee || 0,
+            total: order.total || 0,
+            restaurant: order.restaurant || 'Onigiri'
+          };
+        } catch (error) {
+          console.error('Error processing order:', order, error);
+          return null;
+        }
+      }).filter(order => order !== null); // Remove any null entries
+      
+      setOrders(formattedOrders);
+    } catch (error) {
+      console.error('Error loading order history:', error);
+      setOrders([]); // Set empty array on error
     }
-  ]);
+  }, []);
 
   const [filterStatus, setFilterStatus] = useState('all');
 
@@ -104,10 +106,6 @@ const OrderHistoryPage = () => {
 
   const handleLogout = () => {
     navigate('/login');
-  };
-
-  const handleNavigateHome = () => {
-    navigate('/home');
   };
 
   const getStatusColor = (status) => {
@@ -174,7 +172,7 @@ const OrderHistoryPage = () => {
               <p>View and track your past orders</p>
             </div>
           </div>
-          <button className="notification-btn">🔔</button>
+          <NotificationButton onClick={() => navigate('/notifications')} />
         </header>
 
         {/* Filter Section */}
@@ -185,24 +183,24 @@ const OrderHistoryPage = () => {
               className={`filter-btn ${filterStatus === 'all' ? 'active' : ''}`}
               onClick={() => setFilterStatus('all')}
             >
-              All Orders ({orders.length})
+              All
             </button>
             <button 
               className={`filter-btn ${filterStatus === 'delivered' ? 'active' : ''}`}
               onClick={() => setFilterStatus('delivered')}
             >
-              Delivered ({orders.filter(o => o.status === 'delivered').length})
+              Delivered
             </button>
             <button 
               className={`filter-btn ${filterStatus === 'cancelled' ? 'active' : ''}`}
               onClick={() => setFilterStatus('cancelled')}
             >
-              Cancelled ({orders.filter(o => o.status === 'cancelled').length})
+              Cancelled
             </button>
           </div>
         </section>
 
-        {/* Orders List */}
+        {/* Orders Grid */}
         <section className="orders-history-section">
           {filteredOrders.length > 0 ? (
             <div className="orders-list">
@@ -210,63 +208,64 @@ const OrderHistoryPage = () => {
                 <div key={order.id} className="order-card">
                   <div className="order-header">
                     <div className="order-info">
+                      <span className="restaurant-name">{order.restaurant}</span>
                       <h3>{order.id}</h3>
-                      <p>{order.restaurant}</p>
-                      <p>{order.date} at {order.time}</p>
+                      <span className="order-date">{order.date} • {order.time}</span>
                     </div>
                     <div className="order-status">
                       <span 
                         className="status-badge"
-                        style={{ backgroundColor: getStatusColor(order.status) }}
+                        style={{ backgroundColor: getStatusColor(order.status || 'pending') }}
                       >
-                        {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                        {order.status || 'pending'}
                       </span>
-                      <div className="order-total">₹{order.total}</div>
+                      <span className="order-total-badge">₹{(order.total || 0).toFixed(2)}</span>
                     </div>
                   </div>
                   
                   <div className="order-items">
-                    {order.items.map((item, index) => (
-                      <div key={index} className="order-item">
-                        <span className="item-icon">
-                          {item.image ? (
-                            <img src={item.image} alt={item.name} style={{width: '20px', height: '20px', objectFit: 'cover'}} />
-                          ) : (
-                            item.icon
-                          )}
-                        </span>
-                        <span className="item-name">{item.name}</span>
-                        <span className="item-quantity">x{item.quantity}</span>
-                        <span className="item-price">₹{item.price}</span>
+                    {order.items && order.items.length > 0 ? (
+                      order.items.map((item, index) => (
+                        <div key={item.id || index} className="order-item">
+                          <span className="item-icon">
+                            {item.image ? (
+                              <img 
+                                src={item.image} 
+                                alt={item.name || 'Item'} 
+                                style={{width: '100%', height: '100%', objectFit: 'cover'}} 
+                                onError={(e) => {
+                                  e.target.style.display = 'none';
+                                  e.target.parentElement.innerHTML = item.icon || '🍽️';
+                                }}
+                              />
+                            ) : (
+                              item.icon || '🍽️'
+                            )}
+                          </span>
+                          <span className="item-name">{item.name || 'Unknown Item'}</span>
+                          <div style={{ marginLeft: 'auto', display: 'flex', gap: '8px', alignItems: 'center' }}>
+                            <span className="item-quantity">x{item.quantity || 1}</span>
+                            <span className="item-price">₹{(item.price || 0).toFixed(2)}</span>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="order-item">
+                        <span className="item-name">No items details available</span>
                       </div>
-                    ))}
-                  </div>
-                  
-                  <div className="order-summary">
-                    <div className="summary-row">
-                      <span>Subtotal:</span>
-                      <span>₹{order.subtotal}</span>
-                    </div>
-                    <div className="summary-row">
-                      <span>Delivery Fee:</span>
-                      <span>₹{order.deliveryFee}</span>
-                    </div>
-                    <div className="summary-row total-row">
-                      <span>Total:</span>
-                      <span>₹{order.total}</span>
-                    </div>
+                    )}
                   </div>
                   
                   <div className="order-actions">
                     <button 
-                      className="order-btn"
+                      className="order-btn btn-secondary"
                       onClick={() => handleViewDetails(order)}
                     >
-                      View Details
+                      Details
                     </button>
                     {order.status === 'delivered' && (
                       <button 
-                        className="order-btn"
+                        className="order-btn btn-primary"
                         onClick={() => handleReorder(order)}
                       >
                         Reorder
@@ -281,8 +280,8 @@ const OrderHistoryPage = () => {
               <div className="empty-icon">📋</div>
               <h3>No orders found</h3>
               <p>No orders match the selected filter</p>
-              <button className="order-btn" onClick={() => navigate('/home')}>
-                Order Food
+              <button className="order-btn btn-primary" onClick={() => navigate('/home')}>
+                Browse Menu
               </button>
             </div>
           )}
@@ -296,6 +295,8 @@ const OrderHistoryPage = () => {
           </button>
         </footer>
       </main>
+
+      <HoveringCart />
     </div>
   );
 };
