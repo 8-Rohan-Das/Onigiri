@@ -51,6 +51,12 @@ const OrderConfirmationPage = () => {
     navigate('/home');
   };
 
+  const handleLogout = () => {
+    // Clear user data from localStorage
+    localStorage.removeItem('user');
+    navigate('/login');
+  };
+
   if (!orderData) {
     return (
       <div className="confirmation-container">
@@ -77,6 +83,22 @@ const OrderConfirmationPage = () => {
             <img src={userImage} alt="User" className="user-avatar" />
             <span>{userName}</span>
           </div>
+          <button 
+            className="logout-btn" 
+            onClick={handleLogout}
+            style={{
+              background: 'none',
+              border: '1px solid #dc3545',
+              color: '#dc3545',
+              padding: '6px 12px',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontSize: '14px',
+              marginLeft: '10px'
+            }}
+          >
+            Logout
+          </button>
         </div>
       </header>
 

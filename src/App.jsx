@@ -16,6 +16,8 @@ import MessagesPage from './pages/MessagesPage';
 import OrderHistoryPage from './pages/OrderHistoryPage';
 import OthersPage from './pages/OthersPage';
 import NotificationPage from './pages/NotificationPage';
+import CheckoutPage from './pages/CheckoutPage';
+import OrderConfirmationPage from './pages/OrderConfirmationPage';
 
 
 
@@ -36,6 +38,8 @@ function App() {
             <Route path="/order-history" element={<OrderHistoryPage />} />
             <Route path="/others" element={<OthersPage />} />
             <Route path="/notifications" element={<NotificationPage />} />
+            <Route path="/checkout" element={<CheckoutPage />} />
+            <Route path="/order-confirmation" element={<OrderConfirmationPage />} />
           </Routes>
         </CartProvider>
       </NotificationProvider>
