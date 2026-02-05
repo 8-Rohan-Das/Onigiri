@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useNotifications } from '../context/NotificationContext';
-import { useFavorites } from '../context/FavoriteContext';
-import { useCart } from '../context/CartContext';
+import { useNotifications } from '../../context/NotificationContext';
+import { useFavorites } from '../../context/FavoriteContext';
+import { useCart } from '../../context/CartContext';
 import './homepage.css';
-import NotificationButton from '../components/NotificationButton';
-import HoveringCart from '../components/HoveringCart';
+import NotificationButton from '../../components/NotificationButton';
+import HoveringCart from '../../components/HoveringCart';
 import logo from '../assets/logo.png';
 import butterChickenImage from '../assets/vecteezy_butter-chicken-with_25270174.png';
 import sushiPlatterImage from '../assets/vecteezy_sushi-platter-with-different-types-of-sushi_27735645.png';

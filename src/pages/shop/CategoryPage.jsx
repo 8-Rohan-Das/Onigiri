@@ -1,9 +1,9 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useCart } from '../context/CartContext';
-import { useFavorites } from '../context/FavoriteContext';
-import HoveringCart from '../components/HoveringCart';
-import './homepage.css';
+import { useCart } from '../../context/CartContext';
+import { useFavorites } from '../../context/FavoriteContext';
+import HoveringCart from '../../components/HoveringCart';
+import '../home/homepage.css';
 import './CategoryPage.css';
 
 // Import images
@@ -128,7 +128,6 @@ const categoryConfig = {
     ]
   }
 };
->>>>>>> 712cb2653bc70b534b76baa996af5bda35e9b38c:src/pages/shop/CategoryPage.jsx
 
 const CategoryPage = () => {
   const { category } = useParams();
