@@ -5,7 +5,7 @@ import { useFavorites } from '../../context/FavoriteContext';
 import { useCart } from '../../context/CartContext';
 import NotificationButton from '../../components/NotificationButton';
 import HoveringCart from '../../components/HoveringCart';
-import './homepage.css';
+import '../home/homepage.css';
 import logo from '../../assets/logo.png';
 import restaurantImage from '../../assets/restaurant.png';
 import heartImage from '../../assets/heart.png';
