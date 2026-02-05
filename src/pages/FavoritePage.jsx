@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useNotifications } from '../context/NotificationContext';
-import NotificationButton from '../components/NotificationButton';
+import { useFavorites } from '../context/FavoriteContext';
 import { useCart } from '../context/CartContext';
+import NotificationButton from '../components/NotificationButton';
 import HoveringCart from '../components/HoveringCart';
 import './homepage.css';
 import logo from '../assets/logo.png';
@@ -11,15 +12,13 @@ import heartImage from '../assets/heart.png';
 import emailImage from '../assets/email.png';
 import orderHistoryImage from '../assets/order-history.png';
 import otherImage from '../assets/other.png';
-import butterChickenImage from '../assets/vecteezy_butter-chicken-with_25270174.png';
-import sushiPlatterImage from '../assets/vecteezy_sushi-platter-with-different-types-of-sushi_27735645.png';
-import springRollsImage from '../assets/vecteezy_a-plate-with-several-spring-rolls-and-a-small-bowl-of-sauce_53110058.png';
 import userImage from '../assets/user.png';
 
 const FavoritePage = () => {
   const navigate = useNavigate();
   const { addNotification } = useNotifications();
   const { addToCart } = useCart();
+  const { favoriteItems, removeFromFavorites } = useFavorites();
   const [activeNav, setActiveNav] = useState('favorite');
   
   // Get user data from localStorage
@@ -35,33 +34,15 @@ const FavoritePage = () => {
     { id: 'others', label: 'Others', image: otherImage },
   ];
 
-  // Favorite items
-  const [favoriteItems, setFavoriteItems] = useState([
-    { id: 'fav-1', name: 'Butter Chicken', price: '₹189', discount: '15% Off', image: butterChickenImage, category: 'Indian' },
-    { id: 'fav-2', name: 'Sushi Platter', price: '₹259', discount: '10% Off', image: sushiPlatterImage, category: 'Japanese' },
-    { id: 'fav-3', name: 'Spring Rolls', price: '₹149', discount: '20% Off', image: springRollsImage, category: 'Chinese' },
-    { id: 'fav-4', name: 'Pepperoni Pizza', price: '₹180', category: 'Italian' },
-    { id: 'fav-5', name: 'Fish Burger', price: '₹150', category: 'American' },
-  ]);
-
   const handleRemoveFavorite = (id) => {
-    const item = favoriteItems.find(item => item.id === id);
-    setFavoriteItems(favoriteItems.filter(item => item.id !== id));
-    
-    addNotification({
-      type: 'favorite',
-      title: 'Removed from Favorites',
-      message: `${item.name} has been removed from your favorites.`,
-      icon: '💔',
-      action: '/favorite'
-    });
+    removeFromFavorites(id);
   };
 
   const handleAddToCart = (item) => {
     const cartItem = {
       id: item.id,
       name: item.name,
-      price: parseFloat(item.price.replace('₹', '')),
+      price: parseFloat(item.price?.replace('₹', '') || 0),
       icon: item.icon || '🍽️'
     };
     
@@ -76,14 +57,14 @@ const FavoritePage = () => {
     });
   };
 
+  const handleNavigateHome = () => {
+    navigate('/home');
+  };
+
   const handleLogout = () => {
     // Clear user data from localStorage
     localStorage.removeItem('user');
     navigate('/login');
-  };
-
-  const handleNavigateHome = () => {
-    navigate('/home');
   };
 
   return (
@@ -160,9 +141,9 @@ const FavoritePage = () => {
                     )}
                   </div>
                   <div className="dish-info">
-                    <h3 className="dish-name">{item.name}</h3>
-                    <p className="dish-category">{item.category}</p>
-                    <div className="dish-price">{item.price}</div>
+                    <h3 className="dish-name">{item.name || 'Unknown Item'}</h3>
+                    <p className="dish-category">{item.category || 'Uncategorized'}</p>
+                    <div className="dish-price">{item.price || '₹0'}</div>
                     <div className="dish-actions">
                       <button 
                         className="order-btn"

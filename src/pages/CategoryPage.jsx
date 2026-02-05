@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { useFavorites } from '../context/FavoriteContext';
 import HoveringCart from '../components/HoveringCart';
 import './homepage.css';
 import './CategoryPage.css';
@@ -26,6 +27,7 @@ import pekingDuckImage from '../assets/vecteezy_peking-duck-png-with-ai-generate
 // Import navigation images
 import restaurantImage from '../assets/restaurant.png';
 import heartImage from '../assets/heart.png';
+import favouriteIcon from '../assets/favourite.svg';
 import emailImage from '../assets/email.png';
 import orderHistoryImage from '../assets/order-history.png';
 import otherImage from '../assets/other.png';
@@ -38,6 +40,7 @@ const CategoryPage = () => {
   const [selectedSubCategory, setSelectedSubCategory] = useState('all');
   
   const { addToCart } = useCart();
+  const { addToFavorites, isFavorite } = useFavorites();
   
   // Get user data
   const userData = JSON.parse(localStorage.getItem('user')) || {};
@@ -633,9 +636,22 @@ burger: [
       id: item.id,
       name: item.name,
       price: parseFloat(item.price.replace('₹', '')),
-      icon: item.image ? '🍽️' : '🍱'
+      icon: item.icon || '🍽️'
     };
+    
     addToCart(cartItem);
+    
+    addNotification({
+      type: 'order',
+      title: 'Added to Cart',
+      message: `${item.name} has been added to your cart.`,
+      icon: '🛒',
+      action: '/home'
+    });
+  };
+
+  const handleAddToFavorites = (item) => {
+    addToFavorites(item);
   };
 
   const handleSubCategoryClick = (subCategoryId) => {
@@ -768,12 +784,42 @@ burger: [
                   </div>
                   <div className="menu-item-footer">
                     <span className="price">{item.price}</span>
-                    <button 
-                      className="add-to-cart-btn"
-                      onClick={() => handleAddToCart(item)}
-                    >
-                      Add to Cart
-                    </button>
+                    <div className="menu-item-actions">
+                      <button 
+                        className="favorite-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleAddToFavorites(item);
+                        }}
+                        style={{
+                          background: isFavorite(item.id) ? '#ff4444' : 'transparent',
+                          border: '1px solid #ff4444',
+                          borderRadius: '4px',
+                          padding: '4px 8px',
+                          cursor: 'pointer',
+                          marginRight: '8px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}
+                      >
+                        <img 
+                          src={favouriteIcon} 
+                          alt="Add to Favorite" 
+                          style={{
+                            width: '16px',
+                            height: '16px',
+                            filter: isFavorite(item.id) ? 'brightness(0) invert(1)' : 'none'
+                          }}
+                        />
+                      </button>
+                      <button 
+                        className="add-to-cart-btn"
+                        onClick={() => handleAddToCart(item)}
+                      >
+                        Add to Cart
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>

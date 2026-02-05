@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useNotifications } from '../context/NotificationContext';
+import { useFavorites } from '../context/FavoriteContext';
 import './homepage.css';
 import HoveringCart from '../components/HoveringCart';
 import NotificationButton from '../components/NotificationButton';
@@ -26,6 +27,7 @@ import choleBhatureImage from '../assets/chole-bhature.png';
 import notificationImage from '../assets/notification.png';
 import restaurantImage from '../assets/restaurant.png';
 import heartImage from '../assets/heart.png';
+import favouriteIcon from '../assets/favourite.svg';
 import emailImage from '../assets/email.png';
 import orderHistoryImage from '../assets/order-history.png';
 import otherImage from '../assets/other.png';
@@ -34,6 +36,7 @@ import userImage from '../assets/user.png';
 const Homepage = () => {
   const navigate = useNavigate();
   const { cartItems, addToCart } = useCart();
+  const { addToFavorites, isFavorite } = useFavorites();
   const [activeNav, setActiveNav] = useState('food-order');
   const [activeCategory, setActiveCategory] = useState('all');
   
@@ -96,6 +99,10 @@ const Homepage = () => {
       icon: dish.icon || '🍽️'
     };
     addToCart(cartItem);
+  };
+
+  const handleAddToFavorites = (item) => {
+    addToFavorites(item);
   };
 
   const handleCheckout = () => {
