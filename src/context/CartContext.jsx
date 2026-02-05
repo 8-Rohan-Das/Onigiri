@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { getStoredItem } from '../utils/storageUtils';
 import { useNotifications } from './NotificationContext';
 
 const CartContext = createContext();
@@ -8,18 +9,13 @@ export const useCart = () => useContext(CartContext);
 export const CartProvider = ({ children }) => {
   const { addNotification } = useNotifications();
   const [cartItems, setCartItems] = useState(() => {
-    try {
-      const savedCart = localStorage.getItem('cartItems');
-      return savedCart ? JSON.parse(savedCart) : [
-        // Default items for demo
-        { id: 'def-1', name: 'Vegan Pizza Dough', quantity: 1, price: 120.00, icon: '🍕' },
-        { id: 'def-2', name: 'Pepperoni Pizza', quantity: 1, price: 180.00, icon: '🍕' },
-        { id: 'def-3', name: 'Fish Burger & Vege', quantity: 1, price: 150.00, icon: '🍔' },
-      ];
-    } catch (e) {
-      console.error('Failed to load cart', e);
-      return [];
-    }
+    const defaultItems = [
+      // Default items for demo
+      { id: 'def-1', name: 'Vegan Pizza Dough', quantity: 1, price: 120.00, icon: '🍕' },
+      { id: 'def-2', name: 'Pepperoni Pizza', quantity: 1, price: 180.00, icon: '🍕' },
+      { id: 'def-3', name: 'Fish Burger & Vege', quantity: 1, price: 150.00, icon: '🍔' },
+    ];
+    return getStoredItem('cartItems', defaultItems);
   });
 
   useEffect(() => {

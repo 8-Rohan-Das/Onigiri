@@ -9,15 +9,15 @@ import { NotificationProvider } from './context/NotificationContext';
 // Import pages
 import LoginPage from './pages/auth/LoginPage';
 import SignUpPage from './pages/auth/SignUpPage';
-import Homepage from './pages/homepage';
-import CategoryPage from './pages/CategoryPage';
-import FavoritePage from './pages/FavoritePage';
-import MessagesPage from './pages/MessagesPage';
-import OrderHistoryPage from './pages/OrderHistoryPage';
-import OthersPage from './pages/OthersPage';
-import NotificationPage from './pages/NotificationPage';
-import CheckoutPage from './pages/CheckoutPage';
-import OrderConfirmationPage from './pages/OrderConfirmationPage';
+import Homepage from './pages/home/homepage';
+import CategoryPage from './pages/shop/CategoryPage';
+import FavoritePage from './pages/shop/FavoritePage';
+import MessagesPage from './pages/user/MessagesPage';
+import OrderHistoryPage from './pages/order/OrderHistoryPage';
+import OthersPage from './pages/user/OthersPage';
+import NotificationPage from './pages/notification/NotificationPage';
+import CheckoutPage from './pages/checkout/CheckoutPage';
+import OrderConfirmationPage from './pages/order/OrderConfirmationPage';
 
 
 

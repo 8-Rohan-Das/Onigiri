@@ -1,20 +1,20 @@
 import React, { useState, useEffect } from 'react';
+import { getStoredUser, getStoredItem } from '../../utils/storageUtils';
 
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 import './OrderConfirmationPage.css';
 
-import logo from '../assets/logo.png';
+import logo from '../../assets/logo.png';
 
-import userImage from '../assets/user.png';
+import userImage from '../../assets/user.png';
 
 
 
 const OrderConfirmationPage = () => {
 
   const navigate = useNavigate();
-
-  const [orderData, setOrderData] = useState(null);
+  const location = useLocation();
 
   const [countdown, setCountdown] = useState(30);
 
@@ -22,38 +22,36 @@ const OrderConfirmationPage = () => {
 
   // Get user data from localStorage
 
-  const userData = JSON.parse(localStorage.getItem('user')) || {};
-
+  const userData = getStoredUser();
   const userName = userData.name || 'Guest';
+  
+  // Initialize orderData lazily
+  const [orderData] = useState(() => {
+     if (location.state?.orderData) {
+        return location.state.orderData;
+     }
+
+     return getStoredItem('lastOrder');
+  });
+
+  // Ensure we have a stable ID for the order
+  const [displayOrderId] = useState(() => {
+    // Check if orderData exists before accessing its properties
+    return orderData?.orderNumber || 'ORD' + Date.now();
+  });
 
 
 
   useEffect(() => {
-
-    // Get the last order from localStorage
-
-    const lastOrder = localStorage.getItem('lastOrder');
-
-    if (lastOrder) {
-
-      setOrderData(JSON.parse(lastOrder));
-
-    } else {
-
-      // If no order data, redirect to home
-
+    // If no order data, redirect to home
+    if (!orderData) {
       navigate('/home');
-
+      return; // Exit early if no orderData
     }
 
-
-
     // Countdown timer for auto-redirect
-
     const timer = setInterval(() => {
-
       setCountdown((prev) => {
-
         if (prev <= 1) {
 
           clearInterval(timer);
@@ -104,15 +102,7 @@ const OrderConfirmationPage = () => {
 
 
 
-  const handleLogout = () => {
 
-    // Clear user data from localStorage
-
-    localStorage.removeItem('user');
-
-    navigate('/login');
-
-  };
 
 
 
@@ -196,7 +186,7 @@ const OrderConfirmationPage = () => {
 
             <div className="order-number">
 
-              Order #{orderData.orderNumber || 'ORD' + Date.now()}
+              Order #{displayOrderId}
 
             </div>
 
