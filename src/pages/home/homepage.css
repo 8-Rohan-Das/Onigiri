@@ -202,15 +202,101 @@
 /* Header */
 
 .main-header {
-
   display: flex;
-
   justify-content: space-between;
-
   align-items: center;
-
   margin-bottom: 40px;
+}
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.search-container {
+  display: flex;
+  align-items: center;
+  background: white;
+  border-radius: 30px;
+  padding: 5px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--shadow-light);
+  border: 1px solid transparent;
+}
+
+.search-container.active {
+  box-shadow: var(--shadow-medium);
+  border-color: var(--border-light);
+  padding-right: 5px; /* Reduced since clear button has its own spacing */
+}
+
+.search-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  transition: all 0.3s ease;
+  color: var(--text-dark);
+}
+
+.search-btn:hover {
+  background-color: var(--border-light);
+  color: var(--primary-gradient-start);
+}
+
+.search-input {
+  width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: 1rem;
+  color: var(--text-dark);
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 0;
+}
+
+.search-container.active .search-input {
+  width: 220px;
+  opacity: 1;
+  margin-left: 5px;
+  margin-right: 5px;
+}
+
+.clear-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  color: var(--text-light);
+  transition: all 0.2s ease;
+  opacity: 0;
+  transform: scale(0.8);
+  pointer-events: none;
+}
+
+.clear-btn.visible {
+  opacity: 1;
+  transform: scale(1);
+  pointer-events: all;
+}
+
+.clear-btn:hover {
+  background-color: var(--border-light);
+  color: var(--primary-gradient-end);
 }
 
 

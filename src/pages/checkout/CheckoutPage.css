@@ -34,6 +34,12 @@ body {
   --shadow: 0 5px 15px rgba(0,0,0,0.06);
   --radius: 12px;
   --max-width: 1400px;
+
+  /* Mappings for Checkout Page */
+  --bg: var(--global-bg);
+  --card: var(--card-bg);
+  --accent: var(--primary-gradient-end);
+  --muted: var(--text-light);
 }
 
 /* Utility */
