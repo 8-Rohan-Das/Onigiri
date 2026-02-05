@@ -1,18 +1,21 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useNotifications } from '../context/NotificationContext';
-import { useFavorites } from '../context/FavoriteContext';
-import { useCart } from '../context/CartContext';
-import NotificationButton from '../components/NotificationButton';
-import HoveringCart from '../components/HoveringCart';
+import { useNotifications } from '../../context/NotificationContext';
+import { useFavorites } from '../../context/FavoriteContext';
+import { useCart } from '../../context/CartContext';
+import NotificationButton from '../../components/NotificationButton';
+import HoveringCart from '../../components/HoveringCart';
 import './homepage.css';
-import logo from '../assets/logo.png';
-import restaurantImage from '../assets/restaurant.png';
-import heartImage from '../assets/heart.png';
-import emailImage from '../assets/email.png';
-import orderHistoryImage from '../assets/order-history.png';
-import otherImage from '../assets/other.png';
-import userImage from '../assets/user.png';
+import logo from '../../assets/logo.png';
+import restaurantImage from '../../assets/restaurant.png';
+import heartImage from '../../assets/heart.png';
+import emailImage from '../../assets/email.png';
+import orderHistoryImage from '../../assets/order-history.png';
+import otherImage from '../../assets/other.png';
+import userImage from '../../assets/user.png';
+import butterChickenImage from '../../assets/vecteezy_butter-chicken-with_25270174.png';
+import sushiPlatterImage from '../../assets/vecteezy_sushi-platter-with-different-types-of-sushi_27735645.png';
+import springRollsImage from '../../assets/vecteezy_a-plate-with-several-spring-rolls-and-a-small-bowl-of-sauce_53110058.png';
 
 const FavoritePage = () => {
   const navigate = useNavigate();
@@ -22,7 +25,7 @@ const FavoritePage = () => {
   const [activeNav, setActiveNav] = useState('favorite');
   
   // Get user data from localStorage
-  const userData = JSON.parse(localStorage.getItem('user')) || {};
+  const userData = getStoredUser();
   const userName = userData.name || 'Guest';
 
   // Navigation items

@@ -1,17 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useNotifications } from '../context/NotificationContext';
-import NotificationButton from '../components/NotificationButton';
-import HoveringCart from '../components/HoveringCart';
-import './homepage.css';
+import { useNotifications } from '../../context/NotificationContext';
+import { getStoredUser, setStoredItem } from '../../utils/storageUtils';
+import NotificationButton from '../../components/NotificationButton';
+import HoveringCart from '../../components/HoveringCart';
+import '../home/homepage.css';
 import './OthersPage.css';
-import logo from '../assets/logo.png';
-import restaurantImage from '../assets/restaurant.png';
-import heartImage from '../assets/heart.png';
-import emailImage from '../assets/email.png';
-import orderHistoryImage from '../assets/order-history.png';
-import otherImage from '../assets/other.png';
-import userImage from '../assets/user.png';
+import logo from '../../assets/logo.png';
+import restaurantImage from '../../assets/restaurant.png';
+import heartImage from '../../assets/heart.png';
+import emailImage from '../../assets/email.png';
+import orderHistoryImage from '../../assets/order-history.png';
+import otherImage from '../../assets/other.png';
+import userImage from '../../assets/user.png';
 
 const OthersPage = () => {
   const navigate = useNavigate();
@@ -19,7 +20,7 @@ const OthersPage = () => {
   const [activeNav, setActiveNav] = useState('others');
   
   // Get user data from localStorage
-  const userData = JSON.parse(localStorage.getItem('user')) || {};
+  const userData = getStoredUser();
   const userName = userData.name || 'Guest';
 
   // Navigation items
@@ -68,10 +69,10 @@ const OthersPage = () => {
   };
 
   const handleSaveProfile = () => {
-    localStorage.setItem('user', JSON.stringify({
+    setStoredItem('user', {
       ...userData,
       ...profile
-    }));
+    });
     
     addNotification({
       type: 'settings',
@@ -101,9 +102,7 @@ const OthersPage = () => {
     navigate('/login');
   };
 
-  const handleNavigateHome = () => {
-    navigate('/home');
-  };
+
 
   return (
     <div className="homepage-container">

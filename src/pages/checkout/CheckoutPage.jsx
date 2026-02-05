@@ -1,9 +1,10 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useCart } from '../context/CartContext';
+import { useCart } from '../../context/CartContext';
+import { getStoredUser, getStoredItem } from '../../utils/storageUtils';
 import './CheckoutPage.css';
-import logo from '../assets/logo.png';
-import userImage from '../assets/user.png';
+import logo from '../../assets/logo.png';
+import userImage from '../../assets/user.png';
 
 const inr = (value) =>
   new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 }).format(value);
@@ -12,7 +13,7 @@ const CheckoutPage = () => {
   const navigate = useNavigate();
 
   // user data from localStorage
-  const userData = JSON.parse(localStorage.getItem('user')) || {};
+  const userData = getStoredUser();
   const userName = userData.name || 'Guest';
 
   const { 
@@ -117,7 +118,7 @@ const CheckoutPage = () => {
     localStorage.setItem('lastOrder', JSON.stringify(orderPayload));
 
     // save to persistent history
-    const currentHistory = JSON.parse(localStorage.getItem('orderHistory') || '[]');
+    const currentHistory = getStoredItem('orderHistory', []);
     const updatedHistory = [orderPayload, ...currentHistory]; // Newest first
     localStorage.setItem('orderHistory', JSON.stringify(updatedHistory));
 

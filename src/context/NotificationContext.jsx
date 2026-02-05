@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { getStoredItem } from '../utils/storageUtils';
 
 const NotificationContext = createContext();
 
@@ -11,25 +12,18 @@ export const useNotifications = () => {
 };
 
 export const NotificationProvider = ({ children }) => {
-  const [notifications, setNotifications] = useState([]);
-  const [unreadCount, setUnreadCount] = useState(0);
+  // Load notifications from localStorage on mount (lazy initialization)
+  // Load notifications from localStorage on mount (lazy initialization)
+  const [notifications, setNotifications] = useState(() => {
+    return getStoredItem('notifications', []);
+  });
 
-  // Load notifications from localStorage on mount
-  useEffect(() => {
-    const savedNotifications = localStorage.getItem('notifications');
-    if (savedNotifications) {
-      const parsed = JSON.parse(savedNotifications);
-      setNotifications(parsed);
-      setUnreadCount(parsed.filter(n => !n.read).length);
-    }
-  }, []);
+  // Derived state (no need for useState + useEffect)
+  const unreadCount = notifications.filter(n => !n.read).length;
 
   // Save notifications to localStorage whenever they change
   useEffect(() => {
-    if (notifications.length > 0) {
-      localStorage.setItem('notifications', JSON.stringify(notifications));
-      setUnreadCount(notifications.filter(n => !n.read).length);
-    }
+    localStorage.setItem('notifications', JSON.stringify(notifications));
   }, [notifications]);
 
   const addNotification = (notification) => {

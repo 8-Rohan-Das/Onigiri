@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useNotifications } from '../context/NotificationContext';
-import './homepage.css';
-import logo from '../assets/logo.png';
-import restaurantImage from '../assets/restaurant.png';
-import heartImage from '../assets/heart.png';
-import emailImage from '../assets/email.png';
-import orderHistoryImage from '../assets/order-history.png';
-import otherImage from '../assets/other.png';
-import notificationImage from '../assets/notification.png';
-import userImage from '../assets/user.png';
+import { useNotifications } from '../../context/NotificationContext';
+import { getStoredUser } from '../../utils/storageUtils';
+import '../home/homepage.css';
+import logo from '../../assets/logo.png';
+import restaurantImage from '../../assets/restaurant.png';
+import heartImage from '../../assets/heart.png';
+import emailImage from '../../assets/email.png';
+import orderHistoryImage from '../../assets/order-history.png';
+import otherImage from '../../assets/other.png';
+
+import userImage from '../../assets/user.png';
 
 const NotificationPage = () => {
   const navigate = useNavigate();
@@ -24,7 +25,7 @@ const NotificationPage = () => {
   const [activeNav, setActiveNav] = useState('notifications');
   
   // Get user data from localStorage
-  const userData = JSON.parse(localStorage.getItem('user')) || {};
+  const userData = getStoredUser();
   const userName = userData.name || 'Guest';
 
   // Navigation items

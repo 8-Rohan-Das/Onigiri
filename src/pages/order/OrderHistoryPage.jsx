@@ -1,26 +1,26 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useNotifications } from '../context/NotificationContext';
-import NotificationButton from '../components/NotificationButton';
-import HoveringCart from '../components/HoveringCart';
-import './homepage.css';
+import { getStoredUser, getStoredItem } from '../../utils/storageUtils';
+
+import NotificationButton from '../../components/NotificationButton';
+import HoveringCart from '../../components/HoveringCart';
+import '../home/homepage.css';
 import './OrderHistoryPage.css'; // Import dedicated CSS
-import logo from '../assets/logo.png';
-import restaurantImage from '../assets/restaurant.png';
-import heartImage from '../assets/heart.png';
-import emailImage from '../assets/email.png';
-import orderHistoryImage from '../assets/order-history.png';
-import otherImage from '../assets/other.png';
-import butterChickenImage from '../assets/vecteezy_butter-chicken-with_25270174.png';
-import sushiPlatterImage from '../assets/vecteezy_sushi-platter-with-different-types-of-sushi_27735645.png';
-import userImage from '../assets/user.png';
+import logo from '../../assets/logo.png';
+import restaurantImage from '../../assets/restaurant.png';
+import heartImage from '../../assets/heart.png';
+import emailImage from '../../assets/email.png';
+import orderHistoryImage from '../../assets/order-history.png';
+import otherImage from '../../assets/other.png';
+
+import userImage from '../../assets/user.png';
 
 const OrderHistoryPage = () => {
   const navigate = useNavigate();
   const [activeNav, setActiveNav] = useState('order-history');
   
   // Get user data from localStorage
-  const userData = JSON.parse(localStorage.getItem('user')) || {};
+  const userData = getStoredUser();
   const userName = userData.name || 'Guest';
 
   // Navigation items
@@ -32,16 +32,15 @@ const OrderHistoryPage = () => {
     { id: 'others', label: 'Others', image: otherImage },
   ];
 
-  // Order history data
-  const [orders, setOrders] = useState([]);
-
-  useEffect(() => {
+  // Order history data with lazy initialization
+  const [orders] = useState(() => {
     try {
       // Get order history from localStorage
-      const savedHistory = JSON.parse(localStorage.getItem('orderHistory') || '[]');
+      const savedHistory = getStoredItem('orderHistory', []);
+      
       
       // Also check for lastOrder and add it to history if not already there
-      const lastOrder = JSON.parse(localStorage.getItem('lastOrder') || 'null');
+      const lastOrder = getStoredItem('lastOrder');
       
       let allOrders = [...savedHistory];
       
@@ -54,8 +53,7 @@ const OrderHistoryPage = () => {
         localStorage.removeItem('lastOrder');
       }
       
-      // Map saved orders to display format with error handling
-      const formattedOrders = allOrders.map(order => {
+      return allOrders.map(order => {
         try {
           const dateDate = order.timestamp ? new Date(order.timestamp) : new Date();
           
@@ -81,14 +79,12 @@ const OrderHistoryPage = () => {
           console.error('Error processing order:', order, error);
           return null;
         }
-      }).filter(order => order !== null); // Remove any null entries
-      
-      setOrders(formattedOrders);
+      }).filter(order => order !== null);
     } catch (error) {
       console.error('Error loading order history:', error);
-      setOrders([]); // Set empty array on error
+      return [];
     }
-  }, []);
+  });
 
   const [filterStatus, setFilterStatus] = useState('all');
 
