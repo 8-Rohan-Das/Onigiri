@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { getStoredItem, setStoredItem } from '../utils/storageUtils.js';
 import { useNotifications } from './NotificationContext';
 
 const FavoriteContext = createContext();
@@ -8,21 +9,11 @@ export const useFavorites = () => useContext(FavoriteContext);
 export const FavoriteProvider = ({ children }) => {
   const { addNotification } = useNotifications();
   const [favoriteItems, setFavoriteItems] = useState(() => {
-    try {
-      const savedFavorites = localStorage.getItem('favoriteItems');
-      return savedFavorites ? JSON.parse(savedFavorites) : [];
-    } catch (e) {
-      console.error('Failed to load favorites', e);
-      return [];
-    }
+    return getStoredItem('favoriteItems', []);
   });
 
   useEffect(() => {
-    try {
-      localStorage.setItem('favoriteItems', JSON.stringify(favoriteItems));
-    } catch (e) {
-      console.error('Failed to save favorites', e);
-    }
+    setStoredItem('favoriteItems', favoriteItems);
   }, [favoriteItems]);
 
   const addToFavorites = (item) => {

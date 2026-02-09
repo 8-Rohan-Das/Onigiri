@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
-import { getStoredUser, getStoredItem } from '../../utils/storageUtils';
+import { getStoredUser, removeStoredItem } from '../../utils/storageUtils.js';
 import './CheckoutPage.css';
 import logo from '../../assets/logo.png';
 import userImage from '../../assets/user.png';
@@ -115,12 +115,12 @@ const CheckoutPage = () => {
 
     // save last order and clear cart
     // save last order for confirmation page
-    localStorage.setItem('lastOrder', JSON.stringify(orderPayload));
+    setStoredItem('lastOrder', orderPayload);
 
     // save to persistent history
     const currentHistory = getStoredItem('orderHistory', []);
     const updatedHistory = [orderPayload, ...currentHistory]; // Newest first
-    localStorage.setItem('orderHistory', JSON.stringify(updatedHistory));
+    setStoredItem('orderHistory', updatedHistory);
 
     clearCart();
 
@@ -131,8 +131,8 @@ const CheckoutPage = () => {
   const handleBackToHome = () => navigate('/home');
 
   const handleLogout = () => {
-    // Clear user data from localStorage
-    localStorage.removeItem('user');
+    // Clear user data from localStorage safely
+    removeStoredItem('user');
     navigate('/login');
   };
 

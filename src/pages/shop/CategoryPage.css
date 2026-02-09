@@ -146,8 +146,9 @@
   background: white;
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
   transition: all 0.3s ease;
+  position: relative;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
 }
 
 .menu-item-card:hover {

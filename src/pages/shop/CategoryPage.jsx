@@ -2,7 +2,10 @@ import React, { useMemo, useState, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 import { useFavorites } from '../../context/FavoriteContext';
+import { useNotifications } from '../../context/NotificationContext';
+import { getStoredUser } from '../../utils/storageUtils.js';
 import HoveringCart from '../../components/HoveringCart';
+import PremiumFavoriteButton from '../../components/PremiumFavoriteButton';
 import '../home/homepage.css';
 import './CategoryPage.css';
 
@@ -23,7 +26,6 @@ import manchurianImage from '../../assets/vecteezy_chili-soup-in-a-bowl-on-a-tra
 // Import navigation images
 import restaurantImage from '../../assets/restaurant.png';
 import heartImage from '../../assets/heart.png';
-import favouriteIcon from '../../assets/favourite.svg';
 import emailImage from '../../assets/email.png';
 import orderHistoryImage from '../../assets/order-history.png';
 import otherImage from '../../assets/other.png';
@@ -137,6 +139,7 @@ const CategoryPage = () => {
   
   const { addToCart } = useCart();
   const { addToFavorites, isFavorite } = useFavorites();
+  const { addNotification } = useNotifications();
   
   // Get user data
   const userData = getStoredUser();
@@ -644,10 +647,6 @@ burger: [
     });
   };
 
-  const handleAddToFavorites = (item) => {
-    addToFavorites(item);
-  };
-
   const handleSubCategoryClick = (subCategoryId) => {
     setSelectedSubCategory(subCategoryId);
     // Filter items based on sub-category (you can implement this logic)
@@ -775,34 +774,7 @@ burger: [
                   <div className="menu-item-footer">
                     <span className="price">{item.price}</span>
                     <div className="menu-item-actions">
-                      <button 
-                        className="favorite-btn"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleAddToFavorites(item);
-                        }}
-                        style={{
-                          background: isFavorite(item.id) ? '#ff4444' : 'transparent',
-                          border: '1px solid #ff4444',
-                          borderRadius: '4px',
-                          padding: '4px 8px',
-                          cursor: 'pointer',
-                          marginRight: '8px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center'
-                        }}
-                      >
-                        <img 
-                          src={favouriteIcon} 
-                          alt="Add to Favorite" 
-                          style={{
-                            width: '16px',
-                            height: '16px',
-                            filter: isFavorite(item.id) ? 'brightness(0) invert(1)' : 'none'
-                          }}
-                        />
-                      </button>
+                      <PremiumFavoriteButton item={item} />
                       <button 
                         className="add-to-cart-btn"
                         onClick={() => handleAddToCart(item)}

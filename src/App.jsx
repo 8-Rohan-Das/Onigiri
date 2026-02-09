@@ -24,8 +24,8 @@ function App() {
   return (
     <BrowserRouter>
       <NotificationProvider>
-        <FavoriteProvider>
-          <CartProvider>
+        <CartProvider>
+          <FavoriteProvider>
             <Routes>
               <Route path="/" element={<LoginPage />} />
               <Route path="/login" element={<LoginPage />} />
@@ -40,8 +40,8 @@ function App() {
               <Route path="/checkout" element={<CheckoutPage />} />
               <Route path="/order-confirmation" element={<OrderConfirmationPage />} />
             </Routes>
-          </CartProvider>
-        </FavoriteProvider>
+          </FavoriteProvider>
+        </CartProvider>
       </NotificationProvider>
     </BrowserRouter>
   );

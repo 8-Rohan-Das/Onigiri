@@ -1,37 +1,38 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useNotifications } from '../../context/NotificationContext';
+import { getStoredUser, removeStoredItem } from '../../utils/storageUtils.js';
 import { useFavorites } from '../../context/FavoriteContext';
 import { useCart } from '../../context/CartContext';
 import './homepage.css';
 import NotificationButton from '../../components/NotificationButton';
+import PremiumFavoriteButton from '../../components/PremiumFavoriteButton';
 import HoveringCart from '../../components/HoveringCart';
-import logo from '../assets/logo.png';
-import butterChickenImage from '../assets/vecteezy_butter-chicken-with_25270174.png';
-import sushiPlatterImage from '../assets/vecteezy_sushi-platter-with-different-types-of-sushi_27735645.png';
-import springRollsImage from '../assets/vecteezy_a-plate-with-several-spring-rolls-and-a-small-bowl-of-sauce_53110058.png';
-import manchurianSoupImage from '../assets/vecteezy_chili-soup-in-a-bowl-on-a-transparent-background_57754847.png';
-import dimSumImage from '../assets/vecteezy_ai-generated-steamed-stuff-custard-bun-in-bamboo-basket-png_35675661.png';
-import pekingDuckImage from '../assets/vecteezy_peking-duck-png-with-ai-generated_26758795.png';
-import kungPaoImage from '../assets/vecteezy_spicy-kung-pao-chicken-a-fiery-sichuan-favorite-with_47072686.png';
-import tempuraImage from '../assets/vecteezy_golden-fried-shrimp-tempura-on-white-plate_50278149.png';
-import biryaniImage from '../assets/vecteezy_ai-generated-delicious-dum-handi-biryani-in-bowl-isolated-on_41856072.png';
-import burgerImage from '../assets/icons8-burger-100.png';
-import pizzaImage from '../assets/pizza.png';
-import biryaniCategoryImage from '../assets/biryani.png';
-import parathaImage from '../assets/paratha.png';
-import cakeImage from '../assets/cake.png';
-import springRollsCategoryImage from '../assets/spring-rolls.png';
-import noodlesImage from '../assets/noodles.png';
-import choleBhatureImage from '../assets/chole-bhature.png';
-import notificationImage from '../assets/notification.png';
-import restaurantImage from '../assets/restaurant.png';
-import heartImage from '../assets/heart.png';
-import favouriteIcon from '../assets/favourite.svg';
-import emailImage from '../assets/email.png';
-import orderHistoryImage from '../assets/order-history.png';
-import otherImage from '../assets/other.png';
-import userImage from '../assets/user.png';
+import logo from '../../assets/logo.png';
+import butterChickenImage from '../../assets/vecteezy_butter-chicken-with_25270174.png';
+import sushiPlatterImage from '../../assets/vecteezy_sushi-platter-with-different-types-of-sushi_27735645.png';
+import springRollsImage from '../../assets/vecteezy_a-plate-with-several-spring-rolls-and-a-small-bowl-of-sauce_53110058.png';
+import manchurianSoupImage from '../../assets/vecteezy_chili-soup-in-a-bowl-on-a-transparent-background_57754847.png';
+import dimSumImage from '../../assets/vecteezy_ai-generated-steamed-stuff-custard-bun-in-bamboo-basket-png_35675661.png';
+import pekingDuckImage from '../../assets/vecteezy_peking-duck-png-with-ai-generated_26758795.png';
+import kungPaoImage from '../../assets/vecteezy_spicy-kung-pao-chicken-a-fiery-sichuan-favorite-with_47072686.png';
+import tempuraImage from '../../assets/vecteezy_golden-fried-shrimp-tempura-on-white-plate_50278149.png';
+import biryaniImage from '../../assets/vecteezy_ai-generated-delicious-dum-handi-biryani-in-bowl-isolated-on_41856072.png';
+import burgerImage from '../../assets/icons8-burger-100.png';
+import pizzaImage from '../../assets/pizza.png';
+import biryaniCategoryImage from '../../assets/biryani.png';
+import parathaImage from '../../assets/paratha.png';
+import cakeImage from '../../assets/cake.png';
+import springRollsCategoryImage from '../../assets/spring-rolls.png';
+import noodlesImage from '../../assets/noodles.png';
+import choleBhatureImage from '../../assets/chole-bhature.png';
+import notificationImage from '../../assets/notification.png';
+import restaurantImage from '../../assets/restaurant.png';
+import heartImage from '../../assets/heart.png';
+import emailImage from '../../assets/email.png';
+import orderHistoryImage from '../../assets/order-history.png';
+import otherImage from '../../assets/other.png';
+import userImage from '../../assets/user.png';
+import favouriteIcon from '../../assets/favourite.svg';
 
 const Homepage = () => {
   const navigate = useNavigate();
@@ -40,8 +41,8 @@ const Homepage = () => {
   const [activeNav, setActiveNav] = useState('food-order');
   const [activeCategory, setActiveCategory] = useState('all');
   
-  // Get user data from localStorage
-  const userData = JSON.parse(localStorage.getItem('user')) || {};
+  // Get user data from localStorage safely
+  const userData = getStoredUser();
   const userName = userData.name || 'Guest';
 
   // Navigation items
@@ -110,8 +111,8 @@ const Homepage = () => {
   };
 
   const handleLogout = () => {
-    // Clear user data from localStorage
-    localStorage.removeItem('user');
+    // Clear user data from localStorage safely
+    removeStoredItem('user');
     navigate('/login');
   };
 
@@ -264,7 +265,7 @@ const Homepage = () => {
 
         {/* Categories */}
         <section className="categories-section">
-          <h2 className="section-title">What's on your mind?</h2>
+          <h2 className="section-title">What&apos;s on your mind?</h2>
           <div className="categories-scroll-container">
             <button className="scroll-arrow left-arrow" onClick={() => scrollCategories('left')}>←</button>
             <div className="categories-grid" id="categoriesGrid">
@@ -314,6 +315,7 @@ const Homepage = () => {
                   <div key={dish.id} className="dish-card">
                     <div className="dish-image">
                       <span className="dish-badge">{dish.discount}</span>
+                      <PremiumFavoriteButton item={dish} />
                       {dish.image ? (
                         <img 
                           src={dish.image} 

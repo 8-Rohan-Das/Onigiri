@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useNotifications } from '../../context/NotificationContext';
-import { getStoredUser, setStoredItem } from '../../utils/storageUtils';
+import { getStoredUser, setStoredItem, removeStoredItem } from '../../utils/storageUtils';
 import NotificationButton from '../../components/NotificationButton';
 import HoveringCart from '../../components/HoveringCart';
 import '../home/homepage.css';
@@ -97,8 +97,8 @@ const OthersPage = () => {
   };
 
   const handleLogout = () => {
-    // Clear user data from localStorage
-    localStorage.removeItem('user');
+    // Clear user data from localStorage safely
+    removeStoredItem('user');
     navigate('/login');
   };
 

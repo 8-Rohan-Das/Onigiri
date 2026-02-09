@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useNotifications } from '../../context/NotificationContext';
-import { getStoredUser } from '../../utils/storageUtils';
+import { getStoredUser, removeStoredItem } from '../../utils/storageUtils.js';
 import '../home/homepage.css';
 import logo from '../../assets/logo.png';
 import restaurantImage from '../../assets/restaurant.png';
@@ -56,8 +56,8 @@ const NotificationPage = () => {
   };
 
   const handleLogout = () => {
-    // Clear user data from localStorage
-    localStorage.removeItem('user');
+    // Clear user data from localStorage safely
+    removeStoredItem('user');
     navigate('/login');
   };
 

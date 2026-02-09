@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useNotifications } from '../../context/NotificationContext';
+import { getStoredUser, removeStoredItem } from '../../utils/storageUtils.js';
 import { useFavorites } from '../../context/FavoriteContext';
 import { useCart } from '../../context/CartContext';
 import NotificationButton from '../../components/NotificationButton';
@@ -65,8 +66,8 @@ const FavoritePage = () => {
   };
 
   const handleLogout = () => {
-    // Clear user data from localStorage
-    localStorage.removeItem('user');
+    // Clear user data from localStorage safely
+    removeStoredItem('user');
     navigate('/login');
   };
 

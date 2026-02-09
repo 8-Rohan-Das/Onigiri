@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './LoginPage.css';
+import { setStoredItem } from '../../utils/storageUtils.js';
 import logo from '../../assets/logo.png';
 
 const SignUpPage = () => {
@@ -98,11 +99,11 @@ const SignUpPage = () => {
     setTimeout(() => {
       console.log('Sign up successful!', formData);
       // Store user data and redirect to homepage
-      localStorage.setItem('user', JSON.stringify({
+      setStoredItem('user', {
         name: formData.name,
         email: formData.email,
         password: formData.password
-      }));
+      });
       navigate('/home'); // Redirect to homepage after successful signup
       setIsLoading(false);
     }, 1500);

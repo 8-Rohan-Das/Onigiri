@@ -1,0 +1,94 @@
+/* Button container */
+.premium-favorite-btn {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* soft floating glass look */
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+
+  /* clean shadow (not pink muddy shadow) */
+  box-shadow:
+    0 6px 16px rgba(0,0,0,0.18),
+    0 2px 6px rgba(0,0,0,0.12);
+
+  transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+
+  z-index: 10;
+  outline: none;
+}
+
+/* Hover */
+.premium-favorite-btn:hover {
+  transform: translateY(-50%) scale(1.08);
+  box-shadow: 0 10px 24px rgba(255,107,129,0.25);
+}
+
+/* Active background */
+.premium-favorite-btn.active {
+  background: linear-gradient(135deg, #FFB3C1, #FF758F);
+}
+
+/* Heart icon */
+.premium-heart-icon {
+  width: 22px;
+  height: 22px;
+}
+
+/* Default heart (unclicked) */
+.premium-heart-icon path {
+  fill: none;
+  stroke: #F28FA1;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: all .18s ease;
+}
+
+/* Hover color */
+.premium-favorite-btn:hover .premium-heart-icon path {
+  stroke: #FF6B81;
+}
+
+/* Active (saved) */
+.premium-favorite-btn.active .premium-heart-icon path {
+  fill: #ffffff;
+  stroke: #ffffff;
+}
+
+/* Click pop animation */
+.premium-favorite-btn:active {
+  transform: translateY(-50%) scale(0.92);
+}
+
+/* Remove focus ring */
+.premium-favorite-btn:focus,
+.premium-favorite-btn:focus-visible {
+  outline: none;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .premium-favorite-btn {
+    width: 40px;
+    height: 40px;
+  }
+
+  .premium-heart-icon {
+    width: 20px;
+    height: 20px;
+  }
+}

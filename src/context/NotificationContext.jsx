@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { getStoredItem } from '../utils/storageUtils';
+import { getStoredItem, setStoredItem } from '../utils/storageUtils.js';
 
 const NotificationContext = createContext();
 
@@ -23,7 +23,7 @@ export const NotificationProvider = ({ children }) => {
 
   // Save notifications to localStorage whenever they change
   useEffect(() => {
-    localStorage.setItem('notifications', JSON.stringify(notifications));
+    setStoredItem('notifications', notifications);
   }, [notifications]);
 
   const addNotification = (notification) => {

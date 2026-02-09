@@ -662,6 +662,7 @@
   min-width: 280px;
   max-width: 280px;
   flex-shrink: 0;
+  position: relative;
   /* Performance optimizations */
   will-change: transform;
   contain: layout style paint;
@@ -705,7 +706,12 @@
 
 }
 
-
+.dish-favorite-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 10;
+}
 
 .dish-emoji {
 

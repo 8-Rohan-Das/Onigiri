@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './LoginPage.css';
+import { setStoredItem } from '../../utils/storageUtils.js';
 import logo from '../../assets/logo.png';
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -106,7 +107,7 @@ const LoginPage = () => {
           id: 'user123',
           loginTime: new Date().toISOString()
         };
-        localStorage.setItem('user', JSON.stringify(userData));
+        setStoredItem('user', userData);
         
         navigate('/home'); // Redirect to homepage after successful login
       } else {

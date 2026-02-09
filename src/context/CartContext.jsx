@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { getStoredItem } from '../utils/storageUtils';
+import { getStoredItem, setStoredItem } from '../utils/storageUtils.js';
 import { useNotifications } from './NotificationContext';
 
 const CartContext = createContext();
@@ -19,7 +19,7 @@ export const CartProvider = ({ children }) => {
   });
 
   useEffect(() => {
-    localStorage.setItem('cartItems', JSON.stringify(cartItems));
+    setStoredItem('cartItems', cartItems);
   }, [cartItems]);
 
   const addToCart = (item) => {

@@ -40,10 +40,29 @@ export const getStoredUser = () => {
  * @param {string} key - The localStorage key to set
  * @param {any} value - The value to stringify and store
  */
+/**
+ * Safely saves a value to localStorage.
+ * 
+ * @param {string} key - The localStorage key to set
+ * @param {any} value - The value to stringify and store
+ */
 export const setStoredItem = (key, value) => {
   try {
     localStorage.setItem(key, JSON.stringify(value));
   } catch (error) {
     console.error(`Error saving to localStorage "${key}":`, error);
+  }
+};
+
+/**
+ * Safely removes an item from localStorage.
+ * 
+ * @param {string} key - The localStorage key to remove
+ */
+export const removeStoredItem = (key) => {
+  try {
+    localStorage.removeItem(key);
+  } catch (error) {
+    console.error(`Error removing localStorage item "${key}":`, error);
   }
 };

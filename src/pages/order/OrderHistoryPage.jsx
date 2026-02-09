@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getStoredUser, getStoredItem } from '../../utils/storageUtils';
+import { getStoredUser, setStoredItem, removeStoredItem } from '../../utils/storageUtils.js';
 
 import NotificationButton from '../../components/NotificationButton';
 import HoveringCart from '../../components/HoveringCart';
@@ -48,9 +48,9 @@ const OrderHistoryPage = () => {
       if (lastOrder && !allOrders.find(order => order.orderNumber === lastOrder.orderNumber)) {
         allOrders.unshift(lastOrder);
         // Update localStorage to include this order
-        localStorage.setItem('orderHistory', JSON.stringify(allOrders));
+        setStoredItem('orderHistory', allOrders);
         // Clear lastOrder since it's now in history
-        localStorage.removeItem('lastOrder');
+        removeStoredItem('lastOrder');
       }
       
       return allOrders.map(order => {
@@ -101,8 +101,8 @@ const OrderHistoryPage = () => {
   };
 
   const handleLogout = () => {
-    // Clear user data from localStorage
-    localStorage.removeItem('user');
+    // Clear user data from localStorage safely
+    removeStoredItem('user');
     navigate('/login');
   };
 
