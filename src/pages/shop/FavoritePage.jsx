@@ -6,7 +6,8 @@ import { useFavorites } from '../../context/FavoriteContext';
 import { useCart } from '../../context/CartContext';
 import NotificationButton from '../../components/NotificationButton';
 import HoveringCart from '../../components/HoveringCart';
-import '../home/homepage.css';
+import PremiumFavoriteButton from '../../components/PremiumFavoriteButton';
+import './FavoritePage.css';
 import logo from '../../assets/logo.png';
 import restaurantImage from '../../assets/restaurant.png';
 import heartImage from '../../assets/heart.png';
@@ -22,7 +23,7 @@ const FavoritePage = () => {
   const navigate = useNavigate();
   const { addNotification } = useNotifications();
   const { addToCart } = useCart();
-  const { favoriteItems, removeFromFavorites } = useFavorites();
+  const { favoriteItems } = useFavorites(); // Only read from context
   const [activeNav, setActiveNav] = useState('favorite');
   
   // Get user data from localStorage
@@ -37,10 +38,6 @@ const FavoritePage = () => {
     { id: 'order-history', label: 'Order History', image: orderHistoryImage },
     { id: 'others', label: 'Others', image: otherImage },
   ];
-
-  const handleRemoveFavorite = (id) => {
-    removeFromFavorites(id);
-  };
 
   const handleAddToCart = (item) => {
     const cartItem = {
@@ -59,10 +56,6 @@ const FavoritePage = () => {
       icon: '🛒',
       action: '/home'
     });
-  };
-
-  const handleNavigateHome = () => {
-    navigate('/home');
   };
 
   const handleLogout = () => {
@@ -138,6 +131,7 @@ const FavoritePage = () => {
                 <div key={item.id} className="dish-card">
                   <div className="dish-image">
                     {item.discount && <span className="dish-badge">{item.discount}</span>}
+                    <PremiumFavoriteButton item={item} />
                     {item.image ? (
                       <img src={item.image} alt={item.name} className="dish-emoji" style={{width: '100%', height: '100%', objectFit: 'cover'}} />
                     ) : (
@@ -154,21 +148,6 @@ const FavoritePage = () => {
                         onClick={() => handleAddToCart(item)}
                       >
                         Add to Cart
-                      </button>
-                      <button 
-                        className="remove-btn"
-                        onClick={() => handleRemoveFavorite(item.id)}
-                        style={{
-                          background: '#ff4444',
-                          color: 'white',
-                          border: 'none',
-                          padding: '8px 12px',
-                          borderRadius: '6px',
-                          cursor: 'pointer',
-                          marginLeft: '8px'
-                        }}
-                      >
-                        Remove
                       </button>
                     </div>
                   </div>

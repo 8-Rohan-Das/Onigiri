@@ -9,15 +9,16 @@ export const useFavorites = () => useContext(FavoriteContext);
 export const FavoriteProvider = ({ children }) => {
   const { addNotification } = useNotifications();
   const [favoriteItems, setFavoriteItems] = useState(() => {
-    return getStoredItem('favoriteItems', []);
+    const stored = getStoredItem('favorites', []);
+    return Array.isArray(stored) ? stored : [];
   });
 
   useEffect(() => {
-    setStoredItem('favoriteItems', favoriteItems);
+    setStoredItem('favorites', favoriteItems);
   }, [favoriteItems]);
 
   const addToFavorites = (item) => {
-    // Check if item is already in favorites
+    // Check if item is already in favorites using consistent ID comparison
     const existing = favoriteItems.find(fav => fav.id === item.id);
     if (existing) {
       addNotification({
@@ -30,7 +31,7 @@ export const FavoriteProvider = ({ children }) => {
       return;
     }
 
-    setFavoriteItems(prev => [...prev, { ...item, id: `fav-${item.id}` }]);
+    setFavoriteItems(prev => [...prev, { ...item }]);
     
     addNotification({
       type: 'favorite',
@@ -41,15 +42,18 @@ export const FavoriteProvider = ({ children }) => {
     });
   };
 
-  const removeFromFavorites = (id) => {
-    const item = favoriteItems.find(item => item.id === id);
-    setFavoriteItems(prev => prev.filter(item => item.id !== id));
+  const removeFromFavorites = (item) => {
+    // Handle both item object and ID for flexibility
+    const itemId = typeof item === 'object' ? item.id : item;
     
-    if (item) {
+    setFavoriteItems(prev => prev.filter(fav => fav.id !== itemId));
+    
+    const removedItem = favoriteItems.find(fav => fav.id === itemId);
+    if (removedItem) {
       addNotification({
         type: 'favorite',
         title: 'Removed from Favorites',
-        message: `${item.name} has been removed from your favorites.`,
+        message: `${removedItem.name} has been removed from your favorites.`,
         icon: '💔',
         action: '/favorite'
       });
@@ -57,7 +61,7 @@ export const FavoriteProvider = ({ children }) => {
   };
 
   const isFavorite = (id) => {
-    return favoriteItems.some(fav => fav.id === `fav-${id}` || fav.id === id);
+    return favoriteItems.some(fav => fav.id === id);
   };
 
   const getFavorites = () => {

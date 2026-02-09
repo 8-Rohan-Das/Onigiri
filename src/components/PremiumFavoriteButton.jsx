@@ -22,6 +22,7 @@ const PremiumFavoriteButton = ({ item, className = '' }) => {
       className={`premium-favorite-btn ${isFavorited ? 'active' : ''} ${className}`}
       onClick={handleToggleFavorite}
       aria-label={isFavorited ? 'Remove from favorites' : 'Add to favorites'}
+      title={isFavorited ? 'Remove from favorites' : 'Add to favorites'}
     >
       <svg
         className="premium-heart-icon"
