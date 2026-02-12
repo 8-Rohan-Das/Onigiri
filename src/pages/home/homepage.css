@@ -694,32 +694,29 @@
 
 
 .dishes-scroll-container {
-
   position: relative;
-
   display: flex;
-
   align-items: center;
-
-  gap: 10px;
-
+  gap: 12px;
   width: 100%;
-
-  overflow: hidden;
-
+  margin: 0 -8px;
+  padding: 0 8px;
 }
 
 
 
 .dishes-grid {
   display: flex;
-  gap: 20px;
+  gap: 24px;
   overflow-x: auto;
-  scroll-behavior: auto; /* Remove smooth to use our custom animation */
+  overflow-y: hidden;
+  scroll-behavior: smooth;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE and Edge */
-  padding: 10px 0;
-  width: 100%;
+  padding: 16px 4px;
+  width: max-content;
   flex-wrap: nowrap;
   /* Performance optimizations */
   will-change: transform;
@@ -742,13 +739,12 @@
 
 .dish-card {
   background: var(--border-light);
-  border-radius: 15px;
+  border-radius: 16px;
   overflow: hidden;
-  transition: background-color 0.15s ease, transform 0.2s ease;
-  min-width: 280px;
-  max-width: 280px;
-  flex-shrink: 0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  flex: 0 0 300px;
   position: relative;
+  scroll-snap-align: start;
   /* Performance optimizations */
   will-change: transform;
   contain: layout style paint;
@@ -756,11 +752,14 @@
   transform: translateZ(0);
   backface-visibility: hidden;
   perspective: 1000px;
+  /* Enhanced shadow and hover effects */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .dish-card:hover {
-  background-color: #e8eaed;
-  transform: translateY(-2px) translateZ(0);
+  background-color: #f8f9fa;
+  transform: translateY(-4px) scale(1.02) translateZ(0);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
 
 .dish-badge {
@@ -1624,29 +1623,30 @@
   
 
   .dishes-grid {
-
-    display: grid;
-
-    grid-template-columns: 1fr;
-
-    gap: 15px;
-
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-behavior: smooth;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding: 12px 4px;
+    width: max-content;
+    flex-wrap: nowrap;
   }
 
   
 
   .dishes-scroll-container {
-
-    overflow-x: visible;
-
+    overflow-x: auto;
+    overflow-y: hidden;
   }
-
   
 
   .dish-card {
-
-    min-width: auto;
-
+    flex: 0 0 280px;
   }
 
   
@@ -1824,9 +1824,7 @@
   
 
   .dish-card {
-
-    min-width: auto;
-
+    flex: 0 0 260px;
   }
 
   
@@ -2001,4 +1999,68 @@
 
   }
 
+}
+/* ===================================================
+   POPULAR DISHES HORIZONTAL SCROLL (FINAL FIX)
+   =================================================== */
+
+/* flex column must be allowed to shrink */
+.left-column {
+  min-width: 0;
+  width: 100%;
+}
+
+/* wrapper for arrows + scroll */
+.dishes-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+/* actual scroll viewport */
+.dishes-scroll-container {
+  overflow-x: auto;
+  overflow-y: hidden;
+  width: 100%;
+  padding: 10px 0;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* horizontal row */
+.dishes-grid {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 24px;
+  width: max-content; /* ⭐ KEY PROPERTY */
+  padding: 0 6px;
+}
+
+/* card size */
+.dishes-grid .dish-card {
+  flex: 0 0 300px;
+}
+
+/* scrollbar styling */
+.dishes-scroll-container::-webkit-scrollbar {
+  height: 6px;
+}
+
+.dishes-scroll-container::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.25);
+  border-radius: 10px;
+}
+
+.dishes-scroll-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* arrows positioning - use original styling */
+.left-arrow {
+  margin-right: 8px;
+}
+
+.right-arrow {
+  margin-left: 8px;
 }
