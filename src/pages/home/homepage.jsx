@@ -195,41 +195,21 @@ const Homepage = () => {
     const grid = document.getElementById('dishesGrid');
     if (!grid) return;
     
-    // Cancel any existing scroll animation
-    if (grid.scrollAnimationId) {
-      cancelAnimationFrame(grid.scrollAnimationId);
-    }
-    
-    const scrollAmount = 320; // Slightly larger for better feel
-    const startScroll = grid.scrollLeft;
+    // Use native smooth scrolling with scroll-snap for better performance
+    const cardWidth = 324; // 300px card width + 24px gap
+    const scrollAmount = cardWidth;
+    const currentScroll = grid.scrollLeft;
     const targetScroll = direction === 'left' 
-      ? Math.max(0, startScroll - scrollAmount)
-      : Math.min(grid.scrollWidth - grid.clientWidth, startScroll + scrollAmount);
+      ? Math.max(0, currentScroll - scrollAmount)
+      : Math.min(grid.scrollWidth - grid.clientWidth, currentScroll + scrollAmount);
     
-    // Don't scroll if already at the edge
-    if (targetScroll === startScroll) return;
-    
-    // Optimized smooth animation with better easing
-    const duration = 250; // Slightly faster
-    const startTime = performance.now();
-    
-    const animateScroll = (currentTime) => {
-      const elapsed = currentTime - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      
-      // Optimized easing function - less expensive calculation
-      const easeOutCubic = 1 - Math.pow(1 - progress, 3);
-      
-      grid.scrollLeft = startScroll + (targetScroll - startScroll) * easeOutCubic;
-      
-      if (progress < 1) {
-        grid.scrollAnimationId = requestAnimationFrame(animateScroll);
-      } else {
-        grid.scrollAnimationId = null;
-      }
-    };
-    
-    grid.scrollAnimationId = requestAnimationFrame(animateScroll);
+    // Only scroll if we're not already at the edge
+    if (targetScroll !== currentScroll) {
+      grid.scrollTo({
+        left: targetScroll,
+        behavior: 'smooth'
+      });
+    }
   };
 
   return (
@@ -388,41 +368,38 @@ const Homepage = () => {
               <div className="dishes-scroll-container">
                 <button className="scroll-arrow left-arrow" onClick={() => scrollDishes('left')}>←</button>
                 <div className="dishes-grid" id="dishesGrid">
-                {filteredDishes.length > 0 ? filteredDishes.map((dish) => (
-                  <div key={dish.id} className="dish-card">
-                    <div className="dish-image">
-                      <span className="dish-badge">{dish.discount}</span>
-                      <PremiumFavoriteButton item={dish} />
-                      {dish.image ? (
-                        <img 
-                          src={dish.image} 
-                          alt={dish.name} 
-                          className="dish-emoji" 
-                          style={{width: '100%', height: '100%', objectFit: 'cover'}}
-                          loading="lazy"
-                          decoding="async"
-                        />
-                      ) : (
-                        <span className="dish-emoji">{dish.icon}</span>
-                      )}
+                  {filteredDishes.length > 0 ? filteredDishes.map((dish) => (
+                    <div key={dish.id} className="dish-card">
+                      <div className="dish-image">
+                        <span className="dish-badge">{dish.discount}</span>
+                        <PremiumFavoriteButton item={dish} />
+                        {dish.image ? (
+                          <img
+                            src={dish.image}
+                            alt={dish.name}
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                          />
+                        ) : (
+                          <span className="dish-emoji">{dish.icon}</span>
+                        )}
+                      </div>
+                      <div className="dish-info">
+                        <h3 className="dish-name">{dish.name}</h3>
+                        <div className="dish-price">{dish.price}</div>
+                        <button
+                          className="order-btn"
+                          style={{ marginTop: '15px', width: '100%' }}
+                          onClick={() => handleAddToCart(dish)}
+                        >
+                          Add to Cart
+                        </button>
+                      </div>
                     </div>
-                    <div className="dish-info">
-                      <h3 className="dish-name">{dish.name}</h3>
-                      <div className="dish-price">{dish.price}</div>
-                      <button 
-                        className="order-btn"
-                        style={{marginTop: '15px', width: '100%'}}
-                        onClick={() => handleAddToCart(dish)}
-                      >
-                        Add to Cart
-                      </button>
+                  )) : (
+                    <div style={{ padding: '20px', color: '#666' }}>
+                      No dishes found matching your search.
                     </div>
-                  </div>
-                )) : (
-                  <div className="no-results" style={{padding: '20px', color: '#666'}}>
-                    No dishes found matching your search.
-                  </div>
-                )}
+                  )}
                 </div>
                 <button className="scroll-arrow right-arrow" onClick={() => scrollDishes('right')}>→</button>
               </div>
