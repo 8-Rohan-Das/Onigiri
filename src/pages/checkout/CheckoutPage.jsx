@@ -1,7 +1,5 @@
-import React, { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useCart } from '../../context/CartContext';
-import { getStoredUser, removeStoredItem } from '../../utils/storageUtils.js';
+import React from 'react';
+import { useCheckout } from '../../hooks/useCheckout';
 import './CheckoutPage.css';
 import logo from '../../assets/logo.png';
 import userImage from '../../assets/user.png';
@@ -10,131 +8,23 @@ const inr = (value) =>
   new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 }).format(value);
 
 const CheckoutPage = () => {
-  const navigate = useNavigate();
-
-  // user data from localStorage
-  const userData = getStoredUser();
-  const userName = userData.name || 'Guest';
-
-  const { 
-    cartItems, 
-    updateQuantity, 
-    removeFromCart, 
-    clearCart,
-    getCartTotal 
-  } = useCart();
-
-  // mobile summary drawer toggle
-  const [showSummary, setShowSummary] = useState(false);
-
-  // form state
-  const [formData, setFormData] = useState({
-    fullName: userName,
-    email: userData.email || '',
-    phone: '',
-    address: 'Plot No. 42, Sector 5, CDA Building',
-    city: 'Bhubaneswar',
-    state: 'Odisha',
-    zipCode: '751019',
-    paymentMethod: 'cod',
-    cardNumber: '',
-    cardName: '',
-    expiryDate: '',
-    cvv: '',
-    upiId: ''
-  });
-
-  // derived totals
-  const subtotal = useMemo(
-    () => getCartTotal(),
-    [cartItems, getCartTotal]
-  );
-  const deliveryFee = 40.0;
-  const tax = +(subtotal * 0.05).toFixed(2); // 5% tax
-  const total = +(subtotal + deliveryFee + tax).toFixed(2);
-
-  // update form inputs
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((p) => ({ ...p, [name]: value }));
-  };
-
-  // quantity updates (guard against negatives)
-  // Context handles the logic, just call context methods
-  // updateQuantity(id, newQuantity) and removeFromCart(id)
-  
-  // basic client-side validation for card fields only when card selected
-  const validatePayment = () => {
-    if (formData.paymentMethod === 'card') {
-      // simple checks (lengths); production needs stronger validation
-      const cardNumber = formData.cardNumber.replace(/\s+/g, '');
-      if (!/^\d{12,19}$/.test(cardNumber)) return { ok: false, message: 'Enter a valid card number' };
-      if (!formData.cardName.trim()) return { ok: false, message: 'Card name required' };
-      if (!/^(0[1-9]|1[0-2])\/?([0-9]{2})$/.test(formData.expiryDate)) return { ok: false, message: 'Expiry should be MM/YY' };
-      if (!/^\d{3,4}$/.test(formData.cvv)) return { ok: false, message: 'CVV should be 3 or 4 digits' };
-    } else if (formData.paymentMethod === 'upi') {
-      if (!formData.upiId || !formData.upiId.includes('@')) return { ok: false, message: 'Enter a valid UPI ID' };
-    }
-    return { ok: true };
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    if (cartItems.length === 0) {
-      alert('Your cart is empty. Add items before placing an order.');
-      return;
-    }
-
-    const paymentValid = validatePayment();
-    if (!paymentValid.ok) {
-      alert(paymentValid.message);
-      return;
-    }
-
-    const orderNumber = 'ORD' + Date.now();
-    const orderPayload = {
-      orderNumber,
-      items: cartItems,
-      subtotal,
-      deliveryFee,
-      tax,
-      total,
-      deliveryInfo: {
-        name: formData.fullName,
-        email: formData.email,
-        phone: formData.phone,
-        address: formData.address,
-        city: formData.city,
-        state: formData.state,
-        zipCode: formData.zipCode
-      },
-      paymentMethod: formData.paymentMethod,
-      timestamp: new Date().toISOString()
-    };
-
-    // save last order and clear cart
-    // save last order for confirmation page
-    setStoredItem('lastOrder', orderPayload);
-
-    // save to persistent history
-    const currentHistory = getStoredItem('orderHistory', []);
-    const updatedHistory = [orderPayload, ...currentHistory]; // Newest first
-    setStoredItem('orderHistory', updatedHistory);
-
-    clearCart();
-
-    // navigate to a confirmation page (keep history)
-    navigate('/order-confirmation', { state: { orderNumber } });
-  };
-
-  const handleBackToHome = () => navigate('/home');
-
-  const handleLogout = () => {
-    // Clear user data from localStorage safely
-    removeStoredItem('user');
-    navigate('/login');
-  };
+  const {
+    cartItems,
+    updateQuantity,
+    removeFromCart,
+    showSummary,
+    toggleSummary,
+    formData,
+    handleInputChange,
+    subtotal,
+    deliveryFee,
+    tax,
+    total,
+    handleSubmit,
+    handleBackToHome,
+    handleLogout,
+    userName
+  } = useCheckout();
 
   return (
     <div className="checkout-container">
@@ -306,7 +196,7 @@ const CheckoutPage = () => {
               className="summary-toggle"
               type="button"
               aria-expanded={showSummary}
-              onClick={() => setShowSummary((s) => !s)}
+              onClick={toggleSummary}
             >
               {showSummary ? 'Hide' : 'View'}
             </button>
@@ -316,7 +206,7 @@ const CheckoutPage = () => {
             {cartItems.length === 0 && (
               <div className="empty-cart">
                 <p>Your cart is empty.</p>
-                <button type="button" className="cta" onClick={() => navigate('/menu')}>Browse Menu</button>
+                <button type="button" className="cta" onClick={handleBackToHome}>Browse Menu</button>
               </div>
             )}
 
@@ -330,31 +220,31 @@ const CheckoutPage = () => {
                   </div>
                 </div>
 
-                    <div className="item-controls">
-                      <div className="quantity-controls" aria-label={`Quantity for ${item.name}`}>
-                        <button
-                          type="button"
-                          onClick={() => updateQuantity(item.id, Math.max(0, (item.quantity || 1) - 1))}
-                          className="quantity-btn"
-                          aria-label={`Decrease ${item.name} quantity`}
-                        >
-                          −
-                        </button>
-                        <span className="quantity" aria-live="polite">{item.quantity}</span>
-                        <button
-                          type="button"
-                          onClick={() => updateQuantity(item.id, (item.quantity || 0) + 1)}
-                          className="quantity-btn"
-                          aria-label={`Increase ${item.name} quantity`}
-                        >
-                          +
-                        </button>
-                      </div>
+                <div className="item-controls">
+                  <div className="quantity-controls" aria-label={`Quantity for ${item.name}`}>
+                    <button
+                      type="button"
+                      onClick={() => updateQuantity(item.id, Math.max(0, (item.quantity || 1) - 1))}
+                      className="quantity-btn"
+                      aria-label={`Decrease ${item.name} quantity`}
+                    >
+                      −
+                    </button>
+                    <span className="quantity" aria-live="polite">{item.quantity}</span>
+                    <button
+                      type="button"
+                      onClick={() => updateQuantity(item.id, (item.quantity || 0) + 1)}
+                      className="quantity-btn"
+                      aria-label={`Increase ${item.name} quantity`}
+                    >
+                      +
+                    </button>
+                  </div>
 
-                      <button type="button" onClick={() => removeFromCart(item.id)} className="remove-btn" aria-label={`Remove ${item.name}`}>
-                        ×
-                      </button>
-                    </div>
+                  <button type="button" onClick={() => removeFromCart(item.id)} className="remove-btn" aria-label={`Remove ${item.name}`}>
+                    ×
+                  </button>
+                </div>
               </div>
             ))}
           </div>
