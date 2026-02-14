@@ -82,6 +82,13 @@ export const useCheckout = () => {
       return;
     }
 
+    // Phone number validation
+    const phoneRegex = /^\d{10}$/;
+    if (!phoneRegex.test(formData.phone)) {
+      alert('Please enter a valid 10-digit Indian phone number (e.g., 9876543210).');
+      return;
+    }
+
     const orderNumber = 'ORD' + Date.now();
     const orderPayload = {
       orderNumber,
@@ -103,18 +110,24 @@ export const useCheckout = () => {
       timestamp: new Date().toISOString()
     };
 
-    // save last order and clear cart
-    // save last order for confirmation page
-    setStoredItem('lastOrder', orderPayload);
+    console.log('Saving order:', orderPayload);
 
-    // save to persistent history
+    // Save order to localStorage first
+    setStoredItem('lastOrder', orderPayload);
+    
+    // Also save to order history
     const currentHistory = getStoredItem('orderHistory', []);
-    const updatedHistory = [orderPayload, ...currentHistory]; // Newest first
+    const updatedHistory = Array.isArray(currentHistory) 
+      ? [orderPayload, ...currentHistory] 
+      : [orderPayload];
     setStoredItem('orderHistory', updatedHistory);
 
+    console.log('Order saved to localStorage');
+
+    // Clear cart after saving order
     clearCart();
 
-    // navigate to a confirmation page (keep history)
+    console.log('Cart cleared, navigating to confirmation');
     navigate('/order-confirmation', { state: { orderNumber } });
   };
 

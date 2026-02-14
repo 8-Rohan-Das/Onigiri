@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Order Storage</title>
+</head>
+<body>
+    <h1>Testing Order Storage</h1>
+    <button onclick="testStorage()">Test Order Storage</button>
+    <button onclick="viewStorage()">View Storage</button>
+    <button onclick="clearStorage()">Clear Storage</button>
+    <div id="output"></div>
+
+    <script>
+        function testStorage() {
+            const orderPayload = {
+                orderNumber: 'ORD' + Date.now(),
+                items: [{name: 'Test Item', price: 100, quantity: 2}],
+                subtotal: 200,
+                deliveryFee: 40,
+                tax: 10,
+                total: 250,
+                timestamp: new Date().toISOString()
+            };
+
+            // Save to localStorage
+            localStorage.setItem('lastOrder', JSON.stringify(orderPayload));
+            
+            let currentHistory = JSON.parse(localStorage.getItem('orderHistory') || '[]');
+            if (!Array.isArray(currentHistory)) {
+                currentHistory = [];
+            }
+            
+            const updatedHistory = [orderPayload, ...currentHistory];
+            localStorage.setItem('orderHistory', JSON.stringify(updatedHistory));
+            
+            document.getElementById('output').innerHTML = 'Order saved successfully!';
+        }
+
+        function viewStorage() {
+            const lastOrder = JSON.parse(localStorage.getItem('lastOrder') || 'null');
+            const orderHistory = JSON.parse(localStorage.getItem('orderHistory') || '[]');
+            
+            document.getElementById('output').innerHTML = `
+                <h3>Last Order:</h3>
+                <pre>${JSON.stringify(lastOrder, null, 2)}</pre>
+                <h3>Order History:</h3>
+                <pre>${JSON.stringify(orderHistory, null, 2)}</pre>
+            `;
+        }
+
+        function clearStorage() {
+            localStorage.removeItem('lastOrder');
+            localStorage.removeItem('orderHistory');
+            document.getElementById('output').innerHTML = 'Storage cleared!';
+        }
+    </script>
+</body>
+</html>

@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getStoredUser, setStoredItem, removeStoredItem } from '../../utils/storageUtils.js';
+import { getStoredUser, getStoredItem, setStoredItem, removeStoredItem } from '../../utils/storageUtils.js';
 
 import NotificationButton from '../../components/NotificationButton';
 import HoveringCart from '../../components/HoveringCart';
@@ -32,59 +32,67 @@ const OrderHistoryPage = () => {
     { id: 'others', label: 'Others', image: otherImage },
   ];
 
-  // Order history data with lazy initialization
-  const [orders] = useState(() => {
-    try {
-      // Get order history from localStorage
-      const savedHistory = getStoredItem('orderHistory', []);
-      
-      
-      // Also check for lastOrder and add it to history if not already there
-      const lastOrder = getStoredItem('lastOrder');
-      
-      let allOrders = [...savedHistory];
-      
-      // Add lastOrder to history if it exists and isn't already included
-      if (lastOrder && !allOrders.find(order => order.orderNumber === lastOrder.orderNumber)) {
-        allOrders.unshift(lastOrder);
-        // Update localStorage to include this order
-        setStoredItem('orderHistory', allOrders);
-        // Clear lastOrder since it's now in history
-        removeStoredItem('lastOrder');
-      }
-      
-      return allOrders.map(order => {
-        try {
-          const dateDate = order.timestamp ? new Date(order.timestamp) : new Date();
-          
-          // Validate date
-          if (isNaN(dateDate.getTime())) {
-            console.warn('Invalid timestamp for order:', order.orderNumber);
-            return null;
-          }
-          
-          return {
-            id: '#' + (order.orderNumber || Date.now()).toString().slice(-6),
-            fullId: order.orderNumber,
-            date: dateDate.toLocaleDateString(),
-            time: dateDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            status: order.status || 'pending',
-            items: Array.isArray(order.items) ? order.items : [],
-            subtotal: order.subtotal || 0,
-            deliveryFee: order.deliveryFee || 0,
-            total: order.total || 0,
-            restaurant: order.restaurant || 'Onigiri'
-          };
-        } catch (error) {
-          console.error('Error processing order:', order, error);
-          return null;
+  // Order history data
+  const [orders, setOrders] = useState([]);
+
+  useEffect(() => {
+    console.log('OrderHistoryPage: Component mounted or updated');
+    
+    const loadOrders = () => {
+      try {
+        console.log('OrderHistoryPage: Loading orders...');
+        
+        // Get order history from localStorage
+        const savedHistory = getStoredItem('orderHistory', []);
+        console.log('OrderHistoryPage: savedHistory from storage:', savedHistory);
+        
+        // Get last order and merge if needed
+        const lastOrder = getStoredItem('lastOrder');
+        console.log('OrderHistoryPage: lastOrder from storage:', lastOrder);
+        
+        let allOrders = Array.isArray(savedHistory) ? savedHistory : [];
+        
+        // Add lastOrder if it exists and isn't already in the history
+        if (lastOrder && !allOrders.find(order => order.orderNumber === lastOrder.orderNumber)) {
+          console.log('OrderHistoryPage: Adding lastOrder to history');
+          allOrders.unshift(lastOrder);
+          // Save the updated history
+          setStoredItem('orderHistory', allOrders);
+          // Remove lastOrder since it's now in history
+          removeStoredItem('lastOrder');
         }
-      }).filter(order => order !== null);
-    } catch (error) {
-      console.error('Error loading order history:', error);
-      return [];
-    }
-  });
+        
+        // Format orders for display
+        const formattedOrders = allOrders.map(order => ({
+          id: '#' + (order.orderNumber || Date.now()).toString().slice(-6),
+          fullId: order.orderNumber,
+          date: order.timestamp ? new Date(order.timestamp).toLocaleDateString() : new Date().toLocaleDateString(),
+          time: order.timestamp ? new Date(order.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          status: order.status || 'pending',
+          items: Array.isArray(order.items) ? order.items : [],
+          subtotal: order.subtotal || 0,
+          deliveryFee: order.deliveryFee || 0,
+          total: order.total || 0,
+          restaurant: order.restaurant || 'Onigiri'
+        }));
+        
+        console.log('OrderHistoryPage: Setting formatted orders:', formattedOrders);
+        setOrders(formattedOrders);
+        
+      } catch (error) {
+        console.error('OrderHistoryPage: Error loading orders:', error);
+        setOrders([]);
+      }
+    };
+
+    // Load orders immediately
+    loadOrders();
+    
+    // Set up a simple interval to check for new orders
+    const interval = setInterval(loadOrders, 3000); // Check every 3 seconds
+    
+    return () => clearInterval(interval);
+  }, []); // Only run on mount
 
   const [filterStatus, setFilterStatus] = useState('all');
 
@@ -92,12 +100,24 @@ const OrderHistoryPage = () => {
     ? orders 
     : orders.filter(order => order.status === filterStatus);
 
+  console.log('OrderHistoryPage: Current orders state:', orders);
+  console.log('OrderHistoryPage: Filtered orders:', filteredOrders);
+
   const handleReorder = (order) => {
     alert(`Reordering items from ${order.id}`);
   };
 
   const handleViewDetails = (order) => {
     alert(`Viewing details for order ${order.id}`);
+  };
+
+  const handleClearHistory = () => {
+    if (window.confirm('Are you sure you want to clear all order history? This action cannot be undone.')) {
+      removeStoredItem('orderHistory');
+      removeStoredItem('lastOrder');
+      setOrders([]);
+      alert('Order history cleared successfully!');
+    }
   };
 
   const handleLogout = () => {
@@ -175,7 +195,16 @@ const OrderHistoryPage = () => {
 
         {/* Filter Section */}
         <section className="filter-section">
-          <h2 className="section-title">Your Orders</h2>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+            <h2 className="section-title">Your Orders</h2>
+            <button 
+              className="filter-btn"
+              onClick={handleClearHistory}
+              style={{ backgroundColor: '#dc3545', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '4px', cursor: 'pointer' }}
+            >
+              🗑️ Clear History
+            </button>
+          </div>
           <div className="filter-buttons">
             <button 
               className={`filter-btn ${filterStatus === 'all' ? 'active' : ''}`}
