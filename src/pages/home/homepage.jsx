@@ -78,7 +78,7 @@ const Homepage = () => {
     { id: 'favorite', label: 'Favorite', image: heartImage },
     { id: 'messages', label: 'Messages', image: emailImage },
     { id: 'order-history', label: 'Order History', image: orderHistoryImage },
-    { id: 'others', label: 'Others', image: otherImage },
+    { id: 'others', label: 'User Details', image: otherImage },
   ];
 
   // Categories
@@ -442,44 +442,47 @@ const Homepage = () => {
 
           {/* Right Sidebar */}
           <div className="right-sidebar">
-            {/* Recent Orders */}
-            <section className="recent-orders">
-              <h2 className="section-title">
-                Recent Order
-                <button className="view-all" onClick={() => navigate('/order-history')}>View all</button>
-              </h2>
-              <div className="orders-list">
-                {recentOrders.map((order) => (
-                  <div key={order.id} className="order-item">
-                    <div className="order-icon">{order.icon}</div>
-                    <div className="order-details">
-                      <h4>{order.name}</h4>
-                      <p>{order.time}</p>
+            {/* Top Section - Recent Order and Balance Side by Side */}
+            <div className="top-section">
+              {/* Recent Orders */}
+              <section className="recent-orders">
+                <h2 className="section-title">
+                  Recent Order
+                  <button className="view-all" onClick={() => navigate('/order-history')}>View all</button>
+                </h2>
+                <div className="orders-list">
+                  {recentOrders.map((order) => (
+                    <div key={order.id} className="order-item">
+                      <div className="order-icon">{order.icon}</div>
+                      <div className="order-details">
+                        <h4>{order.name}</h4>
+                        <p>{order.time}</p>
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            </section>
+                  ))}
+                </div>
+              </section>
 
-            {/* Balance Card */}
-            <section className="balance-card">
-              <h2 className="section-title" style={{color: 'white'}}>Your Balance</h2>
-              <div className="balance-amount">₹20.04</div>
-              <div className="balance-actions">
-                <button className="balance-btn">
-                  <span>💳</span>
-                  <span>Transfer</span>
-                </button>
-                <button className="balance-btn">
-                  <span>➕</span>
-                  <span>Add</span>
-                </button>
-                <button className="balance-btn">
-                  <span>₿</span>
-                  <span>Crypto</span>
-                </button>
-              </div>
-            </section>
+              {/* Balance Card */}
+              <section className="balance-card">
+                <h2 className="section-title" style={{color: 'white'}}>Your Balance</h2>
+                <div className="balance-amount">₹20.04</div>
+                <div className="balance-actions">
+                  <button className="balance-btn">
+                    <span>💳</span>
+                    <span>Transfer</span>
+                  </button>
+                  <button className="balance-btn">
+                    <span>➕</span>
+                    <span>Add</span>
+                  </button>
+                  <button className="balance-btn">
+                    <span>₿</span>
+                    <span>Crypto</span>
+                  </button>
+                </div>
+              </section>
+            </div>
 
             {/* Address Card */}
             <section className="address-card">
