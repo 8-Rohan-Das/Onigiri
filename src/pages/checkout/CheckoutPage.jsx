@@ -86,7 +86,7 @@ const CheckoutPage = () => {
 
                 <div className="form-group">
                   <label htmlFor="phone">Phone Number</label>
-                  <input id="phone" name="phone" type="tel" value={formData.phone} onChange={handleInputChange} placeholder="+91 98765 43210" required />
+                  <input id="phone" name="phone" type="tel" value={formData.phone} onChange={handleInputChange} placeholder="9876543210" maxLength="10" pattern="\d{10}" title="Please enter a valid 10-digit Indian phone number" required />
                 </div>
               </div>
 
