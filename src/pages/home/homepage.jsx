@@ -113,9 +113,9 @@ const Homepage = () => {
 
   // Recent orders
   const recentOrders = [
-    { id: 1, name: 'Spicy Ramen', time: '10:30 AM', icon: '🍜' },
-    { id: 2, name: 'Salmon Sushi', time: 'Yesterday', icon: '🍣' },
-    { id: 3, name: 'Chocolate Cake', time: 'Dec 12', icon: '🍰' },
+    { id: 1, name: 'Butter Chicken', time: '10:30 AM', icon: '�', image: butterChickenImage },
+    { id: 2, name: 'Sushi Platter', time: 'Yesterday', icon: '🍣', image: sushiPlatterImage },
+    { id: 3, name: 'Spring Rolls', time: 'Dec 12', icon: '🥟', image: springRollsImage },
   ];
 
   // Calculate totals
@@ -409,15 +409,28 @@ const Homepage = () => {
             <section className="order-menu">
               <h2 className="section-title">Order Menu</h2>
               <div className="menu-items">
-                {cartItems.map((item) => (
-                  <div key={item.id} className="menu-item">
-                    <span className="item-name">
-                      {item.icon} {item.name}
-                    </span>
-                    <span className="item-quantity">X{item.quantity}</span>
-                    <span className="item-price">+₹{item.price.toFixed(2)}</span>
-                  </div>
-                ))}
+                {cartItems.map((item) => {
+                  // Find corresponding dish image from popularDishes
+                  const dish = popularDishes.find(d => d.name === item.name);
+                  return (
+                    <div key={item.id} className="menu-item">
+                      <div className="item-image-container">
+                        {dish && dish.image ? (
+                          <img
+                            src={dish.image}
+                            alt={item.name}
+                            className="item-image"
+                          />
+                        ) : (
+                          <span className="item-icon">{item.icon}</span>
+                        )}
+                      </div>
+                      <span className="item-name">{item.name}</span>
+                      <span className="item-quantity">X{item.quantity}</span>
+                      <span className="item-price">+₹{item.price.toFixed(2)}</span>
+                    </div>
+                  );
+                })}
               </div>
               
               <div className="delivery-row">
@@ -453,7 +466,17 @@ const Homepage = () => {
                 <div className="orders-list">
                   {recentOrders.map((order) => (
                     <div key={order.id} className="order-item">
-                      <div className="order-icon">{order.icon}</div>
+                      <div className="order-image-container">
+                        {order.image ? (
+                          <img
+                            src={order.image}
+                            alt={order.name}
+                            className="order-image"
+                          />
+                        ) : (
+                          <div className="order-icon">{order.icon}</div>
+                        )}
+                      </div>
                       <div className="order-details">
                         <h4>{order.name}</h4>
                         <p>{order.time}</p>
