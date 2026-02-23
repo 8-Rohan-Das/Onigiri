@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './LoginPage.css';
 import logo from '../../assets/logo.png';
@@ -13,6 +13,15 @@ const SignUpPage = () => {
     handleChange,
     handleSubmit
   } = useSignUp();
+
+  // Force light mode on auth pages
+  useEffect(() => {
+    const wasDark = document.body.classList.contains('dark-mode');
+    document.body.classList.remove('dark-mode');
+    return () => {
+      if (wasDark) document.body.classList.add('dark-mode');
+    };
+  }, []);
 
   return (
     <div className="login-wrapper">
