@@ -25,6 +25,7 @@ const NotificationButton = ({ onClick, style = {} }) => {
       <img 
         src={notificationImage} 
         alt="Notifications" 
+        className="notification-icon"
         style={{ 
           width: '30px', 
           height: '30px', 

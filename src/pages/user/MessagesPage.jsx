@@ -430,61 +430,36 @@ const MessagesPage = () => {
           /* Contact Us Form */
           <div className="contact-form-container">
             <h2 className="section-title">Contact Us</h2>
-            <form onSubmit={handleContactSubmit} className="contact-form" style={{
-              maxWidth: '600px',
-              margin: '0 auto',
-              padding: '20px',
-              background: 'white',
-              borderRadius: '8px',
-              border: '1px solid #ddd'
-            }}>
-              <div className="form-row" style={{ display: 'flex', gap: '16px', marginBottom: '16px' }}>
-                <div className="form-group" style={{ flex: 1 }}>
-                  <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500' }}>Name *</label>
+            <form onSubmit={handleContactSubmit} className="contact-form contact-form-card">
+              <div className="contact-form-row">
+                <div className="contact-form-group">
+                  <label className="contact-label">Name *</label>
                   <input
                     type="text"
                     value={contactForm.name}
                     onChange={(e) => setContactForm({...contactForm, name: e.target.value})}
                     required
-                    style={{
-                      width: '100%',
-                      padding: '12px',
-                      border: '1px solid #ddd',
-                      borderRadius: '6px',
-                      fontSize: '14px'
-                    }}
+                    className="contact-input"
                   />
                 </div>
-                <div className="form-group" style={{ flex: 1 }}>
-                  <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500' }}>Email *</label>
+                <div className="contact-form-group">
+                  <label className="contact-label">Email *</label>
                   <input
                     type="email"
                     value={contactForm.email}
                     onChange={(e) => setContactForm({...contactForm, email: e.target.value})}
                     required
-                    style={{
-                      width: '100%',
-                      padding: '12px',
-                      border: '1px solid #ddd',
-                      borderRadius: '6px',
-                      fontSize: '14px'
-                    }}
+                    className="contact-input"
                   />
                 </div>
               </div>
               
-              <div className="form-group" style={{ marginBottom: '16px' }}>
-                <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500' }}>Category</label>
+              <div className="contact-form-group">
+                <label className="contact-label">Category</label>
                 <select
                   value={contactForm.category}
                   onChange={(e) => setContactForm({...contactForm, category: e.target.value})}
-                  style={{
-                    width: '100%',
-                    padding: '12px',
-                    border: '1px solid #ddd',
-                    borderRadius: '6px',
-                    fontSize: '14px'
-                  }}
+                  className="contact-input"
                 >
                   <option value="general">General Inquiry</option>
                   <option value="order">Order Related</option>
@@ -495,111 +470,66 @@ const MessagesPage = () => {
                 </select>
               </div>
               
-              <div className="form-group" style={{ marginBottom: '16px' }}>
-                <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500' }}>Subject</label>
+              <div className="contact-form-group">
+                <label className="contact-label">Subject</label>
                 <input
                   type="text"
                   value={contactForm.subject}
                   onChange={(e) => setContactForm({...contactForm, subject: e.target.value})}
                   placeholder="Brief description of your inquiry"
-                  style={{
-                    width: '100%',
-                    padding: '12px',
-                    border: '1px solid #ddd',
-                    borderRadius: '6px',
-                    fontSize: '14px'
-                  }}
+                  className="contact-input"
                 />
               </div>
               
-              <div className="form-group" style={{ marginBottom: '24px' }}>
-                <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500' }}>Message *</label>
+              <div className="contact-form-group">
+                <label className="contact-label">Message *</label>
                 <textarea
                   value={contactForm.message}
                   onChange={(e) => setContactForm({...contactForm, message: e.target.value})}
                   required
                   rows={6}
                   placeholder="Please provide detailed information about your inquiry..."
-                  style={{
-                    width: '100%',
-                    padding: '12px',
-                    border: '1px solid #ddd',
-                    borderRadius: '6px',
-                    fontSize: '14px',
-                    resize: 'vertical',
-                    fontFamily: 'inherit'
-                  }}
+                  className="contact-input contact-textarea"
                 />
               </div>
               
-              <div className="form-actions" style={{ display: 'flex', gap: '12px' }}>
+              <div className="contact-form-actions">
                 <button
                   type="submit"
-                  className="order-btn"
-                  style={{
-                    background: '#4ecdc4',
-                    color: 'white',
-                    border: 'none',
-                    padding: '12px 24px',
-                    borderRadius: '6px',
-                    cursor: 'pointer',
-                    fontSize: '16px',
-                    fontWeight: '500'
-                  }}
+                  className="contact-submit-btn"
                 >
                   Send Message
                 </button>
                 <button
                   type="button"
-                  onClick={() => setContactForm({
-                    name: '',
-                    email: '',
-                    subject: '',
-                    message: '',
-                    category: 'general'
-                  })}
-                  style={{
-                    background: '#6c757d',
-                    color: 'white',
-                    border: 'none',
-                    padding: '12px 24px',
-                    borderRadius: '6px',
-                    cursor: 'pointer',
-                    fontSize: '16px',
-                    fontWeight: '500'
-                  }}
+                  onClick={() => setContactForm({ name: '', email: '', subject: '', message: '', category: 'general' })}
+                  className="contact-clear-btn"
                 >
                   Clear Form
                 </button>
               </div>
             </form>
-            
-            <div className="contact-info" style={{
-              marginTop: '40px',
-              padding: '20px',
-              background: '#f8f9fa',
-              borderRadius: '8px',
-              textAlign: 'center'
-            }}>
-              <h3 style={{ marginBottom: '16px' }}>Other Ways to Reach Us</h3>
-              <div style={{ display: 'flex', justifyContent: 'space-around', flexWrap: 'wrap' }}>
-                <div style={{ margin: '16px' }}>
-                  <div style={{ fontSize: '24px', marginBottom: '8px' }}>📞</div>
+
+            <div className="contact-info-section">
+              <h3>Other Ways to Reach Us</h3>
+              <div className="contact-channels">
+                <div className="contact-channel">
+                  <div className="contact-channel-icon">📞</div>
                   <h4>Phone</h4>
                   <p>+91 98765 43210</p>
-                  <p style={{ fontSize: '12px', color: '#6c757d' }}>Mon-Sat, 9AM-9PM</p>
+                  <p className="contact-channel-meta">Mon-Sat, 9AM-9PM</p>
                 </div>
-                <div style={{ margin: '16px' }}>
-                  <div style={{ fontSize: '24px', marginBottom: '8px' }}>✉️</div>
+                <div className="contact-channel">
+                  <div className="contact-channel-icon">✉️</div>
                   <h4>Email</h4>
                   <p>support@onigiri.com</p>
-                  <p style={{ fontSize: '12px', color: '#6c757d' }}>24/7 Support</p>
+                  <p className="contact-channel-meta">24/7 Support</p>
                 </div>
-                <div style={{ margin: '16px' }}>
-                  <div style={{ fontSize: '24px', marginBottom: '8px' }}>💬</div>
+                <div className="contact-channel">
+                  <div className="contact-channel-icon">💬</div>
                   <h4>Live Chat</h4>
                   <p>Available on app</p>
-                  <p style={{ fontSize: '12px', color: '#6c757d' }}>Instant help</p>
+                  <p className="contact-channel-meta">Instant help</p>
                 </div>
               </div>
             </div>

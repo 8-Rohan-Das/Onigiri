@@ -266,6 +266,14 @@
 
 
 
+.dark-mode .order-total-badge,
+.dark-mode .item-price,
+.dark-mode .summary-row.total-row {
+  color: #fff !important;
+}
+
+
+
 /* Order Items */
 
 .order-items {
@@ -594,3 +602,95 @@
 
 }
 
+/* ===================== DARK MODE ===================== */
+
+.dark-mode .order-history-container {
+  background-color: #1a1a1a;
+}
+
+.dark-mode .section-title {
+  color: #e0e0e0;
+}
+
+.dark-mode .filter-buttons {
+  background: #2a2a2a;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.dark-mode .filter-btn {
+  color: #bbb;
+}
+
+.dark-mode .filter-btn:hover {
+  background: rgba(255, 107, 53, 0.15);
+  color: #ff6b35;
+}
+
+.dark-mode .order-card {
+  background: #242424;
+  border-color: #333;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.dark-mode .order-card:hover {
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+}
+
+.dark-mode .order-header {
+  border-color: #3a3a3a;
+}
+
+.dark-mode .order-info h3 {
+  color: #e0e0e0;
+}
+
+.dark-mode .order-date {
+  color: #888;
+}
+
+.dark-mode .item-name {
+  color: #bbb;
+}
+
+.dark-mode .item-icon {
+  background: #1a1a1a;
+}
+
+.dark-mode .item-price {
+  color: #e0e0e0;
+}
+
+.dark-mode .order-summary-mini {
+  background: #1e1e1e;
+}
+
+.dark-mode .summary-row {
+  color: #bbb;
+}
+
+.dark-mode .summary-row.total-row {
+  border-color: #444;
+  color: #fff;
+}
+
+.dark-mode .btn-secondary {
+  background: #333;
+  color: #e0e0e0;
+}
+
+.dark-mode .btn-secondary:hover {
+  background: #444;
+}
+
+.dark-mode .empty-orders {
+  background: #242424;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.dark-mode .empty-orders h3 {
+  color: #e0e0e0;
+}
+
+.dark-mode .empty-orders p {
+  color: #999;
+}

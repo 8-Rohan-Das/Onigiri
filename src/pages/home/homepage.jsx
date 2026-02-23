@@ -7,6 +7,7 @@ import './homepage.css';
 import NotificationButton from '../../components/NotificationButton';
 import PremiumFavoriteButton from '../../components/PremiumFavoriteButton';
 import HoveringCart from '../../components/HoveringCart';
+import ThemeToggle from '../../components/ThemeToggle';
 // Removing external dependency to fix import error
 // import { FiSearch, FiX } from 'react-icons/fi'; 
 import logo from '../../assets/logo.png';
@@ -302,6 +303,7 @@ const Homepage = () => {
               )}
             </div>
             <NotificationButton onClick={() => navigate('/notifications')} />
+            <ThemeToggle />
           </div>
         </header>
 

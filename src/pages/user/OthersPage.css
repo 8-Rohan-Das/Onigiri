@@ -1,17 +1,16 @@
 /* OthersPage.css - Matching Homepage Theme */
 
 :root {
-  --primary-gradient-start: #8B1E3F;
-  --primary-gradient-end: #F2542D;
-  --accent-gold: #F6AE2D;
-  --global-bg: #FFFFFF;
-  --card-bg: #FFFFFF;
-  --text-dark: #2D3436;
-  --text-light: #636E72;
-  --border-light: #F0F0F0;
-  --shadow-light: rgba(0, 0, 0, 0.05);
-  --shadow-medium: rgba(0, 0, 0, 0.1);
+  --global-bg: var(--bg-primary, #FFFFFF);
+  --card-bg: var(--bg-card, #FFFFFF);
+  --text-dark: var(--text-primary, #2D3436);
+  --text-light: var(--text-secondary, #636E72);
+  --border-light: var(--border-color, #F0F0F0);
+  --shadow-light: var(--shadow-sm, rgba(0, 0, 0, 0.05));
+  --shadow-medium: var(--shadow-md, rgba(0, 0, 0, 0.1));
 }
+
+
 
 .settings-container {
   max-width: 1000px;
@@ -292,4 +291,99 @@
   .payment-methods, .quick-actions {
     grid-template-columns: 1fr;
   }
+}
+
+/* ===================== DARK MODE ===================== */
+
+.dark-mode .settings-section {
+  background: #242424 !important;
+  border-color: #333 !important;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.25);
+}
+
+.dark-mode .settings-section:hover {
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+}
+
+.dark-mode .danger-zone {
+  background: rgba(229, 62, 62, 0.08) !important;
+  border-color: rgba(229, 62, 62, 0.25) !important;
+}
+
+.dark-mode .section-title {
+  color: #e0e0e0;
+}
+
+.dark-mode .form-group label {
+  color: #bbb;
+}
+
+.dark-mode .input-custom {
+  background: #2d2d2d !important;
+  border-color: #444 !important;
+  color: #fff !important;
+}
+
+.dark-mode .input-custom:focus {
+  background: #242424 !important;
+  border-color: #667eea !important;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.dark-mode .input-custom::placeholder {
+  color: #777;
+}
+
+.dark-mode .checkbox-container span {
+  color: #ccc;
+}
+
+.dark-mode .setting-item {
+  border-color: #333;
+}
+
+.dark-mode .payment-card {
+  background: #2d3436 !important;
+  border-color: #444;
+}
+
+.dark-mode .payment-info h4 {
+  color: #fff;
+}
+
+.dark-mode .payment-info p {
+  color: #aaa;
+}
+
+.dark-mode .add-payment-btn {
+  border-color: #555;
+  color: #aaa;
+}
+
+.dark-mode .add-payment-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #667eea;
+}
+
+.dark-mode .action-btn {
+  background: #242424 !important;
+  border-color: #444;
+}
+
+.dark-mode .action-btn h4 {
+  color: #fff;
+}
+
+.dark-mode .action-btn p {
+  color: #aaa;
+}
+
+.dark-mode .danger-btn {
+  background: transparent;
+  color: #e53e3e;
+}
+
+.dark-mode .danger-btn:hover {
+  background: #e53e3e;
+  color: #fff;
 }

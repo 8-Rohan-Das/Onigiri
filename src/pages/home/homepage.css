@@ -1,35 +1,12 @@
 /* HOMEPAGE STYLES - Updated Color Theme */
 
-:root {
 
-  --primary-gradient-start: #8B1E3F;
-
-  --primary-gradient-end: #F2542D;
-
-  --accent-gold: #F6AE2D;
-
-  --primary-orange: #F2542D;
-
-  --global-bg: #FFFFFF;
-
-  --card-bg: #FFFFFF;
-
-  --text-dark: #2D3436;
-
-  --text-light: #636E72;
-
-  --border-light: #F0F0F0;
-
-  --shadow-light: rgba(0, 0, 0, 0.05);
-
-  --shadow-medium: rgba(0, 0, 0, 0.1);
-
-}
 
 
 .homepage-container {
   min-height: 100vh;
-  background-color: var(--global-bg);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
   font-family: 'Poppins', sans-serif;
   display: flex;
   overflow-x: hidden;
@@ -39,6 +16,15 @@
   contain: layout style paint;
 }
 
+.dark-mode .homepage-container {
+  background-color: #1a1a1a;
+  color: #e0e0e0;
+}
+
+.dark-mode .main-header {
+  background-color: transparent; /* Or #1a1a1a if sticky */
+}
+
 
 /* Sidebar Navigation */
 
@@ -46,7 +32,7 @@
 
   width: 250px;
 
-  background: white;
+  background: var(--bg-card);
 
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
 
@@ -92,7 +78,7 @@
 
 .sidebar-logo h1 {
 
-  color: var(--primary-gradient-start);
+  color: var(--accent-gradient-start);
 
   font-size: 1.8rem;
 
@@ -113,58 +99,72 @@
 
 
 .nav-item {
-
   display: flex;
-
   align-items: center;
-
   gap: 15px;
-
   padding: 15px 20px;
-
   border-radius: 12px;
-
   margin-bottom: 10px;
-
   cursor: pointer;
-
   transition: all 0.3s ease;
-
-  color: var(--text-dark);
-
+  color: var(--text-primary);
   font-weight: 500;
-
   border: none;
-
   background: none;
-
   width: 100%;
-
   text-align: left;
-
   font-size: 1rem;
-
+  position: relative; /* Context for pseudo-element */
+  z-index: 1; /* Ensure text sits above ::before */
+  overflow: hidden; /* Prevent bleed outside rounded corners/bounds if needed, but might cut off glow? User said "remove light from bottom", so maybe overflow hidden is good? No, glow usually extends. But here we are using a radial gradient INSIDE the box. */
 }
 
-
+/* Backlight effect using pseudo-element */
+.nav-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 12px;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  background: radial-gradient(circle at center, rgba(242, 84, 45, 0.15) 0%, transparent 80%);
+}
 
 .nav-item:hover {
-
-  background-color: var(--border-light);
-
   transform: translateX(5px);
+  color: var(--accent-gradient-start);
+}
 
+.nav-item:hover::before {
+  opacity: 1;
+}
+
+.dark-mode .nav-item::before {
+  background: radial-gradient(circle at center, rgba(255, 153, 0, 0.25) 0%, transparent 60%);
+}
+
+.dark-mode .nav-item:hover {
+  color: var(--accent-color);
+  background: none; /* Ensure no background on the item itself */
 }
 
 
 
 .nav-item.active {
-  background: linear-gradient(90deg, var(--primary-gradient-start), var(--primary-gradient-end));
+  background: linear-gradient(90deg, var(--accent-gradient-start), var(--accent-gradient-end));
   color: white;
   box-shadow: 0 4px 15px rgba(139, 30, 63, 0.3);
 }
 
 .nav-item.active .nav-icon img {
+  filter: brightness(0) invert(1);
+}
+
+.dark-mode .nav-item:not(.active) .nav-icon img {
   filter: brightness(0) invert(1);
 }
 
@@ -219,17 +219,17 @@
 .search-container {
   display: flex;
   align-items: center;
-  background: white;
+  background: var(--bg-card);
   border-radius: 30px;
   padding: 5px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: var(--shadow-light);
+  box-shadow: var(--shadow-sm);
   border: 1px solid transparent;
 }
 
 .search-container.active {
-  box-shadow: var(--shadow-medium);
-  border-color: var(--border-light);
+  box-shadow: var(--shadow-md);
+  border-color: var(--border-color);
   padding-right: 5px; /* Reduced since clear button has its own spacing */
 }
 
@@ -245,12 +245,12 @@
   justify-content: center;
   font-size: 1.2rem;
   transition: all 0.3s ease;
-  color: var(--text-dark);
+  color: var(--text-primary);
 }
 
 .search-btn:hover {
-  background-color: var(--border-light);
-  color: var(--primary-gradient-start);
+  background-color: var(--bg-secondary);
+  color: var(--accent-color);
 }
 
 .search-input {
@@ -260,7 +260,7 @@
   background: transparent;
   font-family: inherit;
   font-size: 1rem;
-  color: var(--text-dark);
+  color: var(--text-primary);
   transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   opacity: 0;
 }
@@ -283,7 +283,7 @@
   align-items: center;
   justify-content: center;
   font-size: 1rem;
-  color: var(--text-light);
+  color: var(--text-secondary);
   transition: all 0.2s ease;
   opacity: 0;
   transform: scale(0.8);
@@ -297,77 +297,70 @@
 }
 
 .clear-btn:hover {
-  background-color: var(--border-light);
-  color: var(--primary-gradient-end);
+  background-color: var(--border-color);
+  color: var(--accent-color);
 }
 
 
 
 .user-profile {
-
   display: flex;
-
   align-items: center;
-
   gap: 15px;
-
+  transition: all 0.3s ease;
+  flex-shrink: 0;
 }
 
-
+.dark-mode .user-profile {
+  background-color: transparent;
+}
 
 .profile-image {
-
   width: 50px;
-
   height: 50px;
-
   border-radius: 50%;
-
-  background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
-
+  background: linear-gradient(135deg, var(--accent-gradient-start), var(--accent-gradient-end));
   display: flex;
-
   align-items: center;
-
   justify-content: center;
-
   font-size: 1.5rem;
-
   color: white;
-
 }
 
-
+.user-info {
+  background-color: transparent !important;
+  white-space: nowrap;
+}
 
 .user-info h3 {
-
   margin: 0;
-
   font-size: 1.2rem;
-
-  color: var(--text-dark);
-
+  color: var(--text-primary);
+  font-weight: 600;
+  background-color: transparent !important;
 }
 
-
+.dark-mode .user-info h3 {
+  color: #FFFFFF !important;
+}
 
 .user-info p {
-
   margin: 5px 0 0 0;
-
-  color: var(--text-light);
-
+  color: var(--text-secondary);
   font-size: 0.9rem;
+  background-color: transparent !important;
+}
 
+.dark-mode .user-info p {
+  color: #E0E0E0 !important;
 }
 
 
 
 .notification-btn {
 
-  background: white;
-
-  border: 2px solid var(--border-light);
+  background: var(--bg-card);
+  border: 2px solid var(--border-color);
 
   border-radius: 50%;
 
@@ -393,9 +386,8 @@
 
 .notification-btn:hover {
 
-  border-color: var(--primary-gradient-start);
-
-  color: var(--primary-gradient-start);
+  border-color: var(--accent-color);
+  color: var(--accent-color);
 
   transform: scale(1.05);
 
@@ -406,7 +398,7 @@
 /* Discount Banner */
 
 .discount-banner {
-  background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
+  background: linear-gradient(135deg, var(--accent-gradient-start), var(--accent-gradient-end));
   border-radius: 20px;
   padding: 30px;
   color: white;
@@ -438,8 +430,8 @@
 
 
 .order-btn {
-  background: white;
-  color: var(--primary-gradient-start);
+  background: var(--bg-card);
+  color: var(--accent-color);
   border: none;
   padding: 12px 30px;
   border-radius: 25px;
@@ -480,7 +472,7 @@
 
   font-weight: 700;
 
-  color: var(--text-dark);
+  color: var(--text-primary);
 
   margin-bottom: 25px;
 
@@ -546,7 +538,7 @@
 
 .scroll-arrow {
 
-  background: var(--primary-gradient-start);
+  background: var(--accent-gradient-start);
 
   color: white;
 
@@ -580,7 +572,7 @@
 
 .scroll-arrow:hover {
 
-  background: var(--primary-gradient-end);
+  background: var(--accent-gradient-end);
 
   transform: scale(1.1);
 
@@ -602,7 +594,7 @@
 
 .category-card {
 
-  background: white;
+  background: var(--bg-card);
 
   border-radius: 15px;
 
@@ -635,7 +627,7 @@
 
 
 .category-card.active {
-  background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
+  background: linear-gradient(135deg, var(--accent-gradient-start), var(--accent-gradient-end));
   color: white;
 }
 
@@ -683,7 +675,7 @@
 
 .dishes-section {
 
-  background: white;
+  background: var(--bg-card);
 
   border-radius: 20px;
 
@@ -740,7 +732,7 @@
 
 
 .dish-card {
-  background: var(--border-light);
+  background: var(--bg-secondary);
   border-radius: 16px;
   overflow: hidden;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -759,9 +751,14 @@
 }
 
 .dish-card:hover {
-  background-color: linear-gradient(135deg, #FFE4E6, #FFD6D6, #FFD1C2);
-  transform: translateY(-4px) scale(1.02) translateZ(0);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  background: var(--bg-secondary);
+  transform: translateY(-5px) translateZ(0);
+  box-shadow: 0 15px 50px -10px rgba(242, 84, 45, 0.3);
+}
+
+.dark-mode .dish-card:hover {
+  background: var(--bg-secondary);
+  box-shadow: 0 15px 50px -10px rgba(255, 153, 0, 0.4);
 }
 
 .dish-badge {
@@ -875,7 +872,7 @@
 
 .recent-orders {
 
-  background: white;
+  background: var(--bg-card);
 
   border-radius: 20px;
 
@@ -932,7 +929,7 @@
 
   padding: 15px;
 
-  background: var(--light-gray);
+  background: var(--bg-secondary);
 
   border-radius: 10px;
 
@@ -948,7 +945,7 @@
 
   height: 40px;
 
-  background: white;
+  background: var(--bg-card);
 
   border-radius: 10px;
 
@@ -973,7 +970,7 @@
 
   font-size: 0.95rem;
 
-  color: var(--text-dark);
+  color: var(--text-primary);
 
 }
 
@@ -985,7 +982,7 @@
 
   font-size: 0.85rem;
 
-  color: var(--text-light);
+  color: var(--text-secondary);
 
 }
 
@@ -1070,7 +1067,7 @@
 
 .address-card {
 
-  background: white;
+  background: var(--bg-card);
 
   border-radius: 20px;
 
@@ -1102,7 +1099,7 @@
 
   border: 2px solid var(--medium-gray);
 
-  color: var(--text-dark);
+  color: var(--text-primary);
 
   padding: 8px 20px;
 
@@ -1132,7 +1129,7 @@
 
 .address-text {
 
-  color: var(--text-light);
+  color: var(--text-secondary);
 
   line-height: 1.6;
 
@@ -1152,7 +1149,7 @@
 
   border: 2px dashed var(--medium-gray);
 
-  color: var(--text-dark);
+  color: var(--text-primary);
 
   padding: 15px;
 
@@ -1192,7 +1189,7 @@
 
 .order-menu {
 
-  background: white;
+  background: var(--bg-card);
 
   border-radius: 20px;
 
@@ -1248,7 +1245,7 @@
 
   font-weight: 500;
 
-  color: var(--text-dark);
+  color: var(--text-primary);
 
 }
 
@@ -1294,7 +1291,7 @@
 
 .delivery-row {
 
-  color: var(--text-light);
+  color: var(--text-secondary);
 
 }
 
@@ -1306,7 +1303,7 @@
 
   font-weight: 700;
 
-  color: var(--text-dark);
+  color: var(--text-primary);
 
   border-top: 2px solid var(--medium-gray);
 
@@ -1320,7 +1317,7 @@
 
 .checkout-section {
 
-  background: white;
+  background: var(--bg-card);
 
   border-radius: 20px;
 
@@ -1398,7 +1395,7 @@
 
   align-items: center;
 
-  color: var(--text-light);
+  color: var(--text-secondary);
 
 }
 
@@ -1446,8 +1443,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: white;
-  border: 1px solid var(--border-light);
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
   flex-shrink: 0;
 }
 
@@ -1459,7 +1456,7 @@
 
 .item-icon {
   font-size: 1.2rem;
-  color: var(--text-light);
+  color: var(--text-secondary);
 }
 
 .order-image-container {
@@ -1470,8 +1467,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: white;
-  border: 1px solid var(--border-light);
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
   flex-shrink: 0;
 }
 

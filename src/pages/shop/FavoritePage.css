@@ -15,9 +15,46 @@
   --success-green: #00b894;
 }
 
+.dark-mode .favorites-section {
+  background: var(--bg-card);
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+}
+
+.dark-mode .favorites-section .section-title {
+  color: #fff;
+}
+
+.dark-mode .favorites-section .dish-info {
+  background: var(--bg-card);
+}
+
+.dark-mode .favorites-section .dish-name {
+  color: #fff;
+}
+
+.dark-mode .favorites-section .dish-category {
+  color: #bbb;
+}
+
+.dark-mode .favorites-section .dish-image {
+  background: #333;
+}
+
+.dark-mode .empty-favorites {
+  background: linear-gradient(135deg, #2d3436, #2d3436);
+}
+
+.dark-mode .empty-favorites h3 {
+  color: #fff;
+}
+
+.dark-mode .empty-favorites p {
+  color: #aaa;
+}
+
 /* Favorites Section */
 .favorites-section {
-  background: white;
+  background: var(--card-bg);
   border-radius: 20px;
   padding: 30px;
   margin: 20px 0;
@@ -51,7 +88,7 @@
 
 .favorites-section .dish-image {
   height: 180px;
-  background: #f8f9fa;
+  background: var(--bg-secondary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -92,7 +129,7 @@
 
 .favorites-section .dish-info {
   padding: 20px;
-  background: white;
+  background: var(--card-bg);
 }
 
 .favorites-section .dish-name {

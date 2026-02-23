@@ -1,16 +1,111 @@
 /* ORDER CONFIRMATION PAGE STYLES - Matching Homepage Theme */
 
 :root {
-  --primary-gradient-start: #8B1E3F;
-  --primary-gradient-end: #F2542D;
-  --accent-gold: #F6AE2D;
-  --global-bg: #FFFFFF;
-  --card-bg: #FFFFFF;
-  --text-dark: #2D3436;
-  --text-light: #636E72;
-  --border-light: #F0F0F0;
-  --shadow-light: rgba(0, 0, 0, 0.05);
-  --shadow-medium: rgba(0, 0, 0, 0.1);
+  --global-bg: var(--bg-primary, #FFFFFF);
+  --card-bg: var(--bg-card, #FFFFFF);
+  --text-dark: var(--text-primary, #2D3436);
+  --text-light: var(--text-secondary, #636E72);
+  --border-light: var(--border-color, #F0F0F0);
+  --shadow-light: var(--shadow-sm, rgba(0, 0, 0, 0.05));
+  --shadow-medium: var(--shadow-md, rgba(0, 0, 0, 0.1));
+}
+
+.dark-mode .confirmation-container {
+  background: var(--bg-primary);
+}
+
+.dark-mode .confirmation-header,
+.dark-mode .success-section,
+.dark-mode .order-details-section,
+.dark-mode .order-items-section {
+  background: var(--bg-card);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.dark-mode .back-btn {
+  color: #fff;
+}
+
+.dark-mode .user-info {
+  background: var(--bg-secondary);
+}
+
+.dark-mode .user-info span {
+  color: #fff;
+}
+
+.dark-mode .success-section h1,
+.dark-mode .order-details-section h2,
+.dark-mode .order-items-section h2,
+.dark-mode .info-card h3,
+.dark-mode .item-details h4,
+.dark-mode .price-row.total {
+  color: #fff;
+}
+
+.dark-mode .success-message,
+.dark-mode .info-card p,
+.dark-mode .item-quantity,
+.dark-mode .price-row {
+  color: #bbb;
+}
+
+.dark-mode .info-card {
+  background: var(--bg-secondary);
+}
+
+.dark-mode .order-details-section h2,
+.dark-mode .order-items-section h2,
+.dark-mode .order-item,
+.dark-mode .price-row.total,
+.dark-mode .price-summary {
+  border-color: #333;
+}
+
+.dark-mode .action-btn.secondary {
+  background: transparent;
+  color: #FF6B35;
+  border-color: #FF6B35;
+}
+
+.dark-mode .action-btn.secondary:hover {
+  background: #FF6B35;
+  color: white;
+}
+
+.dark-mode .action-btn.tertiary {
+  background: var(--bg-secondary);
+  color: #fff;
+  border-color: #444;
+}
+
+.dark-mode .action-btn.tertiary:hover {
+  background: #444;
+}
+
+.dark-mode .confirmation-main {
+  background: var(--bg-primary);
+}
+
+.dark-mode .loading-spinner {
+  color: #bbb;
+}
+
+.dark-mode .redirect-notice {
+  background: rgba(255, 107, 53, 0.08);
+  border-color: rgba(255, 107, 53, 0.4);
+}
+
+.dark-mode .redirect-notice p {
+  color: #bbb;
+}
+
+.dark-mode .item-details h4 {
+  color: #e0e0e0;
+}
+
+.dark-mode .item-price {
+  color: #FF6B35;
 }
 
 .confirmation-container {
@@ -23,13 +118,13 @@
 
 /* Header */
 .confirmation-header {
-  background: white;
+  background: var(--bg-card, white);
   padding: 20px 30px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-  flex-shrink: 0; /* Prevent header from shrinking */
+  flex-shrink: 0;
 }
 
 .header-left {
@@ -118,7 +213,7 @@
 /* Success Section */
 .success-section {
   text-align: center;
-  background: white;
+  background: var(--bg-card, white);
   border-radius: 20px;
   padding: 60px 40px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
@@ -182,7 +277,7 @@
 
 /* Order Details Section */
 .order-details-section {
-  background: white;
+  background: var(--bg-card, white);
   border-radius: 20px;
   padding: 40px;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
@@ -237,7 +332,7 @@
 
 /* Order Items Section */
 .order-items-section {
-  background: white;
+  background: var(--bg-card, white);
   border-radius: 20px;
   padding: 40px;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);

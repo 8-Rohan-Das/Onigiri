@@ -1,16 +1,13 @@
 /* Category Page Styles - Matching Homepage Theme */
 
 :root {
-  --primary-gradient-start: #8B1E3F;
-  --primary-gradient-end: #F2542D;
-  --accent-gold: #F6AE2D;
-  --global-bg: #FFFFFF;
-  --card-bg: #FFFFFF;
-  --text-dark: #2D3436;
-  --text-light: #636E72;
-  --border-light: #F0F0F0;
-  --shadow-light: rgba(0, 0, 0, 0.05);
-  --shadow-medium: rgba(0, 0, 0, 0.1);
+  --global-bg: var(--bg-primary, #FFFFFF);
+  --card-bg: var(--bg-card, #FFFFFF);
+  --text-dark: var(--text-primary, #2D3436);
+  --text-light: var(--text-secondary, #636E72);
+  --border-light: var(--border-color, #F0F0F0);
+  --shadow-light: var(--shadow-sm, rgba(0, 0, 0, 0.05));
+  --shadow-medium: var(--shadow-md, rgba(0, 0, 0, 0.1));
 }
 
 .category-hero {
@@ -66,13 +63,14 @@
 }
 
 .subcategory-card {
-  background: white;
+  background: var(--bg-card, white);
   padding: 20px;
   border-radius: 12px;
-  border: 2px solid #f0f0f0;
+  border: 2px solid var(--border-color, #f0f0f0);
   cursor: pointer;
   transition: all 0.3s ease;
   text-align: center;
+  color: var(--text-primary, #2D3436);
 }
 
 .subcategory-card:hover {
@@ -143,7 +141,7 @@
 }
 
 .menu-item-card {
-  background: white;
+  background: var(--bg-card, white);
   border-radius: 16px;
   overflow: hidden;
   transition: all 0.3s ease;
@@ -181,7 +179,7 @@
   margin: 0 0 10px 0;
   font-size: 1.2rem;
   font-weight: 600;
-  color: #2c3e50;
+  color: var(--text-primary, #2c3e50);
 }
 
 .menu-item-meta {
@@ -208,6 +206,10 @@
   color: #2c3e50;
 }
 
+.dark-mode .price {
+  color: #fff !important;
+}
+
 .add-to-cart-btn {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
@@ -228,7 +230,7 @@
 .recommendations-section {
   margin: 40px 0;
   padding: 30px;
-  background: #f8f9fa;
+  background: var(--bg-secondary, #f8f9fa);
   border-radius: 16px;
 }
 
@@ -243,7 +245,7 @@
   display: flex;
   align-items: center;
   gap: 15px;
-  background: white;
+  background: var(--bg-card, white);
   padding: 15px;
   border-radius: 12px;
   cursor: pointer;
@@ -303,4 +305,75 @@
   .recommendations-grid {
     grid-template-columns: 1fr;
   }
+}
+
+/* ===================== DARK MODE ===================== */
+
+.dark-mode .subcategory-card {
+  background: #242424;
+  border-color: #333;
+  color: #e0e0e0;
+}
+
+.dark-mode .subcategory-card:hover {
+  border-color: #667eea;
+  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.2);
+}
+
+.dark-mode .subcategory-card h3 {
+  color: #e0e0e0;
+}
+
+.dark-mode .filter-btn {
+  background: #2a2a2a;
+  border-color: #444;
+  color: #bbb;
+}
+
+.dark-mode .filter-btn:hover {
+  border-color: #667eea;
+  color: #667eea;
+}
+
+.dark-mode .filter-btn.active {
+  background: #667eea;
+  border-color: #667eea;
+  color: white;
+}
+
+.dark-mode .menu-item-card {
+  background: #242424;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.dark-mode .menu-item-card:hover {
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+}
+
+.dark-mode .menu-item-content h3 {
+  color: #e0e0e0;
+}
+
+.dark-mode .menu-item-meta {
+  color: #999;
+}
+
+.dark-mode .recommendations-section {
+  background: #1e1e1e;
+}
+
+.dark-mode .recommendation-card {
+  background: #242424;
+}
+
+.dark-mode .recommendation-card:hover {
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.dark-mode .recommendation-card h4 {
+  color: #e0e0e0;
+}
+
+.dark-mode .recommendation-card p {
+  color: #999;
 }

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useNotifications } from '../../context/NotificationContext';
 import { getStoredUser, removeStoredItem } from '../../utils/storageUtils.js';
 import '../home/homepage.css';
+import './NotificationPage.css';
 import logo from '../../assets/logo.png';
 import restaurantImage from '../../assets/restaurant.png';
 import heartImage from '../../assets/heart.png';
@@ -153,37 +154,18 @@ const NotificationPage = () => {
               <p>Stay updated with your latest activities</p>
             </div>
           </div>
-          <div className="notification-actions">
+          <div className="notif-header-actions">
             {notifications.length > 0 && (
               <>
-                <button 
-                  className="mark-all-read-btn"
+                <button
+                  className="notif-mark-all-btn"
                   onClick={markAllAsRead}
-                  style={{
-                    background: '#4ecdc4',
-                    color: 'white',
-                    border: 'none',
-                    padding: '8px 16px',
-                    borderRadius: '6px',
-                    cursor: 'pointer',
-                    marginRight: '10px',
-                    fontSize: '14px'
-                  }}
                 >
                   Mark All Read
                 </button>
-                <button 
-                  className="clear-all-btn"
+                <button
+                  className="notif-clear-all-btn"
                   onClick={handleClearAll}
-                  style={{
-                    background: '#ff6b6b',
-                    color: 'white',
-                    border: 'none',
-                    padding: '8px 16px',
-                    borderRadius: '6px',
-                    cursor: 'pointer',
-                    fontSize: '14px'
-                  }}
                 >
                   Clear All
                 </button>
@@ -199,98 +181,45 @@ const NotificationPage = () => {
               {notifications.map((notification) => (
                 <div
                   key={notification.id}
-                  className={`notification-item ${notification.read ? 'read' : 'unread'}`}
+                  className={`notif-item ${notification.read ? 'notif-read' : 'notif-unread'}`}
+                  style={{ borderColor: notification.read ? undefined : getNotificationColor(notification.type) }}
                   onClick={() => handleNotificationClick(notification)}
-                  style={{
-                    background: notification.read ? '#f8f9fa' : 'white',
-                    border: `1px solid ${notification.read ? '#e9ecef' : getNotificationColor(notification.type)}`,
-                    borderRadius: '8px',
-                    padding: '16px',
-                    marginBottom: '12px',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                    position: 'relative'
-                  }}
                 >
-                  <div className="notification-content" style={{ display: 'flex', alignItems: 'flex-start' }}>
-                    <div 
-                      className="notification-icon"
-                      style={{
-                        fontSize: '24px',
-                        marginRight: '16px',
-                        minWidth: '24px'
-                      }}
-                    >
+                  <div className="notif-content">
+                    <div className="notif-icon">
                       {notification.icon || getNotificationIcon(notification.type)}
                     </div>
-                    <div className="notification-details" style={{ flex: 1 }}>
-                      <h4 style={{ 
-                        margin: '0 0 4px 0', 
-                        color: notification.read ? '#6c757d' : '#2d3436',
-                        fontWeight: notification.read ? '400' : '600'
-                      }}>
+                    <div className="notif-details">
+                      <h4 className={`notif-title ${notification.read ? 'notif-title-read' : 'notif-title-unread'}`}>
                         {notification.title}
                       </h4>
-                      <p style={{ 
-                        margin: '0 0 8px 0', 
-                        color: '#6c757d',
-                        fontSize: '14px'
-                      }}>
-                        {notification.message}
-                      </p>
-                      <span style={{ 
-                        fontSize: '12px', 
-                        color: '#adb5bd' 
-                      }}>
-                        {formatTimeAgo(notification.timestamp)}
-                      </span>
+                      <p className="notif-message">{notification.message}</p>
+                      <span className="notif-time">{formatTimeAgo(notification.timestamp)}</span>
                     </div>
                     <button
-                      className="delete-notification-btn"
+                      className="notif-delete-btn"
                       onClick={(e) => handleDeleteNotification(e, notification.id)}
-                      style={{
-                        background: 'none',
-                        border: 'none',
-                        color: '#dc3545',
-                        cursor: 'pointer',
-                        padding: '4px',
-                        borderRadius: '4px',
-                        fontSize: '16px'
-                      }}
                     >
                       ×
                     </button>
                   </div>
                   {!notification.read && (
-                    <div 
-                      className="unread-indicator"
-                      style={{
-                        position: 'absolute',
-                        top: '16px',
-                        right: '16px',
-                        width: '8px',
-                        height: '8px',
-                        backgroundColor: getNotificationColor(notification.type),
-                        borderRadius: '50%'
-                      }}
+                    <div
+                      className="notif-unread-dot"
+                      style={{ backgroundColor: getNotificationColor(notification.type) }}
                     />
                   )}
                 </div>
               ))}
             </div>
           ) : (
-            <div className="empty-notifications" style={{
-              textAlign: 'center',
-              padding: '60px 20px',
-              color: '#6c757d'
-            }}>
-              <div style={{ fontSize: '48px', marginBottom: '16px' }}>🔔</div>
+            <div className="notif-empty">
+              <div className="notif-empty-icon">🔔</div>
               <h3>No notifications yet</h3>
               <p>Start placing orders and updating your settings to see notifications here!</p>
-              <button 
-                className="order-btn"
+              <button
+                className="order-btn notif-browse-btn"
                 onClick={() => navigate('/home')}
-                style={{ marginTop: '16px' }}
               >
                 Browse Menu
               </button>

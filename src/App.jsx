@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { CartProvider } from './context/CartContext';
 import { NotificationProvider } from './context/NotificationContext';
 import { FavoriteProvider } from './context/FavoriteContext';
+import { ThemeProvider } from './context/ThemeContext';
 
 // Import pages
 import LoginPage from './pages/auth/LoginPage';
@@ -23,26 +24,28 @@ import OrderConfirmationPage from './pages/order/OrderConfirmationPage';
 function App() {
   return (
     <BrowserRouter>
-      <NotificationProvider>
-        <CartProvider>
-          <FavoriteProvider>
-            <Routes>
-              <Route path="/" element={<LoginPage />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/signup" element={<SignUpPage />} />
-              <Route path="/home" element={<Homepage />} />
-              <Route path="/category/:category" element={<CategoryPage />} />
-              <Route path="/favorite" element={<FavoritePage />} />
-              <Route path="/messages" element={<MessagesPage />} />
-              <Route path="/order-history" element={<OrderHistoryPage />} />
-              <Route path="/others" element={<OthersPage />} />
-              <Route path="/notifications" element={<NotificationPage />} />
-              <Route path="/checkout" element={<CheckoutPage />} />
-              <Route path="/order-confirmation" element={<OrderConfirmationPage />} />
-            </Routes>
-          </FavoriteProvider>
-        </CartProvider>
-      </NotificationProvider>
+      <ThemeProvider>
+        <NotificationProvider>
+          <CartProvider>
+            <FavoriteProvider>
+              <Routes>
+                <Route path="/" element={<LoginPage />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/signup" element={<SignUpPage />} />
+                <Route path="/home" element={<Homepage />} />
+                <Route path="/category/:category" element={<CategoryPage />} />
+                <Route path="/favorite" element={<FavoritePage />} />
+                <Route path="/messages" element={<MessagesPage />} />
+                <Route path="/order-history" element={<OrderHistoryPage />} />
+                <Route path="/others" element={<OthersPage />} />
+                <Route path="/notifications" element={<NotificationPage />} />
+                <Route path="/checkout" element={<CheckoutPage />} />
+                <Route path="/order-confirmation" element={<OrderConfirmationPage />} />
+              </Routes>
+            </FavoriteProvider>
+          </CartProvider>
+        </NotificationProvider>
+      </ThemeProvider>
     </BrowserRouter>
   );
 }

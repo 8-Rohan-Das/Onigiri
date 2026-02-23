@@ -5,8 +5,78 @@
   box-sizing: border-box;
 }
 
+:root {
+  /* Light Mode (Default) */
+  --bg-primary: #FFFFFF;
+  --bg-secondary: #F0F0F0;
+  --bg-card: #FFFFFF;
+  --text-primary: #2D3436;
+  --text-secondary: #636E72;
+  --accent-color: #F2542D;
+  --accent-gradient-start: #8B1E3F;
+  --accent-gradient-end: #F2542D;
+  --border-color: #F0F0F0;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  --input-bg: rgba(255, 255, 255, 0.9);
+  
+  /* Shared */
+  --transition-speed: 0.3s;
+  --shadow-sm: rgba(0, 0, 0, 0.05);
+  --shadow-md: rgba(0, 0, 0, 0.1);
+  --accent-gold: #F6AE2D;
+  
+  /* Missing variables definition for Light Mode */
+  --text-dark: #2D3436;
+  --text-light: #636E72;
+  --cream-white: #FDFBF7;
+  --medium-gray: #E0E0E0;
+  --light-gray: #F5F5F5;
+  --urgent-red: #FF4757;
+  --accent-green: #2ECC71;
+  --primary-orange: #FF6B6B;
+  --primary-gradient-start: #FF6B6B;
+  --primary-gradient-end: #FF8E53;
+}
+
+.dark-mode {
+  /* Dark Industrial Mode */
+  --bg-primary: #1a1a1a;
+  --bg-secondary: #2d2d2d;
+  --bg-card: #242424;
+  --text-primary: #e0e0e0;
+  --text-secondary: #a0a0a0;
+  --text-dark: #e0e0e0; /* Mapped to primary for dark mode */
+  --text-light: #a0a0a0; /* Mapped to secondary for dark mode */
+  --accent-color: #ff9900;
+  --accent-gradient-start: #ff9900;
+  --accent-gradient-end: #cc7a00;
+  --border-color: #404040;
+  --shadow-color: rgba(0, 0, 0, 0.3);
+  --shadow-sm: rgba(0, 0, 0, 0.2);
+  --shadow-md: rgba(0, 0, 0, 0.4);
+  --input-bg: rgba(40, 40, 40, 0.9);
+  --accent-gold: #cc9900;
+  
+  /* Missing variables definition for Dark Mode */
+  --cream-white: #2A2A2A;
+  --medium-gray: #404040;
+  --light-gray: #333333;
+  --urgent-red: #FF4757;
+  --accent-green: #2ECC71;
+  --primary-orange: #FF6B6B;
+  --primary-gradient-start: #FF6B6B;
+  --primary-gradient-end: #FF8E53;
+}
+
 body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color var(--transition-speed) ease, color var(--transition-speed) ease;
+}
+
+.dark-mode .notification-icon {
+  filter: brightness(0) invert(1);
 }

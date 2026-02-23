@@ -1,5 +1,6 @@
 import React from 'react';
 import { useCheckout } from '../../hooks/useCheckout';
+import ThemeToggle from '../../components/ThemeToggle';
 import './CheckoutPage.css';
 import logo from '../../assets/logo.png';
 import userImage from '../../assets/user.png';
@@ -62,6 +63,9 @@ const CheckoutPage = () => {
           >
             Logout
           </button>
+          <div style={{ marginLeft: '15px' }}>
+            <ThemeToggle />
+          </div>
         </div>
       </header>
 
