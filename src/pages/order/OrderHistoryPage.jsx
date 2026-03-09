@@ -18,6 +18,8 @@ import userImage from '../../assets/user.png';
 const OrderHistoryPage = () => {
   const navigate = useNavigate();
   const [activeNav, setActiveNav] = useState('order-history');
+  const [showTrackingModal, setShowTrackingModal] = useState(false);
+  const [trackedOrder, setTrackedOrder] = useState(null);
   
   // Get user data from localStorage
   const userData = getStoredUser();
@@ -109,6 +111,11 @@ const OrderHistoryPage = () => {
 
   const handleViewDetails = (order) => {
     alert(`Viewing details for order ${order.id}`);
+  };
+
+  const handleTrackOrder = (order) => {
+    setTrackedOrder(order);
+    setShowTrackingModal(true);
   };
 
   const handleClearHistory = () => {
@@ -290,6 +297,12 @@ const OrderHistoryPage = () => {
                     >
                       Details
                     </button>
+                    <button
+                      className="order-btn btn-track"
+                      onClick={() => handleTrackOrder(order)}
+                    >
+                      🚴 Track Order
+                    </button>
                     {order.status === 'delivered' && (
                       <button 
                         className="order-btn btn-primary"
@@ -324,6 +337,30 @@ const OrderHistoryPage = () => {
       </main>
 
       <HoveringCart />
+
+      {/* Order Tracking Coming Soon Modal */}
+      {showTrackingModal && (
+        <div className="tracking-modal-overlay" onClick={() => setShowTrackingModal(false)}>
+          <div className="tracking-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="tracking-modal-close" onClick={() => setShowTrackingModal(false)}>✕</button>
+            <div className="tracking-modal-icon">🚀</div>
+            <h2 className="tracking-modal-title">Feature Coming Soon!</h2>
+            <p className="tracking-modal-subtitle">
+              Real-time order tracking for
+              <strong> {trackedOrder?.id}</strong> is on its way!
+            </p>
+            <div className="tracking-steps">
+              <div className="tracking-step done">✅ Order Placed</div>
+              <div className="tracking-step done">✅ Confirmed</div>
+              <div className="tracking-step upcoming">🍳 Preparing</div>
+              <div className="tracking-step upcoming">🚴 On the Way</div>
+              <div className="tracking-step upcoming">🏠 Delivered</div>
+            </div>
+            <p className="tracking-modal-note">We're building live tracking so you can follow your food every step of the way. Stay tuned!</p>
+            <button className="tracking-modal-btn" onClick={() => setShowTrackingModal(false)}>Got it!</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

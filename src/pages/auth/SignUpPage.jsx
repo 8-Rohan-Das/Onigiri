@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useLayoutEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './LoginPage.css';
 import logo from '../../assets/logo.png';
@@ -14,12 +14,14 @@ const SignUpPage = () => {
     handleSubmit
   } = useSignUp();
 
-  // Force light mode on auth pages
-  useEffect(() => {
-    const wasDark = document.body.classList.contains('dark-mode');
+  // Force light mode on auth pages — useLayoutEffect runs before paint (no flash)
+  useLayoutEffect(() => {
     document.body.classList.remove('dark-mode');
     return () => {
-      if (wasDark) document.body.classList.add('dark-mode');
+      // Restore dark mode on leave only if user's saved preference is dark
+      if (localStorage.getItem('theme') === 'dark') {
+        document.body.classList.add('dark-mode');
+      }
     };
   }, []);
 

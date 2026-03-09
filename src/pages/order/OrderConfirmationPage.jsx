@@ -17,6 +17,7 @@ const OrderConfirmationPage = () => {
   const location = useLocation();
 
   const [countdown, setCountdown] = useState(30);
+  const [showTrackingModal, setShowTrackingModal] = useState(false);
 
 
 
@@ -79,9 +80,7 @@ const OrderConfirmationPage = () => {
 
 
   const handleTrackOrder = () => {
-
-    navigate('/order-tracking');
-
+    setShowTrackingModal(true);
   };
 
 
@@ -360,6 +359,64 @@ const OrderConfirmationPage = () => {
 
       </main>
 
+      {/* Order Tracking Coming Soon Modal */}
+      {showTrackingModal && (
+        <div
+          style={{
+            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)',
+            backdropFilter: 'blur(4px)', zIndex: 1000,
+            display: 'flex', alignItems: 'center', justifyContent: 'center'
+          }}
+          onClick={() => setShowTrackingModal(false)}
+        >
+          <div
+            style={{
+              background: 'white', borderRadius: '24px', padding: '40px 36px 32px',
+              maxWidth: '420px', width: '90%', position: 'relative', textAlign: 'center',
+              boxShadow: '0 25px 60px rgba(0,0,0,0.2)'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setShowTrackingModal(false)}
+              style={{
+                position: 'absolute', top: '16px', right: '16px',
+                background: '#f1f2f6', border: 'none', borderRadius: '50%',
+                width: '32px', height: '32px', fontSize: '1rem', cursor: 'pointer'
+              }}
+            >✕</button>
+            <div style={{ fontSize: '3.5rem', marginBottom: '12px' }}>🚀</div>
+            <h2 style={{
+              fontSize: '1.6rem', fontWeight: 800, margin: '0 0 10px',
+              background: 'linear-gradient(135deg, #6c63ff, #a78bfa)',
+              WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent'
+            }}>Feature Coming Soon!</h2>
+            <p style={{ color: '#636e72', marginBottom: '24px' }}>
+              Real-time order tracking for <strong>#{displayOrderId}</strong> is on its way!
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '20px', textAlign: 'left' }}>
+              <div style={{ background: '#f0fdf4', color: '#166534', padding: '10px 14px', borderRadius: '10px', fontWeight: 600 }}>✅ Order Placed</div>
+              <div style={{ background: '#f0fdf4', color: '#166534', padding: '10px 14px', borderRadius: '10px', fontWeight: 600 }}>✅ Confirmed</div>
+              <div style={{ background: '#f5f3ff', color: '#5b21b6', padding: '10px 14px', borderRadius: '10px', fontWeight: 600, opacity: 0.6 }}>🍳 Preparing</div>
+              <div style={{ background: '#f5f3ff', color: '#5b21b6', padding: '10px 14px', borderRadius: '10px', fontWeight: 600, opacity: 0.6 }}>🚴 On the Way</div>
+              <div style={{ background: '#f5f3ff', color: '#5b21b6', padding: '10px 14px', borderRadius: '10px', fontWeight: 600, opacity: 0.6 }}>🏠 Delivered</div>
+            </div>
+            <p style={{ fontSize: '0.82rem', color: '#b2bec3', marginBottom: '24px', lineHeight: 1.5 }}>
+              We're building live tracking so you can follow your food every step of the way. Stay tuned!
+            </p>
+            <button
+              onClick={() => setShowTrackingModal(false)}
+              style={{
+                background: 'linear-gradient(135deg, #6c63ff, #a78bfa)', color: 'white',
+                border: 'none', padding: '12px 36px', borderRadius: '50px',
+                fontSize: '1rem', fontWeight: 700, cursor: 'pointer',
+                boxShadow: '0 4px 15px rgba(108,99,255,0.35)'
+              }}
+            >Got it!</button>
+          </div>
+        </div>
+      )}
+
     </div>
 
   );
@@ -369,4 +426,5 @@ const OrderConfirmationPage = () => {
 
 
 export default OrderConfirmationPage;
+
 

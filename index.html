@@ -5,6 +5,19 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ONIGIRI</title>
+    
+    <!-- Prevent flash of incorrect theme -->
+    <script>
+      // Force light theme for auth pages
+      (function() {
+        const path = window.location.pathname;
+        if (path === '/login' || path === '/signup' || path === '/') {
+          // Remove dark mode class immediately
+          document.documentElement.classList.remove('dark-mode');
+          document.body.classList.remove('dark-mode');
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

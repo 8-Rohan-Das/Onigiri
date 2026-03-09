@@ -3,9 +3,30 @@
 
 /* CSS Variables - Matching Homepage Theme */
 :root {
+  /* Default gradient colors - matching your design */
+  --accent-gradient-start: #8B1E3F;
+  --accent-gradient-end: #F2542D;
+
+  /* Accent */
+  --accent-gold: #FFD166;
+
+  /* Background colors */
+  --bg-primary: #FFFFFF;
+  --bg-secondary: #F0F0F0;
+  --bg-card: #FFFFFF;
+
+  /* Text */
+  --text-primary: #2D3436;
+  --text-secondary: #636E72;
+
+  /* Borders & shadows */
+  --border-color: #F0F0F0;
+  --shadow-sm: rgba(0,0,0,0.05);
+  --shadow-md: rgba(0,0,0,0.1);
+
+  /* Aliases used in your CSS */
   --primary-gradient-start: var(--accent-gradient-start);
   --primary-gradient-end: var(--accent-gradient-end);
-  --accent-gold: var(--accent-gold);
   --global-bg: var(--bg-primary);
   --card-bg: var(--bg-card);
   --text-dark: var(--text-primary);
@@ -13,16 +34,30 @@
   --border-light: var(--border-color);
   --shadow-light: var(--shadow-sm);
   --shadow-medium: var(--shadow-md);
+  --input-bg: #ffffff;
 }
 
-.dark-mode {
-  --global-bg: #1a1a1a;
-  --card-bg: #242424;
-  --text-dark: #ffffff;
-  --text-light: #a0a0a0;
-  --border-light: #333333;
-  --shadow-light: rgba(0, 0, 0, 0.3);
+/* ── Force light-mode inside the login page regardless of <body> class ── */
+.login-wrapper {
+  --bg-primary:             #FFFFFF;
+  --bg-secondary:           #F0F0F0;
+  --bg-card:                #FFFFFF;
+  --text-primary:           #2D3436;
+  --text-secondary:         #636E72;
+  --accent-gradient-start:  #8B1E3F;
+  --border-color:           #F0F0F0;
+  --shadow-sm:              rgba(0, 0, 0, 0.05);
+  --shadow-md:              rgba(0, 0, 0, 0.1);
+  /* local aliases used throughout this file */
+  --global-bg:              #FFFFFF;
+  --card-bg:                #FFFFFF;
+  --text-dark:              #2D3436;
+  --text-light:             #636E72;
+  --border-light:           #F0F0F0;
+  --shadow-light:           rgba(0, 0, 0, 0.05);
+  --input-bg: #ffffff;
 }
+
 
 * {
   margin: 0;
@@ -598,26 +633,20 @@ body {
   transition: all 0.3s ease;
   background-color: var(--card-bg);
   box-shadow: var(--shadow-light);
-  color: var(--text-dark); /* Ensure text color is correct in dark mode */
+  color: #2D3436; /* Dark text color for light mode input fields */
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
-  
-  @media (max-width: 480px) {
+}
+
+@media (max-width: 480px) {
+  .input-custom {
     padding: 14px 16px;
     font-size: 15px;
   }
 }
 
-.dark-mode .input-custom {
-  border-color: var(--border-light);
-  background-color: var(--bg-secondary);
-  color: #fff;
-}
 
-.dark-mode .input-custom::placeholder {
-  color: #888;
-}
 
 .btn-login {
   width: 100%;
@@ -910,5 +939,39 @@ body {
   0%, 100% { transform: translateX(0); }
   25% { transform: translateX(-5px); }
   75% { transform: translateX(5px); }
+}
+
+/* New error and success boxes */
+.error-box {
+  background-color: #fee;
+  color: #c00;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border: 1px solid #fcc;
+  animation: shake 0.5s ease;
+}
+
+.success-box {
+  background-color: #d4edda;
+  color: #155724;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border: 1px solid #c3e6cb;
+}
+
+/* Login form container */
+.login-form {
+  width: 100%;
+  max-width: 480px;
+}
+
+/* Signup text styling */
+.signup-text {
+  text-align: center;
+  margin-top: 25px;
+  font-size: 14px;
+  color: #666;
 }
 
