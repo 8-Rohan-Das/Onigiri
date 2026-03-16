@@ -37,38 +37,13 @@ import otherImage from '../../assets/other.png';
 import userImage from '../../assets/user.png';
 import favouriteIcon from '../../assets/favourite.svg';
 
-// Inline Icons to avoid dependency issues
-const SearchIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="11" cy="11" r="8"></circle>
-    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-  </svg>
-);
-
-const CloseIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <line x1="18" y1="6" x2="6" y2="18"></line>
-    <line x1="6" y1="6" x2="18" y2="18"></line>
-  </svg>
-);
-
 const Homepage = () => {
   const navigate = useNavigate();
   const { cartItems, addToCart } = useCart();
   const { addToFavorites, isFavorite } = useFavorites();
   const [activeNav, setActiveNav] = useState('food-order');
   const [activeCategory, setActiveCategory] = useState('all');
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const inputRef = useRef(null);
 
-  // Auto-focus input when search is opened
-  useEffect(() => {
-    if (isSearchOpen && inputRef.current) {
-      inputRef.current.focus();
-    }
-  }, [isSearchOpen]);
-  
   // Get user data from localStorage safely
   const userData = getStoredUser();
   const userName = userData.name || 'Guest';
@@ -107,11 +82,6 @@ const Homepage = () => {
     { id: 'home-9', name: 'Biryani', price: '₹349', discount: 'Special', image: biryaniImage },
   ];
 
-  // Filter dishes based on search query
-  const filteredDishes = popularDishes.filter(dish => 
-    dish.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
   // Recent orders
   const recentOrders = [
     { id: 1, name: 'Butter Chicken', time: '10:30 AM', icon: '�', image: butterChickenImage },
@@ -147,16 +117,6 @@ const Homepage = () => {
     // Clear user data from localStorage safely
     removeStoredItem('user');
     navigate('/login');
-  };
-
-  const handleClearSearch = () => {
-    setSearchQuery('');
-    if (!isSearchOpen) {
-      setIsSearchOpen(true);
-    }
-    if (inputRef.current) {
-      inputRef.current.focus();
-    }
   };
 
   const scrollCategories = (direction) => {
@@ -270,38 +230,6 @@ const Homepage = () => {
           </div>
           
           <div className="header-actions">
-            <div className={`search-container ${isSearchOpen ? 'active' : ''}`}>
-              <button 
-                className="search-btn" 
-                onClick={() => setIsSearchOpen(!isSearchOpen)}
-                aria-label="Search"
-              >
-                <SearchIcon />
-              </button>
-              <input 
-                ref={inputRef}
-                type="text" 
-                className="search-input" 
-                placeholder="Search food..." 
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-              {(searchQuery || isSearchOpen) && (
-                <button 
-                  className={`clear-btn ${searchQuery || isSearchOpen ? 'visible' : ''}`}
-                  onClick={() => {
-                    if (searchQuery) {
-                      handleClearSearch();
-                    } else {
-                      setIsSearchOpen(false);
-                    }
-                  }}
-                  aria-label="Clear or Close Search"
-                >
-                  <CloseIcon />
-                </button>
-              )}
-            </div>
             <NotificationButton onClick={() => navigate('/notifications')} />
             <ThemeToggle />
           </div>
@@ -364,13 +292,13 @@ const Homepage = () => {
           <div className="left-column">
             <section className="dishes-section">
               <h2 className="section-title">
-                {searchQuery ? `Search Results for "${searchQuery}"` : 'Popular Dishes'}
-                {!searchQuery && <button className="view-all" onClick={() => alert('Viewing all dishes!')}>View all</button>}
+                Popular Dishes
+                <button className="view-all" onClick={() => alert('Viewing all dishes!')}>View all</button>
               </h2>
               <div className="dishes-scroll-container">
                 <button className="scroll-arrow left-arrow" onClick={() => scrollDishes('left')}>←</button>
                 <div className="dishes-grid" id="dishesGrid">
-                  {filteredDishes.length > 0 ? filteredDishes.map((dish) => (
+                  {popularDishes.map((dish) => (
                     <div key={dish.id} className="dish-card">
                       <div className="dish-image">
                         <span className="dish-badge">{dish.discount}</span>
@@ -397,11 +325,7 @@ const Homepage = () => {
                         </button>
                       </div>
                     </div>
-                  )) : (
-                    <div style={{ padding: '20px', color: '#666' }}>
-                      No dishes found matching your search.
-                    </div>
-                  )}
+                  ))}
                 </div>
                 <button className="scroll-arrow right-arrow" onClick={() => scrollDishes('right')}>→</button>
               </div>
