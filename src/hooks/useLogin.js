@@ -4,7 +4,7 @@ import { setStoredItem } from '../utils/storageUtils';
 
 // Mock database (mutable for this session)
 let MOCK_USER = {
-  email: 'user@onigiri.com',
+  email: 'user123@gmail.com',
   password: 'password'
 };
 
