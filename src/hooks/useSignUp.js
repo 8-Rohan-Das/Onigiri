@@ -93,18 +93,40 @@ export const useSignUp = () => {
       return;
     }
 
-    // Simulate API call
-    setTimeout(() => {
-      console.log('Sign up successful!', formData);
-      // Store user data and redirect to homepage
-      setStoredItem('user', {
-        name: formData.name,
-        email: formData.email,
-        password: formData.password
+    // Real API call to the backend
+    try {
+      const response = await fetch('http://localhost:5000/api/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          password: formData.password
+        }),
       });
-      navigate('/home'); // Redirect to homepage after successful signup
+
+      const data = await response.json();
+
+      if (response.ok) {
+        console.log('Sign up successful!', data);
+        // Store user data and redirect to homepage
+        setStoredItem('user', {
+          name: formData.name,
+          email: formData.email,
+          token: data.token // If you plan to add tokens later
+        });
+        navigate('/home');
+      } else {
+        setError(data.message || 'Sign up failed. Please try again.');
+      }
+    } catch (err) {
+      console.error('Signup error:', err);
+      setError('Connection error. Is the server running?');
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   return {
