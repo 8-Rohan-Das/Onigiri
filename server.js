@@ -15,6 +15,31 @@ mongoose.connect(process.env.MONGODB_URI)
 .catch(err=>console.error("MongoDB Connection Error:", err));
 
 // Routes
+app.post('/api/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        // Find user by email
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(401).json({ message: "Invalid email or password" });
+        }
+
+        // Check password (in production, use bcrypt for password comparison)
+        if (user.password !== password) {
+            return res.status(401).json({ message: "Invalid email or password" });
+        }
+
+        res.status(200).json({ 
+            message: "Login successful",
+            user: { id: user._id, name: user.name, email: user.email }
+        });
+    } catch (error) {
+        console.error("Login Error:", error);
+        res.status(500).json({ message: "Server error during login" });
+    }
+});
+
 app.post('/api/signup', async (req, res) => {
     try {
         const { name, email, password } = req.body;

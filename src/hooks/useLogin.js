@@ -107,30 +107,45 @@ export const useLogin = () => {
     setError('');
     setIsLoading(true);
 
-    // Simulate API call
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        if (loginEmail === MOCK_USER.email && loginPassword === MOCK_USER.password) {
-          console.log('Login successful!');
+    try {
+      const response = await fetch('http://localhost:5000/api/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: loginEmail,
+          password: loginPassword
+        })
+      });
 
-          // Store user data in localStorage
-          const userData = {
-            email: loginEmail,
-            name: 'John Doe', // Default name for demo
-            id: 'user123',
-            loginTime: new Date().toISOString()
-          };
-          setStoredItem('user', userData);
+      const data = await response.json();
 
-          navigate('/home'); // Redirect to homepage after successful login
-          resolve(true);
-        } else {
-          setError(`Invalid email or password. Try ${MOCK_USER.email} / ${MOCK_USER.password}`);
-          resolve(false);
-        }
-        setIsLoading(false);
-      }, 1500);
-    });
+      if (response.ok) {
+        console.log('Login successful!', data);
+
+        // Store user data in localStorage
+        const userData = {
+          email: data.user.email,
+          name: data.user.name,
+          id: data.user.id,
+          loginTime: new Date().toISOString()
+        };
+        setStoredItem('user', userData);
+
+        navigate('/home'); // Redirect to homepage after successful login
+        return true;
+      } else {
+        setError(data.message || 'Login failed');
+        return false;
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      setError('Network error. Please try again.');
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSubmit = async (e) => {
