@@ -711,6 +711,8 @@
   padding: 40px 36px 32px;
   max-width: 420px;
   width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
   position: relative;
   text-align: center;
   box-shadow: 0 25px 60px rgba(0, 0, 0, 0.2);
@@ -761,8 +763,8 @@
   margin: 0 0 10px;
   background: linear-gradient(135deg, #6c63ff, #a78bfa);
   -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
   background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .tracking-modal-subtitle {

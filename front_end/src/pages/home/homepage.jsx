@@ -77,7 +77,7 @@ const Homepage = () => {
     { id: 'home-4', name: 'Manchurian Soup', price: '₹119', discount: '25% Off', image: manchurianSoupImage },
     { id: 'home-5', name: 'Dim Sum', price: '₹289', discount: '25% Off', image: dimSumImage },
     { id: 'home-6', name: 'Peking Duck', price: '₹329', discount: '15% Off', image: pekingDuckImage },
-    { id: 'home-7', name: 'Kung Pao', price: '₹179', image: kungPaoImage },
+    { id: 'home-7', name: 'Kung Pao',discount: '25% Off', price: '₹179', image: kungPaoImage },
     { id: 'home-8', name: 'Tempura', price: '₹99', discount: 'Buy 2 Get 1', image: tempuraImage },
     { id: 'home-9', name: 'Biryani', price: '₹349', discount: 'Special', image: biryaniImage },
   ];
