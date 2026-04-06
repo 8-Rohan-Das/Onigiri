@@ -113,12 +113,6 @@ const Homepage = () => {
     navigate('/checkout');
   };
 
-  const handleLogout = () => {
-    // Clear user data from localStorage safely
-    removeStoredItem('user');
-    navigate('/login');
-  };
-
   const scrollCategories = (direction) => {
     const grid = document.getElementById('categoriesGrid');
     if (grid) {
@@ -456,9 +450,6 @@ const Homepage = () => {
         {/* Footer */}
         <footer className="homepage-footer">
           <p> 2026 Onigiri - Delicious Food Delivery</p>
-          <button className="logout-btn" onClick={handleLogout}>
-            Logout
-          </button>
         </footer>
       </main>
       

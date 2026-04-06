@@ -58,11 +58,6 @@ const FavoritePage = () => {
     });
   };
 
-  const handleLogout = () => {
-    // Clear user data from localStorage safely
-    removeStoredItem('user');
-    navigate('/login');
-  };
 
   return (
     <div className="homepage-container">
@@ -169,9 +164,6 @@ const FavoritePage = () => {
         {/* Footer */}
         <footer className="homepage-footer">
           <p>© 2026 Onigiri - Delicious Food Delivery</p>
-          <button className="logout-btn" onClick={handleLogout}>
-            Logout
-          </button>
         </footer>
       </main>
       <HoveringCart />

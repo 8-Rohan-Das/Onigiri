@@ -127,11 +127,6 @@ const OrderHistoryPage = () => {
     }
   };
 
-  const handleLogout = () => {
-    // Clear user data from localStorage safely
-    removeStoredItem('user');
-    navigate('/login');
-  };
 
   const getStatusColor = (status) => {
     switch(status) {
@@ -330,9 +325,6 @@ const OrderHistoryPage = () => {
         {/* Footer */}
         <footer className="homepage-footer">
           <p>© 2026 Onigiri - Delicious Food Delivery</p>
-          <button className="logout-btn" onClick={handleLogout}>
-            Logout
-          </button>
         </footer>
       </main>
 

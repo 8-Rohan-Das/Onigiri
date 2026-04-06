@@ -144,11 +144,6 @@ const MessagesPage = () => {
     alert('Thank you for contacting us! We will get back to you soon.');
   };
 
-  const handleLogout = () => {
-    // Clear user data from localStorage safely
-    removeStoredItem('user');
-    navigate('/login');
-  };
 
 
 
@@ -540,9 +535,6 @@ const MessagesPage = () => {
         {/* Footer */}
         <footer className="homepage-footer">
           <p>© 2026 Onigiri - Delicious Food Delivery</p>
-          <button className="logout-btn" onClick={handleLogout}>
-            Logout
-          </button>
         </footer>
       </main>
     </div>
