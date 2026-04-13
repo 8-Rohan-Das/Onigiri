@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { getStoredUser, setStoredItem, getStoredItem, removeStoredItem } from '../utils/storageUtils';
+import { deliveryAPI, paymentAPI } from '../services/api';
 
 export const useCheckout = () => {
   const navigate = useNavigate();
@@ -68,7 +69,7 @@ export const useCheckout = () => {
     return { ok: true };
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (cartItems.length === 0) {
@@ -90,45 +91,96 @@ export const useCheckout = () => {
     }
 
     const orderNumber = 'ORD' + Date.now();
-    const orderPayload = {
-      orderNumber,
-      items: cartItems,
-      subtotal,
-      deliveryFee,
-      tax,
-      total,
-      deliveryInfo: {
-        name: formData.fullName,
-        email: formData.email,
-        phone: formData.phone,
-        address: formData.address,
-        city: formData.city,
-        state: formData.state,
-        zipCode: formData.zipCode
-      },
-      paymentMethod: formData.paymentMethod,
-      timestamp: new Date().toISOString()
+
+    // Map payment method label for backend
+    const paymentMethodMap = {
+      cod: 'Cash on Delivery',
+      card: 'Credit/Debit Card',
+      upi: 'UPI'
     };
 
-    console.log('Saving order:', orderPayload);
+    try {
+      // Build delivery payload for backend
+      // Cart items may not have MongoDB product ObjectIds (local/demo items),
+      // so we send name & price as embedded data and omit the product ref for those.
+      const deliveryItems = cartItems.map((item) => ({
+        ...(item._id ? { product: item._id } : {}),
+        quantity: item.quantity || 1,
+        price: item.price,
+        name: item.name   // kept for display in confirmation
+      }));
 
-    // Save order to localStorage first
-    setStoredItem('lastOrder', orderPayload);
-    
-    // Also save to order history
-    const currentHistory = getStoredItem('orderHistory', []);
-    const updatedHistory = Array.isArray(currentHistory) 
-      ? [orderPayload, ...currentHistory] 
-      : [orderPayload];
-    setStoredItem('orderHistory', updatedHistory);
+      const deliveryPayload = {
+        user: userData?.id || userData?._id || null,
+        items: deliveryItems,
+        deliveryAddress: {
+          street: formData.address,
+          city: formData.city,
+          state: formData.state,
+          zipCode: formData.zipCode,
+          country: 'India'
+        },
+        totalAmount: total
+      };
 
-    console.log('Order saved to localStorage');
+      // POST delivery to database
+      const deliveryRes = await deliveryAPI.createDelivery(deliveryPayload);
+      const savedDelivery = deliveryRes.data;
 
-    // Clear cart after saving order
-    clearCart();
+      // POST payment to database
+      const paymentPayload = {
+        delivery: savedDelivery._id,
+        user: userData?.id || userData?._id || null,
+        method: paymentMethodMap[formData.paymentMethod] || formData.paymentMethod,
+        amount: total
+      };
 
-    console.log('Cart cleared, navigating to confirmation');
-    navigate('/order-confirmation', { state: { orderNumber } });
+      const paymentRes = await paymentAPI.processPayment(paymentPayload);
+      const savedPayment = paymentRes.data;
+
+      // Build local order record including DB ids for later reference
+      const orderPayload = {
+        orderNumber,
+        deliveryId: savedDelivery._id,
+        paymentId: savedPayment._id,
+        items: cartItems,
+        subtotal,
+        deliveryFee,
+        tax,
+        total,
+        deliveryInfo: {
+          name: formData.fullName,
+          email: formData.email,
+          phone: formData.phone,
+          address: formData.address,
+          city: formData.city,
+          state: formData.state,
+          zipCode: formData.zipCode
+        },
+        paymentMethod: formData.paymentMethod,
+        status: savedDelivery.status || 'Pending',
+        timestamp: new Date().toISOString()
+      };
+
+      // Save to localStorage for confirmation page & history
+      setStoredItem('lastOrder', orderPayload);
+      const currentHistory = getStoredItem('orderHistory', []);
+      const updatedHistory = Array.isArray(currentHistory)
+        ? [orderPayload, ...currentHistory]
+        : [orderPayload];
+      setStoredItem('orderHistory', updatedHistory);
+
+      // Clear cart only after successful API save
+      clearCart();
+
+      console.log('Order saved to DB — Delivery:', savedDelivery._id, '| Payment:', savedPayment._id);
+      navigate('/order-confirmation', { state: { orderNumber } });
+
+    } catch (error) {
+      console.error('Order submission failed:', error);
+      const serverMessage = error?.response?.data?.message || error?.response?.data?.error || error.message;
+      alert(`Failed to place order: ${serverMessage}\n\nPlease try again.`);
+    }
   };
 
   const handleBackToHome = () => navigate('/home');

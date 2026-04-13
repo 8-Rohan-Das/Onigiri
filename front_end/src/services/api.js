@@ -40,11 +40,11 @@ api.interceptors.response.use(
 
 // Auth API calls
 export const authAPI = {
-  login: (credentials) => api.post('/auth/login', credentials),
-  signup: (userData) => api.post('/auth/signup', userData),
-  logout: () => api.post('/auth/logout'),
-  forgotPassword: (email) => api.post('/auth/forgot-password', { email }),
-  resetPassword: (token, password) => api.post('/auth/reset-password', { token, password }),
+  login: (credentials) => api.post('/login', credentials),
+  signup: (userData) => api.post('/signup', userData),
+  logout: () => api.post('/logout'),
+  forgotPassword: (email) => api.post('/forgot-password', { email }),
+  resetPassword: (token, password) => api.post('/reset-password', { token, password }),
 };
 
 // User API calls
@@ -68,6 +68,17 @@ export const orderAPI = {
   createOrder: (orderData) => api.post('/orders', orderData),
   getOrder: (id) => api.get(`/orders/${id}`),
   cancelOrder: (id) => api.delete(`/orders/${id}`),
+};
+
+// Delivery API calls
+export const deliveryAPI = {
+  createDelivery: (deliveryData) => api.post('/deliveries', deliveryData),
+  getDeliveryStatus: (id) => api.get(`/deliveries/${id}/status`),
+};
+
+// Payment API calls
+export const paymentAPI = {
+  processPayment: (paymentData) => api.post('/payments', paymentData),
 };
 
 export default api;

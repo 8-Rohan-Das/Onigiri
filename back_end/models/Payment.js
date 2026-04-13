@@ -9,12 +9,12 @@ const paymentSchema = new mongoose.Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true
+    required: false  // optional: support guest checkout
   },
   method: {
     type: String,
     required: true,
-    enum: ['Credit Card', 'Debit Card', 'PayPal', 'Stripe', 'Cash on Delivery']
+    enum: ['Credit/Debit Card', 'UPI', 'Cash on Delivery', 'Credit Card', 'Debit Card', 'PayPal', 'Stripe']
   },
   amount: {
     type: Number,
