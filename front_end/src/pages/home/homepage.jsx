@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getStoredUser, removeStoredItem } from '../../utils/storageUtils.js';
+import { getPopularProducts } from '../../services/productService.js';
 import { useFavorites } from '../../context/FavoriteContext';
 import { useCart } from '../../context/CartContext';
 import './homepage.css';
@@ -43,6 +44,7 @@ const Homepage = () => {
   const { addToFavorites, isFavorite } = useFavorites();
   const [activeNav, setActiveNav] = useState('food-order');
   const [activeCategory, setActiveCategory] = useState('all');
+  const [popularDishes, setPopularDishes] = useState([]);
 
   // Get user data from localStorage safely
   const userData = getStoredUser();
@@ -69,18 +71,18 @@ const Homepage = () => {
     { id: 'chole', name: 'Chole Bhature', image: choleBhatureImage },
   ];
 
-  // Popular dishes
-  const popularDishes = [
-    { id: 'home-1', name: 'Butter Chicken', price: '₹189', discount: '15% Off', image: butterChickenImage },
-    { id: 'home-2', name: 'Sushi Platter', price: '₹259', discount: '10% Off', image: sushiPlatterImage },
-    { id: 'home-3', name: 'Spring Rolls', price: '₹149', discount: '20% Off', image: springRollsImage },
-    { id: 'home-4', name: 'Manchurian Soup', price: '₹119', discount: '25% Off', image: manchurianSoupImage },
-    { id: 'home-5', name: 'Dim Sum', price: '₹289', discount: '25% Off', image: dimSumImage },
-    { id: 'home-6', name: 'Peking Duck', price: '₹329', discount: '15% Off', image: pekingDuckImage },
-    { id: 'home-7', name: 'Kung Pao',discount: '25% Off', price: '₹179', image: kungPaoImage },
-    { id: 'home-8', name: 'Tempura', price: '₹99', discount: 'Buy 2 Get 1', image: tempuraImage },
-    { id: 'home-9', name: 'Biryani', price: '₹349', discount: 'Special', image: biryaniImage },
-  ];
+  // Fetch only the products marked as popular in the database
+  useEffect(() => {
+    const fetchDishes = async () => {
+      try {
+        const products = await getPopularProducts();
+        setPopularDishes(products);
+      } catch (error) {
+        console.error("Failed to fetch popular products:", error);
+      }
+    };
+    fetchDishes();
+  }, []);
 
   // Recent orders
   const recentOrders = [
@@ -96,10 +98,14 @@ const Homepage = () => {
 
   // Handlers
   const handleAddToCart = (dish) => {
+    const dishPrice = typeof dish.price === 'string' 
+      ? parseFloat(dish.price.replace('₹', '')) 
+      : dish.price;
+      
     const cartItem = {
-      id: dish.id || Date.now(),
+      id: dish._id || dish.id || Date.now(),
       name: dish.name,
-      price: parseFloat(dish.price.replace('₹', '')),
+      price: dishPrice,
       icon: dish.icon || '🍽️'
     };
     addToCart(cartItem);
@@ -292,10 +298,18 @@ const Homepage = () => {
               <div className="dishes-scroll-container">
                 <button className="scroll-arrow left-arrow" onClick={() => scrollDishes('left')}>←</button>
                 <div className="dishes-grid" id="dishesGrid">
-                  {popularDishes.map((dish) => (
-                    <div key={dish.id} className="dish-card">
+                  {popularDishes.length === 0 ? (
+                    <div style={{ padding: '20px', textAlign: 'center', width: '100%', color: 'var(--text-color)' }}>
+                      No popular dishes found. Add products to the database with <code>isPopular: true</code>.
+                    </div>
+                  ) : popularDishes.map((dish) => (
+                    <div key={dish._id || dish.id} className="dish-card">
                       <div className="dish-image">
-                        <span className="dish-badge">{dish.discount}</span>
+                        {dish.discount ? (
+                          <span className="dish-badge">
+                            {typeof dish.discount === 'number' ? `${dish.discount}% Off` : dish.discount}
+                          </span>
+                        ) : null}
                         <PremiumFavoriteButton item={dish} />
                         {dish.image ? (
                           <img
@@ -304,12 +318,14 @@ const Homepage = () => {
                             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                           />
                         ) : (
-                          <span className="dish-emoji">{dish.icon}</span>
+                          <span className="dish-emoji">{dish.icon || '🍽️'}</span>
                         )}
                       </div>
                       <div className="dish-info">
                         <h3 className="dish-name">{dish.name}</h3>
-                        <div className="dish-price">{dish.price}</div>
+                        <div className="dish-price">
+                          {typeof dish.price === 'number' ? `₹${dish.price.toFixed(2)}` : dish.price}
+                        </div>
                         <button
                           className="order-btn"
                           style={{ marginTop: '15px', width: '100%' }}

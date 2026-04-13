@@ -136,7 +136,9 @@ const FavoritePage = () => {
                   <div className="dish-info">
                     <h3 className="dish-name">{item.name || 'Unknown Item'}</h3>
                     <p className="dish-category">{item.category || 'Uncategorized'}</p>
-                    <div className="dish-price">{item.price || '₹0'}</div>
+                    <div className="dish-price">
+                      {typeof item.price === 'number' ? `₹${item.price.toFixed(2)}` : (item.price || '₹0')}
+                    </div>
                     <div className="dish-actions">
                       <button 
                         className="order-btn"

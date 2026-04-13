@@ -9,6 +9,9 @@ import express, { json } from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import User from "./models/User.js";
+import Product from "./models/Product.js";
+import Delivery from "./models/Delivery.js";
+import Payment from "./models/Payment.js";
 const app = express();
 
 // Middleware
@@ -51,7 +54,7 @@ app.post('/api/signup', async (req, res) => {
         const { name, email, password } = req.body;
 
         // Check if user already exists
-const existingUser = await User.findOne({ email });
+        const existingUser = await User.findOne({ email });
         if (existingUser) {
             return res.status(400).json({ message: "User already exists with this email" });
         }
@@ -67,6 +70,106 @@ const existingUser = await User.findOne({ email });
     } catch (error) {
         console.error("Signup Error:", error);
         res.status(500).json({ message: "Server error during signup" });
+    }
+});
+
+// Product Routes
+app.get('/api/products', async (req, res) => {
+    try {
+        const filters = {};
+
+        if (req.query.category) {
+            filters.category = req.query.category;
+        }
+
+        if (req.query.popular === 'true') {
+            filters.isPopular = true;
+        }
+
+        const products = await Product.find(filters);
+        res.status(200).json(products);
+    } catch (error) {
+        console.error("Fetch Products Error:", error);
+        res.status(500).json({ message: "Server error fetching products" });
+    }
+});
+
+app.get('/api/products/category/:category', async (req, res) => {
+    try {
+        const products = await Product.find({ category: req.params.category });
+        res.status(200).json(products);
+    } catch (error) {
+        console.error("Fetch Products by Category Error:", error);
+        res.status(500).json({ message: "Server error fetching products by category" });
+    }
+});
+
+app.post('/api/products', async (req, res) => {
+    try {
+        // Here we could add some basic validation, but the mongoose schema handles most of it.
+        const product = new Product(req.body);
+        const savedProduct = await product.save();
+        res.status(201).json(savedProduct);
+    } catch (error) {
+        console.error("Create Product Error:", error);
+        res.status(400).json({ message: "Error creating product", error: error.message });
+    }
+});
+
+// Delivery Routes
+app.post('/api/deliveries', async (req, res) => {
+    try {
+        const { user, items, deliveryAddress, totalAmount } = req.body;
+        const delivery = new Delivery({ user, items, deliveryAddress, totalAmount, status: 'Pending' });
+        const savedDelivery = await delivery.save();
+        res.status(201).json(savedDelivery);
+    } catch (error) {
+        console.error("Create Delivery Error:", error);
+        res.status(400).json({ message: "Error creating delivery", error: error.message });
+    }
+});
+
+app.get('/api/deliveries/:id/status', async (req, res) => {
+    try {
+        const delivery = await Delivery.findById(req.params.id).select('status');
+        if (!delivery) {
+            return res.status(404).json({ message: "Delivery not found" });
+        }
+        res.status(200).json({ status: delivery.status });
+    } catch (error) {
+        console.error("Fetch Delivery Status Error:", error);
+        res.status(500).json({ message: "Server error fetching delivery status", error: error.message });
+    }
+});
+
+// Payment Routes
+app.post('/api/payments', async (req, res) => {
+    try {
+        const { delivery, user, method, amount, transactionId } = req.body;
+        
+        // Simulating payment processing
+        const paymentStatus = 'Completed'; 
+        
+        const payment = new Payment({
+            delivery,
+            user,
+            method,
+            amount,
+            status: paymentStatus,
+            transactionId: method !== 'Cash on Delivery' ? transactionId || `txn_${Date.now()}` : undefined
+        });
+        
+        const savedPayment = await payment.save();
+        
+        // Update Delivery status to Confirmed upon successful payment
+        if (paymentStatus === 'Completed') {
+            await Delivery.findByIdAndUpdate(delivery, { status: 'Confirmed' });
+        }
+        
+        res.status(201).json(savedPayment);
+    } catch (error) {
+        console.error("Process Payment Error:", error);
+        res.status(400).json({ message: "Error processing payment", error: error.message });
     }
 });
 

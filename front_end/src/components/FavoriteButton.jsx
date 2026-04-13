@@ -7,7 +7,8 @@ import './FavoriteButton.css';
 const FavoriteButton = ({ item, size = 'normal', className = '' }) => {
   const { addToFavorites, removeFromFavorites, isFavorite } = useFavorites();
   
-  const isFavorited = isFavorite(item.id);
+  const itemId = item._id || item.id;
+  const isFavorited = isFavorite(itemId);
   
   const handleToggleFavorite = (e) => {
     e.stopPropagation();

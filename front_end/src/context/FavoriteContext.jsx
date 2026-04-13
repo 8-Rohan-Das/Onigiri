@@ -18,8 +18,8 @@ export const FavoriteProvider = ({ children }) => {
   }, [favoriteItems]);
 
   const addToFavorites = (item) => {
-    // Check if item is already in favorites using consistent ID comparison
-    const existing = favoriteItems.find(fav => fav.id === item.id);
+    const itemId = item._id || item.id;
+    const existing = favoriteItems.find(fav => (fav._id || fav.id) === itemId);
     if (existing) {
       addNotification({
         type: 'favorite',
@@ -44,11 +44,11 @@ export const FavoriteProvider = ({ children }) => {
 
   const removeFromFavorites = (item) => {
     // Handle both item object and ID for flexibility
-    const itemId = typeof item === 'object' ? item.id : item;
+    const itemId = typeof item === 'object' ? (item._id || item.id) : item;
     
-    setFavoriteItems(prev => prev.filter(fav => fav.id !== itemId));
+    setFavoriteItems(prev => prev.filter(fav => (fav._id || fav.id) !== itemId));
     
-    const removedItem = favoriteItems.find(fav => fav.id === itemId);
+    const removedItem = favoriteItems.find(fav => (fav._id || fav.id) === itemId);
     if (removedItem) {
       addNotification({
         type: 'favorite',
@@ -61,7 +61,7 @@ export const FavoriteProvider = ({ children }) => {
   };
 
   const isFavorite = (id) => {
-    return favoriteItems.some(fav => fav.id === id);
+    return favoriteItems.some(fav => (fav._id || fav.id) === id);
   };
 
   const getFavorites = () => {
