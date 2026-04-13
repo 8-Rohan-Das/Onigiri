@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getStoredUser, getStoredItem, setStoredItem, removeStoredItem } from '../../utils/storageUtils.js';
+import { paymentAPI, orderAPI } from '../../services/api.js';
 
 import NotificationButton from '../../components/NotificationButton';
 import HoveringCart from '../../components/HoveringCart';
@@ -38,102 +39,150 @@ const OrderHistoryPage = () => {
   const [orders, setOrders] = useState([]);
 
   useEffect(() => {
-    console.log('OrderHistoryPage: Component mounted or updated');
-    
-    const loadOrders = () => {
-      try {
-        console.log('OrderHistoryPage: Loading orders...');
-        
-        // Get order history from localStorage
-        const savedHistory = getStoredItem('orderHistory', []);
-        console.log('OrderHistoryPage: savedHistory from storage:', savedHistory);
-        
-        // Get last order and merge if needed
-        const lastOrder = getStoredItem('lastOrder');
-        console.log('OrderHistoryPage: lastOrder from storage:', lastOrder);
-        
-        let allOrders = Array.isArray(savedHistory) ? savedHistory : [];
-        
-        // Add lastOrder if it exists and isn't already in the history
-        if (lastOrder && !allOrders.find(order => order.orderNumber === lastOrder.orderNumber)) {
-          console.log('OrderHistoryPage: Adding lastOrder to history');
-          allOrders.unshift(lastOrder);
-          // Save the updated history
-          setStoredItem('orderHistory', allOrders);
-          // Remove lastOrder since it's now in history
-          removeStoredItem('lastOrder');
-        }
-        
-        // Format orders for display
-        const formattedOrders = allOrders.map(order => ({
-          id: '#' + (order.orderNumber || Date.now()).toString().slice(-6),
-          fullId: order.orderNumber,
-          date: order.timestamp ? new Date(order.timestamp).toLocaleDateString() : new Date().toLocaleDateString(),
-          time: order.timestamp ? new Date(order.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          status: order.status || 'pending',
-          items: Array.isArray(order.items) ? order.items : [],
-          subtotal: order.subtotal || 0,
-          deliveryFee: order.deliveryFee || 0,
-          total: order.total || 0,
-          restaurant: order.restaurant || 'Onigiri'
-        }));
-        
-        console.log('OrderHistoryPage: Setting formatted orders:', formattedOrders);
-        setOrders(formattedOrders);
-        
-      } catch (error) {
-        console.error('OrderHistoryPage: Error loading orders:', error);
-        setOrders([]);
+    // Load orders once from localStorage on mount
+    try {
+      const savedHistory = getStoredItem('orderHistory', []);
+      const lastOrder    = getStoredItem('lastOrder');
+
+      let allOrders = Array.isArray(savedHistory) ? savedHistory : [];
+
+      if (lastOrder && !allOrders.find(o => o.orderNumber === lastOrder.orderNumber)) {
+        allOrders = [lastOrder, ...allOrders];
+        setStoredItem('orderHistory', allOrders);
+        removeStoredItem('lastOrder');
+      }
+
+      const formatted = allOrders.map(order => ({
+        id:          '#' + (order.orderNumber || Date.now()).toString().slice(-6),
+        fullId:      order.orderNumber,
+        deliveryId:  order.deliveryId  || null,
+        paymentId:   order.paymentId   || null,
+        date:        order.timestamp ? new Date(order.timestamp).toLocaleDateString()  : new Date().toLocaleDateString(),
+        time:        order.timestamp ? new Date(order.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        status:      order.status || 'Pending',
+        items:       Array.isArray(order.items) ? order.items : [],
+        subtotal:    order.subtotal    || 0,
+        deliveryFee: order.deliveryFee || 0,
+        total:       order.total       || 0,
+        restaurant:  order.restaurant  || 'Onigiri'
+      }));
+
+      setOrders(formatted);
+    } catch (err) {
+      console.error('OrderHistoryPage: Error loading orders:', err);
+    }
+  }, []);
+
+  // Poll the backend every 15 s to reflect Payment.status changes made in MongoDB
+  useEffect(() => {
+    // Map payment status → display status (3 values only)
+    const mapPaymentStatus = (paymentStatus) => {
+      switch ((paymentStatus || '').toLowerCase()) {
+        case 'completed':  return 'Delivered';
+        case 'failed':
+        case 'refunded':   return 'Cancelled';
+        default:           return 'Pending';
       }
     };
 
-    // Load orders immediately
-    loadOrders();
-    
-    // Set up a simple interval to check for new orders
-    const interval = setInterval(loadOrders, 3000); // Check every 3 seconds
-    
+    const syncStatuses = async () => {
+      // Only poll orders that were saved to the DB (have a paymentId)
+      const dbOrders = orders.filter(o => o.paymentId);
+      if (dbOrders.length === 0) return;
+
+      const updates = await Promise.allSettled(
+        dbOrders.map(o =>
+          paymentAPI.getStatus(o.paymentId)
+            .then(res => ({ fullId: o.fullId, status: mapPaymentStatus(res.data.status) }))
+        )
+      );
+
+      const statusMap = {};
+      updates.forEach(result => {
+        if (result.status === 'fulfilled') {
+          statusMap[result.value.fullId] = result.value.status;
+        }
+      });
+
+      if (Object.keys(statusMap).length === 0) return;
+
+      // Update UI state
+      setOrders(prev => prev.map(o => statusMap[o.fullId] ? { ...o, status: statusMap[o.fullId] } : o));
+
+      // Keep localStorage in sync so refresh shows correct status
+      const history = getStoredItem('orderHistory', []);
+      const updated = history.map(o => statusMap[o.orderNumber] ? { ...o, status: statusMap[o.orderNumber] } : o);
+      setStoredItem('orderHistory', updated);
+    };
+
+    if (orders.length === 0) return;
+    syncStatuses();                              // run immediately
+    const interval = setInterval(syncStatuses, 15000); // then every 15 s
     return () => clearInterval(interval);
-  }, []); // Only run on mount
+  }, [orders.length]);
 
   const [filterStatus, setFilterStatus] = useState('all');
 
-  const filteredOrders = filterStatus === 'all' 
-    ? orders 
-    : orders.filter(order => order.status === filterStatus);
+  const filteredOrders = filterStatus === 'all'
+    ? orders
+    : orders.filter(o => (o.status || '').toLowerCase() === filterStatus);
 
-  console.log('OrderHistoryPage: Current orders state:', orders);
-  console.log('OrderHistoryPage: Filtered orders:', filteredOrders);
+  const handleReorder    = (order) => alert(`Reordering items from ${order.id}`);
+  const handleViewDetails= (order) => alert(`Viewing details for order ${order.id}`);
+  const handleTrackOrder = (order) => { setTrackedOrder(order); setShowTrackingModal(true); };
 
-  const handleReorder = (order) => {
-    alert(`Reordering items from ${order.id}`);
-  };
+  const handleClearHistory = async () => {
+    if (!window.confirm('Are you sure you want to clear all order history? This will permanently delete your orders from the database.')) return;
 
-  const handleViewDetails = (order) => {
-    alert(`Viewing details for order ${order.id}`);
-  };
+    // Collect IDs of DB-backed orders
+    const deliveryIds = orders.map(o => o.deliveryId).filter(Boolean);
+    const paymentIds  = orders.map(o => o.paymentId).filter(Boolean);
 
-  const handleTrackOrder = (order) => {
-    setTrackedOrder(order);
-    setShowTrackingModal(true);
-  };
+    // Show clearing feedback
+    const clearButton = document.querySelector('button[onClick*="handleClearHistory"]');
+    if (clearButton) {
+      clearButton.textContent = 'Clearing...';
+      clearButton.disabled = true;
+    }
 
-  const handleClearHistory = () => {
-    if (window.confirm('Are you sure you want to clear all order history? This action cannot be undone.')) {
+    // Delete from DB (best-effort - clear localStorage regardless)
+    try {
+      if (deliveryIds.length > 0 || paymentIds.length > 0) {
+        const response = await orderAPI.clearHistory(deliveryIds, paymentIds);
+        console.log('Clear history response:', response.data);
+        
+        // Show success feedback
+        if (response.data.deliveriesDeleted > 0 || response.data.paymentsDeleted > 0) {
+          console.log(`Successfully deleted ${response.data.deliveriesDeleted} deliveries and ${response.data.paymentsDeleted} payments from database`);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to delete orders from DB:', err);
+      // Show error feedback but continue with localStorage cleanup
+      alert('Warning: Could not clear data from server, but local history will be cleared.');
+    } finally {
+      // Always clear localStorage and UI
       removeStoredItem('orderHistory');
       removeStoredItem('lastOrder');
       setOrders([]);
-      alert('Order history cleared successfully!');
+      
+      // Reset button
+      if (clearButton) {
+        clearButton.textContent = 'History Cleared';
+        setTimeout(() => {
+          clearButton.textContent = 'Clear History';
+          clearButton.disabled = false;
+        }, 2000);
+      }
     }
   };
 
-
   const getStatusColor = (status) => {
-    switch(status) {
-      case 'delivered': return '#00c851';
-      case 'cancelled': return '#ff4444';
-      case 'pending': return '#ffaa00';
-      default: return '#666';
+    switch ((status || '').toLowerCase()) {
+      case 'delivered':  return '#00c851';
+      case 'cancelled':  return '#ff4444';
+      case 'pending':    return '#ffaa00';
+      default:           return '#666';
     }
   };
 
@@ -208,19 +257,25 @@ const OrderHistoryPage = () => {
             </button>
           </div>
           <div className="filter-buttons">
-            <button 
+            <button
               className={`filter-btn ${filterStatus === 'all' ? 'active' : ''}`}
               onClick={() => setFilterStatus('all')}
             >
               All
             </button>
-            <button 
+            <button
+              className={`filter-btn ${filterStatus === 'pending' ? 'active' : ''}`}
+              onClick={() => setFilterStatus('pending')}
+            >
+              Pending
+            </button>
+            <button
               className={`filter-btn ${filterStatus === 'delivered' ? 'active' : ''}`}
               onClick={() => setFilterStatus('delivered')}
             >
               Delivered
             </button>
-            <button 
+            <button
               className={`filter-btn ${filterStatus === 'cancelled' ? 'active' : ''}`}
               onClick={() => setFilterStatus('cancelled')}
             >
@@ -286,7 +341,7 @@ const OrderHistoryPage = () => {
                   </div>
                   
                   <div className="order-actions">
-                    <button 
+                    <button
                       className="order-btn btn-secondary"
                       onClick={() => handleViewDetails(order)}
                     >
@@ -298,8 +353,8 @@ const OrderHistoryPage = () => {
                     >
                       🚴 Track Order
                     </button>
-                    {order.status === 'delivered' && (
-                      <button 
+                    {(order.status || '').toLowerCase() === 'delivered' && (
+                      <button
                         className="order-btn btn-primary"
                         onClick={() => handleReorder(order)}
                       >

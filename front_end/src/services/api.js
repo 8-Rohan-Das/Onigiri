@@ -49,7 +49,7 @@ export const authAPI = {
 
 // User API calls
 export const userAPI = {
-  getProfile: () => api.get('/user/profile'),
+  getProfile: (userId) => api.get('/user/profile', { params: { userId } }),
   updateProfile: (userData) => api.put('/user/profile', userData),
   getOrderHistory: () => api.get('/user/orders'),
 };
@@ -68,17 +68,20 @@ export const orderAPI = {
   createOrder: (orderData) => api.post('/orders', orderData),
   getOrder: (id) => api.get(`/orders/${id}`),
   cancelOrder: (id) => api.delete(`/orders/${id}`),
+  clearHistory: (deliveryIds, paymentIds) => api.delete('/orders/clear', { data: { deliveryIds, paymentIds } }),
 };
 
 // Delivery API calls
 export const deliveryAPI = {
   createDelivery: (deliveryData) => api.post('/deliveries', deliveryData),
   getDeliveryStatus: (id) => api.get(`/deliveries/${id}/status`),
+  updateStatus: (id, status) => api.patch(`/deliveries/${id}/status`, { status }),
 };
 
 // Payment API calls
 export const paymentAPI = {
   processPayment: (paymentData) => api.post('/payments', paymentData),
+  getStatus: (id) => api.get(`/payments/${id}/status`),
 };
 
 export default api;

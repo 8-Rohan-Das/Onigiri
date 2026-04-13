@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useNotifications } from '../../context/NotificationContext';
 import { getStoredUser, setStoredItem, removeStoredItem } from '../../utils/storageUtils';
+import { userAPI } from '../../services/api';
 import NotificationButton from '../../components/NotificationButton';
 import HoveringCart from '../../components/HoveringCart';
 import '../home/homepage.css';
@@ -61,18 +62,22 @@ const OthersPage = () => {
     dateOfBirth: '1995-06-15',
     gender: 'male',
     membership: 'Premium Member',
-    profileImage: userData.profileImage || userImage
+    profileImage: userData.profileImage || userImage,
+    addresses: []
   });
 
   // Statistics state
-  const [stats] = useState({
-    totalOrders: 47,
-    totalSpent: 12480.50,
+  const [stats, setStats] = useState({
+    totalOrders: 0,
+    totalSpent: 0.0,
     favoriteItems: 23,
-    savedAddresses: 3,
-    memberSince: 'January 2024',
+    savedAddresses: 0,
+    memberSince: 'Unknown',
     lastLogin: '2 hours ago'
   });
+
+  // Loading state
+  const [loading, setLoading] = useState(true);
 
   // Contact Form State
   const [contactForm, setContactForm] = useState({
@@ -92,19 +97,99 @@ const OthersPage = () => {
     setContactForm({ ...contactForm, [field]: value });
   };
 
-  const handleSaveProfile = () => {
-    setStoredItem('user', {
-      ...userData,
-      ...profile
-    });
-    
-    addNotification({
-      type: 'settings',
-      title: 'Profile Updated',
-      message: 'Your profile information has been successfully updated.',
-      icon: '✅',
-      action: '/others'
-    });
+  // Fetch user profile data from backend
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      try {
+        if (userData.id) {
+          const response = await userAPI.getProfile(userData.id);
+          const profileData = response.data;
+          
+          // Update profile state with backend data
+          setProfile(prev => ({
+            ...prev,
+            name: profileData.name || prev.name,
+            email: profileData.email || prev.email,
+            phone: profileData.phone || prev.phone,
+            dateOfBirth: profileData.dateOfBirth || prev.dateOfBirth,
+            gender: profileData.gender || prev.gender,
+            addresses: profileData.addresses || [],
+            address: profileData.addresses && profileData.addresses.length > 0 
+              ? `${profileData.addresses[0].street}, ${profileData.addresses[0].city}, ${profileData.addresses[0].state || ''} ${profileData.addresses[0].zipCode}, ${profileData.addresses[0].country || ''}`
+              : prev.address
+          }));
+          
+          // Update stats state with backend data
+          setStats(prev => ({
+            ...prev,
+            totalOrders: profileData.totalOrders || 0,
+            totalSpent: profileData.totalSpent || 0.0,
+            memberSince: profileData.memberSince || 'Unknown',
+            savedAddresses: profileData.addresses ? profileData.addresses.length : 0
+          }));
+        }
+      } catch (error) {
+        console.error('Error fetching profile data:', error);
+        addNotification({
+          type: 'error',
+          title: 'Profile Load Error',
+          message: 'Failed to load profile data from server.',
+          icon: '⚠️',
+          action: '/others'
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfileData();
+  }, [userData.id, addNotification]);
+
+  const handleSaveProfile = async () => {
+    try {
+      // Parse address string into address object for backend
+      const addressParts = profile.address.split(',').map(part => part.trim());
+      const newAddress = {
+        street: addressParts[0] || '',
+        city: addressParts[1] || '',
+        state: addressParts[2] || '',
+        zipCode: addressParts[3] || '',
+        country: addressParts[4] || 'India'
+      };
+
+      // Update backend with all profile data
+      await userAPI.updateProfile({
+        userId: userData.id,
+        name: profile.name,
+        phone: profile.phone,
+        dateOfBirth: profile.dateOfBirth,
+        gender: profile.gender,
+        addresses: [newAddress]
+      });
+
+      // Update localStorage
+      setStoredItem('user', {
+        ...userData,
+        ...profile
+      });
+      
+      addNotification({
+        type: 'settings',
+        title: 'Profile Updated',
+        message: 'Your profile information has been successfully updated.',
+        icon: '✅',
+        action: '/others'
+      });
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      addNotification({
+        type: 'error',
+        title: 'Update Failed',
+        message: 'Failed to update profile. Please try again.',
+        icon: '❌',
+        action: '/others'
+      });
+    }
   };
 
   const handleSendContact = (e) => {
@@ -650,15 +735,15 @@ const OthersPage = () => {
                       <div className="profile-stats">
                         <div className="stat-item">
                           <span className="stat-label">Member Since</span>
-                          <span className="stat-value">January 2024</span>
+                          <span className="stat-value">{loading ? 'Loading...' : stats.memberSince}</span>
                         </div>
                         <div className="stat-item">
                           <span className="stat-label">Total Orders</span>
-                          <span className="stat-value">47</span>
+                          <span className="stat-value">{loading ? 'Loading...' : stats.totalOrders}</span>
                         </div>
                         <div className="stat-item">
                           <span className="stat-label">Total Spent</span>
-                          <span className="stat-value">₹12,480</span>
+                          <span className="stat-value">{loading ? 'Loading...' : `₹${stats.totalSpent.toFixed(2)}`}</span>
                         </div>
                       </div>
                     </div>

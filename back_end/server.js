@@ -142,6 +142,34 @@ app.get('/api/deliveries/:id/status', async (req, res) => {
     }
 });
 
+app.patch('/api/deliveries/:id/status', async (req, res) => {
+    try {
+        const allowedStatuses = ['Pending', 'Delivered', 'Cancelled'];
+        const { status } = req.body;
+
+        if (!status || !allowedStatuses.includes(status)) {
+            return res.status(400).json({
+                message: `Invalid status. Must be one of: ${allowedStatuses.join(', ')}`
+            });
+        }
+
+        const delivery = await Delivery.findByIdAndUpdate(
+            req.params.id,
+            { status },
+            { new: true, runValidators: true }
+        );
+
+        if (!delivery) {
+            return res.status(404).json({ message: "Delivery not found" });
+        }
+
+        res.status(200).json({ status: delivery.status, _id: delivery._id });
+    } catch (error) {
+        console.error("Update Delivery Status Error:", error);
+        res.status(500).json({ message: "Server error updating delivery status", error: error.message });
+    }
+});
+
 // Payment Routes
 app.post('/api/payments', async (req, res) => {
     try {
@@ -161,15 +189,160 @@ app.post('/api/payments', async (req, res) => {
         
         const savedPayment = await payment.save();
         
-        // Update Delivery status to Confirmed upon successful payment
+        // Sync Delivery status based on payment outcome
+        const deliveryStatus = paymentStatus === 'Completed' ? 'Delivered'
+                             : (paymentStatus === 'Failed' || paymentStatus === 'Refunded') ? 'Cancelled'
+                             : 'Pending';
+        await Delivery.findByIdAndUpdate(delivery, { status: deliveryStatus });
+        
+        // Update user statistics when payment is completed
         if (paymentStatus === 'Completed') {
-            await Delivery.findByIdAndUpdate(delivery, { status: 'Confirmed' });
+            await User.findByIdAndUpdate(user, {
+                $inc: {
+                    totalOrders: 1,
+                    totalSpent: amount
+                }
+            });
         }
         
         res.status(201).json(savedPayment);
     } catch (error) {
         console.error("Process Payment Error:", error);
         res.status(400).json({ message: "Error processing payment", error: error.message });
+    }
+});
+
+// Get payment status by payment ID
+app.get('/api/payments/:id/status', async (req, res) => {
+    try {
+        const payment = await Payment.findById(req.params.id).select('status');
+        if (!payment) {
+            return res.status(404).json({ message: "Payment not found" });
+        }
+        res.status(200).json({ status: payment.status });
+    } catch (error) {
+        console.error("Fetch Payment Status Error:", error);
+        res.status(500).json({ message: "Server error fetching payment status", error: error.message });
+    }
+});
+
+// User Profile Routes
+app.get('/api/user/profile', async (req, res) => {
+    try {
+        const { userId } = req.query;
+        
+        if (!userId) {
+            return res.status(400).json({ message: "User ID is required" });
+        }
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        // Calculate member since date
+        const memberSince = user.createdAt ? new Date(user.createdAt).toLocaleDateString('en-US', { 
+            month: 'long', 
+            year: 'numeric' 
+        }) : 'Unknown';
+
+        res.status(200).json({
+            name: user.name,
+            email: user.email,
+            phone: user.phone,
+            dateOfBirth: user.dateOfBirth,
+            gender: user.gender,
+            addresses: user.addresses,
+            totalOrders: user.totalOrders,
+            totalSpent: user.totalSpent,
+            memberSince: memberSince,
+            createdAt: user.createdAt
+        });
+    } catch (error) {
+        console.error("Get Profile Error:", error);
+        res.status(500).json({ message: "Server error fetching profile", error: error.message });
+    }
+});
+
+app.put('/api/user/profile', async (req, res) => {
+    try {
+        const { userId, name, phone, dateOfBirth, gender, addresses } = req.body;
+        
+        if (!userId) {
+            return res.status(400).json({ message: "User ID is required" });
+        }
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        // Update all profile fields if provided
+        if (name) user.name = name;
+        if (phone) user.phone = phone;
+        if (dateOfBirth) user.dateOfBirth = dateOfBirth;
+        if (gender) user.gender = gender;
+        if (addresses) user.addresses = addresses;
+
+        await user.save();
+
+        res.status(200).json({
+            message: "Profile updated successfully",
+            profile: {
+                name: user.name,
+                email: user.email,
+                phone: user.phone,
+                dateOfBirth: user.dateOfBirth,
+                gender: user.gender,
+                addresses: user.addresses
+            }
+        });
+    } catch (error) {
+        console.error("Update Profile Error:", error);
+        res.status(500).json({ message: "Server error updating profile", error: error.message });
+    }
+});
+
+// Delete specific deliveries and payments (used by Clear History on the frontend)
+app.delete('/api/orders/clear', async (req, res) => {
+    try {
+        const { deliveryIds = [], paymentIds = [] } = req.body;
+
+        console.log('Clear history request:', { deliveryIds, paymentIds });
+
+        // Validate input
+        if (!Array.isArray(deliveryIds) || !Array.isArray(paymentIds)) {
+            return res.status(400).json({ 
+                message: 'Invalid input: deliveryIds and paymentIds must be arrays' 
+            });
+        }
+
+        const [deliveryResult, paymentResult] = await Promise.all([
+            deliveryIds.length > 0
+                ? Delivery.deleteMany({ _id: { $in: deliveryIds } })
+                : Promise.resolve({ deletedCount: 0 }),
+            paymentIds.length > 0
+                ? Payment.deleteMany({ _id: { $in: paymentIds } })
+                : Promise.resolve({ deletedCount: 0 })
+        ]);
+
+        console.log('Clear history results:', {
+            deliveriesDeleted: deliveryResult.deletedCount,
+            paymentsDeleted: paymentResult.deletedCount
+        });
+
+        res.status(200).json({
+            message: 'History cleared from database',
+            deliveriesDeleted: deliveryResult.deletedCount,
+            paymentsDeleted: paymentResult.deletedCount,
+            totalDeleted: deliveryResult.deletedCount + paymentResult.deletedCount
+        });
+    } catch (error) {
+        console.error("Clear History Error:", error);
+        res.status(500).json({ 
+            message: "Server error clearing history", 
+            error: error.message 
+        });
     }
 });
 

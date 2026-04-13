@@ -36,7 +36,7 @@ const deliverySchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['Pending', 'Confirmed', 'Preparing', 'Out for Delivery', 'Delivered', 'Cancelled'],
+    enum: ['Pending', 'Delivered', 'Cancelled'],
     default: 'Pending'
   },
   totalAmount: {
