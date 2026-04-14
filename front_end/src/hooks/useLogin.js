@@ -2,12 +2,6 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { setStoredItem, clearUserData, removeStoredItem } from '../utils/storageUtils';
 
-// Mock database (mutable for this session)
-let MOCK_USER = {
-  email: 'user123@gmail.com',
-  password: 'password'
-};
-
 export const useLogin = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -95,11 +89,6 @@ export const useLogin = () => {
     alert(`Login with ${provider} coming soon!`);
   };
 
-  const updateMockCredentials = (newEmail, newPassword) => {
-    MOCK_USER.email = newEmail;
-    MOCK_USER.password = newPassword;
-  };
-
   const login = async (email, password) => {
     const loginEmail = email || formData.email;
     const loginPassword = password || formData.password;
@@ -142,7 +131,7 @@ export const useLogin = () => {
         };
         setStoredItem('user', userData);
 
-        navigate('/home'); // Redirect to homepage after successful login
+        // navigate('/home'); // Redirect to homepage moved to component for splash screen
         return true;
       } else {
         setError(data.message || 'Login failed');
@@ -176,12 +165,10 @@ export const useLogin = () => {
     showPassword,
     handleChange,
     handleSocialLogin,
-    handleSocialLogin,
     handleSubmit,
     togglePasswordVisibility,
     clearError,
     login,
-    setFormData,
-    updateMockCredentials
+    setFormData
   };
 };

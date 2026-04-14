@@ -128,13 +128,16 @@ export const useSignUp = () => {
           email: formData.email,
           token: data.token // If you plan to add tokens later
         });
-        navigate('/home');
+        // navigate('/home'); // Moved to component for splash screen logic
+        return true;
       } else {
         setError(data.message || 'Sign up failed. Please try again.');
+        return false;
       }
     } catch (err) {
       console.error('Signup error:', err);
       setError('Connection error. Is the server running?');
+      return false;
     } finally {
       setIsLoading(false);
     }

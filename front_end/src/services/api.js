@@ -44,7 +44,7 @@ export const authAPI = {
   signup: (userData) => api.post('/signup', userData),
   logout: () => api.post('/logout'),
   forgotPassword: (email) => api.post('/forgot-password', { email }),
-  resetPassword: (token, password) => api.post('/reset-password', { token, password }),
+  resetPassword: (email, password) => api.post('/reset-password', { email, password }),
 };
 
 // User API calls

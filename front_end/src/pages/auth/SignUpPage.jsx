@@ -1,18 +1,33 @@
-import React, { useLayoutEffect } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useLayoutEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import './LoginPage.css';
 import logo from '../../assets/logo.png';
 import { useSignUp } from '../../hooks/useSignUp';
+import SplashScreen from '../../components/SplashScreen';
 
 const SignUpPage = () => {
+  const navigate = useNavigate();
+  const [showSplash, setShowSplash] = useState(false);
+
   const {
     formData,
     passwordStrength,
     error,
     isLoading,
     handleChange,
-    handleSubmit
+    handleSubmit 
   } = useSignUp();
+
+  const handleFormSubmit = async (e) => {
+    e.preventDefault();
+    const success = await handleSubmit(e);
+    if (success) {
+      setShowSplash(true);
+      setTimeout(() => {
+        navigate('/home');
+      }, 2500);
+    }
+  };
 
   // Force light mode on auth pages — useLayoutEffect runs before paint (no flash)
   useLayoutEffect(() => {
@@ -24,6 +39,10 @@ const SignUpPage = () => {
       }
     };
   }, []);
+
+  if (showSplash) {
+    return <SplashScreen message="Preparing your personalized flavors..." />;
+  }
 
   return (
     <div className="login-wrapper">
@@ -120,7 +139,7 @@ const SignUpPage = () => {
           <h2 className="title" style={{ fontSize: '32px', marginBottom: '8px', textAlign: 'center' }}>Sign Up</h2>
           <p className="subtitle" style={{ textAlign: 'center' }}>Create your account to get started</p>
           
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleFormSubmit}>
             {error && (
               <div style={{ 
                 backgroundColor: '#fee', 

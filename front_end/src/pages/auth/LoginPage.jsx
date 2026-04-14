@@ -1,11 +1,15 @@
-import React, { useLayoutEffect } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useLayoutEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import "./LoginPage.css";
 import logo from "../../assets/logo.png";
 import { useLogin } from "../../hooks/useLogin";
 import { useForgotPassword } from "../../hooks/useForgotPassword";
 
+import SplashScreen from "../../components/SplashScreen";
+
 const LoginPage = () => {
+  const navigate = useNavigate();
+  const [showSplash, setShowSplash] = useState(false);
 
   useLayoutEffect(() => {
     document.body.classList.remove("dark-mode");
@@ -25,14 +29,14 @@ const LoginPage = () => {
     showPassword,
     handleChange,
     handleSocialLogin,
-    handleSubmit,
+    login, // Use login function instead of handleSubmit to control flow
     togglePasswordVisibility,
     clearError,
     setFormData,
     updateMockCredentials
   } = useLogin();
 
-  const [resetSuccessMessage, setResetSuccessMessage] = React.useState("");
+  const [resetSuccessMessage, setResetSuccessMessage] = useState("");
 
   const handleResetSuccess = (email, newPassword) => {
     setFormData(prev => ({
@@ -41,13 +45,22 @@ const LoginPage = () => {
       password: ""
     }));
 
-    updateMockCredentials(email, newPassword);
-
     setResetSuccessMessage(
       "Password reset successfully. Please login with your new password."
     );
 
     setTimeout(() => setResetSuccessMessage(""), 5000);
+  };
+
+  const handleFormSubmit = async (e) => {
+    e.preventDefault();
+    const success = await login();
+    if (success) {
+      setShowSplash(true);
+      setTimeout(() => {
+        navigate('/home');
+      }, 2500); // 2.5 seconds for the high-end loading animation
+    }
   };
 
   const {
@@ -63,6 +76,10 @@ const LoginPage = () => {
     handleSendOtp,
     handleResetPassword
   } = useForgotPassword({ onResetSuccess: handleResetSuccess });
+
+  if (showSplash) {
+    return <SplashScreen message="Preparing your personalized dashboard..." />;
+  }
 
   return (
     <div className="login-wrapper">
@@ -116,7 +133,7 @@ const LoginPage = () => {
           <h2 className="title">Login</h2>
           <p className="subtitle">Enter your credentials to access your account</p>
 
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleFormSubmit}>
 
             {error && <div className="error-box">{error}</div>}
             {resetSuccessMessage && <div className="success-box">{resetSuccessMessage}</div>}

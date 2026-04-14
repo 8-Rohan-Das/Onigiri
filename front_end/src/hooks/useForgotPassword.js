@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { authAPI } from '../services/api';
 
 export const useForgotPassword = ({ onResetSuccess } = {}) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -52,19 +53,14 @@ export const useForgotPassword = ({ onResetSuccess } = {}) => {
     setIsLoading(true);
     setError('');
 
-    // Simulate API call to send OTP
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
-
-      // Mock validation
-      if (!formData.email.includes('@')) {
-        throw new Error('Please enter a valid email address');
-      }
-
+      // Call real backend endpoint
+      const response = await authAPI.forgotPassword(formData.email);
+      
       setStep(2);
-      setSuccessMessage('OTP sent successfully to your email!');
+      setSuccessMessage(response.data.message || 'OTP sent successfully to your email!');
     } catch (err) {
-      setError(err.message || 'Failed to send OTP. Please try again.');
+      setError(err.response?.data?.message || 'Failed to send OTP. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -92,16 +88,18 @@ export const useForgotPassword = ({ onResetSuccess } = {}) => {
     setIsLoading(true);
     setError('');
 
-    // Simulate API call to reset password
+    // Mock OTP validation (accept any 6 digit OTP for demo as requested)
+    if (formData.otp.length !== 6) {
+      setIsLoading(false);
+      setError('Invalid OTP. Please enter a 6-digit code.');
+      return;
+    }
+
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Call real backend endpoint to update password
+      const response = await authAPI.resetPassword(formData.email, formData.newPassword);
 
-      // Mock OTP validation (accept any 6 digit OTP for demo)
-      if (formData.otp.length !== 6) {
-        throw new Error('Invalid OTP. Please enter a 6-digit code.');
-      }
-
-      setSuccessMessage('Password reset successfully! You can now login with your new password.');
+      setSuccessMessage(response.data.message || 'Password reset successfully!');
 
       if (onResetSuccess) {
         onResetSuccess(formData.email, formData.newPassword);
@@ -112,7 +110,7 @@ export const useForgotPassword = ({ onResetSuccess } = {}) => {
         closeModal();
       }, 2000);
     } catch (err) {
-      setError(err.message || 'Failed to reset password. Please try again.');
+      setError(err.response?.data?.message || 'Failed to reset password. Please try again.');
     } finally {
       setIsLoading(false);
     }
