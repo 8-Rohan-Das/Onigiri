@@ -1,8 +1,8 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
-import { getStoredUser, setStoredItem, getStoredItem, removeStoredItem } from '../utils/storageUtils';
-import { deliveryAPI, paymentAPI } from '../services/api';
+import { getStoredUser, setUserStoredItem, getUserStoredItem, removeStoredItem } from '../utils/storageUtils';
+import { deliveryAPI, paymentAPI, userAPI } from '../services/api';
 
 export const useCheckout = () => {
   const navigate = useNavigate();
@@ -27,10 +27,10 @@ export const useCheckout = () => {
     fullName: userName,
     email: userData.email || '',
     phone: '',
-    address: 'Plot No. 42, Sector 5, CDA Building',
-    city: 'Bhubaneswar',
-    state: 'Odisha',
-    zipCode: '751019',
+    address: '',
+    city: '',
+    state: '',
+    zipCode: '',
     paymentMethod: 'cod',
     cardNumber: '',
     cardName: '',
@@ -38,6 +38,36 @@ export const useCheckout = () => {
     cvv: '',
     upiId: ''
   });
+
+  // Fetch user's saved address to pre-populate checkout form
+  useEffect(() => {
+    const fetchUserAddress = async () => {
+      try {
+        const userId = userData?.id || userData?._id;
+        if (userId) {
+          const response = await userAPI.getProfile(userId);
+          const profileData = response.data;
+          const primaryAddress = profileData.addresses && profileData.addresses.length > 0
+            ? profileData.addresses[0]
+            : null;
+
+          if (primaryAddress) {
+            setFormData(prev => ({
+              ...prev,
+              address: primaryAddress.street || prev.address,
+              city: primaryAddress.city || prev.city,
+              state: primaryAddress.state || prev.state,
+              zipCode: primaryAddress.zipCode || prev.zipCode
+            }));
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching user address for checkout:', error);
+      }
+    };
+
+    fetchUserAddress();
+  }, []);
 
   // derived totals
   const subtotal = useMemo(
@@ -163,12 +193,12 @@ export const useCheckout = () => {
       };
 
       // Save to localStorage for confirmation page & history
-      setStoredItem('lastOrder', orderPayload);
-      const currentHistory = getStoredItem('orderHistory', []);
+      setUserStoredItem('lastOrder', orderPayload);
+      const currentHistory = getUserStoredItem('orderHistory', []);
       const updatedHistory = Array.isArray(currentHistory)
         ? [orderPayload, ...currentHistory]
         : [orderPayload];
-      setStoredItem('orderHistory', updatedHistory);
+      setUserStoredItem('orderHistory', updatedHistory);
 
       // Clear cart only after successful API save
       clearCart();

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { setStoredItem } from '../utils/storageUtils';
+import { setStoredItem, clearUserData, removeStoredItem } from '../utils/storageUtils';
 
 export const useSignUp = () => {
   const navigate = useNavigate();
@@ -111,8 +111,19 @@ export const useSignUp = () => {
 
       if (response.ok) {
         console.log('Sign up successful!', data);
-        // Store user data and redirect to homepage
+        
+        // Clear any existing user data from localStorage
+        clearUserData();
+        
+        // Clear old generic keys that might exist
+        removeStoredItem('favorites');
+        removeStoredItem('orderHistory');
+        removeStoredItem('lastOrder');
+        removeStoredItem('cartItems');
+        
+        // Store user data with proper ID
         setStoredItem('user', {
+          id: data.user?.id || data.user?._id || `user_${Date.now()}`,
           name: formData.name,
           email: formData.email,
           token: data.token // If you plan to add tokens later

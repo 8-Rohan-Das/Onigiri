@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { setStoredItem } from '../utils/storageUtils';
+import { setStoredItem, clearUserData, removeStoredItem } from '../utils/storageUtils';
 
 // Mock database (mutable for this session)
 let MOCK_USER = {
@@ -124,11 +124,20 @@ export const useLogin = () => {
       if (response.ok) {
         console.log('Login successful!', data);
 
+        // Clear any existing user data from localStorage
+        clearUserData();
+        
+        // Clear old generic keys that might exist
+        removeStoredItem('favorites');
+        removeStoredItem('orderHistory');
+        removeStoredItem('lastOrder');
+        removeStoredItem('cartItems');
+
         // Store user data in localStorage
         const userData = {
           email: data.user.email,
           name: data.user.name,
-          id: data.user.id,
+          id: data.user.id || data.user._id || `user_${Date.now()}`,
           loginTime: new Date().toISOString()
         };
         setStoredItem('user', userData);

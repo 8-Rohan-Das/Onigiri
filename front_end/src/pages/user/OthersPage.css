@@ -389,6 +389,131 @@
   margin-bottom: 20px;
 }
 
+/* Structured Address Fields */
+.address-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px;
+  background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  margin-top: 8px;
+}
+
+.address-street {
+  grid-column: 1 / -1;
+}
+
+.address-city {
+  flex: 2;
+}
+
+.address-state {
+  flex: 1;
+}
+
+.address-zip {
+  flex: 1;
+}
+
+.address-country {
+  grid-column: 1 / -1;
+}
+
+.address-fields .form-group {
+  margin-bottom: 0;
+}
+
+.address-fields label {
+  font-weight: 600;
+  color: #4a5568;
+  font-size: 0.9rem;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.address-fields label::after {
+  content: attr(data-required);
+  color: #e53e3e;
+  font-size: 0.8rem;
+}
+
+.address-fields .input-custom {
+  background: white;
+  border: 2px solid #e2e8f0;
+  padding: 12px 16px;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+}
+
+.address-fields .input-custom:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  background: #ffffff;
+}
+
+.address-fields .input-custom:invalid {
+  border-color: #e53e3e;
+}
+
+.address-fields .input-custom::placeholder {
+  color: #a0aec0;
+}
+
+/* Address field icons */
+.address-fields .form-group::before {
+  content: '';
+  display: none;
+}
+
+/* Responsive address fields */
+@media (max-width: 768px) {
+  .address-fields {
+    padding: 15px;
+    gap: 15px;
+  }
+  
+  .address-fields .form-row {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  
+  .address-city,
+  .address-state,
+  .address-zip {
+    grid-column: 1 / -1;
+    flex: 1;
+  }
+}
+
+/* Dark mode for address fields */
+.dark-mode .address-fields {
+  background: linear-gradient(135deg, #2d3436 0%, #242424 100%);
+  border-color: #444;
+}
+
+.dark-mode .address-fields label {
+  color: #bbb;
+}
+
+.dark-mode .address-fields .input-custom {
+  background: #2d2d2d;
+  border-color: #555;
+  color: #fff;
+}
+
+.dark-mode .address-fields .input-custom:focus {
+  background: #242424;
+  border-color: #667eea;
+}
+
+.dark-mode .address-fields .input-custom::placeholder {
+  color: #777;
+}
+
 .address-item {
   display: flex;
   align-items: center;

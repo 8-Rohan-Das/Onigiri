@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { getStoredItem, setStoredItem } from '../utils/storageUtils.js';
+import { getUserStoredItem, setUserStoredItem, getStoredUser } from '../utils/storageUtils.js';
 import { useNotifications } from './NotificationContext';
 
 const FavoriteContext = createContext();
@@ -9,12 +9,12 @@ export const useFavorites = () => useContext(FavoriteContext);
 export const FavoriteProvider = ({ children }) => {
   const { addNotification } = useNotifications();
   const [favoriteItems, setFavoriteItems] = useState(() => {
-    const stored = getStoredItem('favorites', []);
+    const stored = getUserStoredItem('favorites', []);
     return Array.isArray(stored) ? stored : [];
   });
 
   useEffect(() => {
-    setStoredItem('favorites', favoriteItems);
+    setUserStoredItem('favorites', favoriteItems);
   }, [favoriteItems]);
 
   const addToFavorites = (item) => {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getStoredUser, getStoredItem } from '../../utils/storageUtils';
+import { getStoredUser, getUserStoredItem } from '../../utils/storageUtils';
 
 import { useNavigate, useLocation } from 'react-router-dom';
 
@@ -19,10 +19,7 @@ const OrderConfirmationPage = () => {
   const [countdown, setCountdown] = useState(30);
   const [showTrackingModal, setShowTrackingModal] = useState(false);
 
-
-
   // Get user data from localStorage
-
   const userData = getStoredUser();
   const userName = userData.name || 'Guest';
   
@@ -32,7 +29,7 @@ const OrderConfirmationPage = () => {
         return location.state.orderData;
      }
 
-     return getStoredItem('lastOrder');
+     return getUserStoredItem('lastOrder');
   });
 
   // Ensure we have a stable ID for the order
@@ -47,34 +44,22 @@ const OrderConfirmationPage = () => {
     // If no order data, redirect to home
     if (!orderData) {
       navigate('/home');
-      return; // Exit early if no orderData
+      return;
     }
 
     // Countdown timer for auto-redirect
     const timer = setInterval(() => {
       setCountdown((prev) => {
         if (prev <= 1) {
-
           clearInterval(timer);
-
           navigate('/order-history');
-
           return 0;
-
         }
-
         return prev - 1;
-
-      }
-
-      );
-
+      });
     }, 1000);
 
-
-
     return () => clearInterval(timer);
-
   }, [navigate]);
 
 
@@ -207,9 +192,8 @@ const OrderConfirmationPage = () => {
 
                 <h3>Delivery Address</h3>
 
-                <p>{orderData.deliveryInfo?.address || 'Your saved address'}</p>
-
-                <p>{orderData.deliveryInfo?.city || 'City'}, {orderData.deliveryInfo?.postalCode || 'Postal Code'}</p>
+                <p>{orderData.deliveryInfo?.address || 'No address provided'}</p>
+                <p>{orderData.deliveryInfo?.city || ''}{orderData.deliveryInfo?.state ? ', ' + orderData.deliveryInfo.state : ''}{orderData.deliveryInfo?.zipCode ? ' ' + orderData.deliveryInfo.zipCode : ''}</p>
 
               </div>
 

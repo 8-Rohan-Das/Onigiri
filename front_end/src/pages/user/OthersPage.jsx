@@ -5,6 +5,7 @@ import { getStoredUser, setStoredItem, removeStoredItem } from '../../utils/stor
 import { userAPI } from '../../services/api';
 import NotificationButton from '../../components/NotificationButton';
 import HoveringCart from '../../components/HoveringCart';
+import PopupModal from '../../components/PopupModal';
 import '../home/homepage.css';
 import './OthersPage.css';
 import logo from '../../assets/logo.png';
@@ -19,11 +20,17 @@ const OthersPage = () => {
   const navigate = useNavigate();
   const { addNotification } = useNotifications();
   const [activeNav, setActiveNav] = useState('others');
-  const [activeTab, setActiveTab] = useState('profile');
 
   const handleLogout = () => {
-    removeStoredItem('user');
-    navigate('/login');
+    showPopup(
+      'confirm',
+      'Logout Confirmation',
+      'Are you sure you want to logout? You will need to login again to access your account.',
+      () => {
+        removeStoredItem('user');
+        navigate('/login');
+      }
+    );
   };
 
   // Get user data from localStorage
@@ -63,7 +70,13 @@ const OthersPage = () => {
     gender: 'male',
     membership: 'Premium Member',
     profileImage: userData.profileImage || userImage,
-    addresses: []
+    addresses: [],
+    // Structured address fields
+    street: '',
+    city: '',
+    state: '',
+    zipCode: '',
+    country: 'India'
   });
 
   // Statistics state
@@ -85,6 +98,15 @@ const OthersPage = () => {
     message: ''
   });
 
+  // Popup Modal State
+  const [popupModal, setPopupModal] = useState({
+    isOpen: false,
+    type: 'info',
+    title: '',
+    message: '',
+    onConfirm: null
+  });
+
   const handleSettingChange = (setting, value) => {
     setSettings({ ...settings, [setting]: value });
   };
@@ -97,6 +119,21 @@ const OthersPage = () => {
     setContactForm({ ...contactForm, [field]: value });
   };
 
+  // Popup helper functions
+  const showPopup = (type, title, message, onConfirm = null) => {
+    setPopupModal({
+      isOpen: true,
+      type,
+      title,
+      message,
+      onConfirm
+    });
+  };
+
+  const closePopup = () => {
+    setPopupModal(prev => ({ ...prev, isOpen: false }));
+  };
+
   // Fetch user profile data from backend
   useEffect(() => {
     const fetchProfileData = async () => {
@@ -106,6 +143,10 @@ const OthersPage = () => {
           const profileData = response.data;
           
           // Update profile state with backend data
+          const primaryAddress = profileData.addresses && profileData.addresses.length > 0 
+            ? profileData.addresses[0] 
+            : {};
+          
           setProfile(prev => ({
             ...prev,
             name: profileData.name || prev.name,
@@ -114,17 +155,30 @@ const OthersPage = () => {
             dateOfBirth: profileData.dateOfBirth || prev.dateOfBirth,
             gender: profileData.gender || prev.gender,
             addresses: profileData.addresses || [],
-            address: profileData.addresses && profileData.addresses.length > 0 
-              ? `${profileData.addresses[0].street}, ${profileData.addresses[0].city}, ${profileData.addresses[0].state || ''} ${profileData.addresses[0].zipCode}, ${profileData.addresses[0].country || ''}`
-              : prev.address
+            address: primaryAddress.street 
+              ? `${primaryAddress.street}, ${primaryAddress.city}, ${primaryAddress.state || ''} ${primaryAddress.zipCode}, ${primaryAddress.country || 'India'}`
+              : prev.address,
+            // Populate structured address fields
+            street: primaryAddress.street || '',
+            city: primaryAddress.city || '',
+            state: primaryAddress.state || '',
+            zipCode: primaryAddress.zipCode || '',
+            country: primaryAddress.country || 'India'
           }));
           
           // Update stats state with backend data
+          const memberSince = profileData.memberSince || profileData.createdAt 
+            ? new Date(profileData.createdAt).toLocaleDateString('en-US', { 
+                month: 'long', 
+                year: 'numeric' 
+              })
+            : 'January 2024'; // Fallback date for existing users
+          
           setStats(prev => ({
             ...prev,
             totalOrders: profileData.totalOrders || 0,
             totalSpent: profileData.totalSpent || 0.0,
-            memberSince: profileData.memberSince || 'Unknown',
+            memberSince: memberSince,
             savedAddresses: profileData.addresses ? profileData.addresses.length : 0
           }));
         }
@@ -145,68 +199,122 @@ const OthersPage = () => {
     fetchProfileData();
   }, [userData.id, addNotification]);
 
-  const handleSaveProfile = async () => {
-    try {
-      // Parse address string into address object for backend
-      const addressParts = profile.address.split(',').map(part => part.trim());
-      const newAddress = {
-        street: addressParts[0] || '',
-        city: addressParts[1] || '',
-        state: addressParts[2] || '',
-        zipCode: addressParts[3] || '',
-        country: addressParts[4] || 'India'
-      };
-
-      // Update backend with all profile data
-      await userAPI.updateProfile({
-        userId: userData.id,
-        name: profile.name,
-        phone: profile.phone,
-        dateOfBirth: profile.dateOfBirth,
-        gender: profile.gender,
-        addresses: [newAddress]
-      });
-
-      // Update localStorage
-      setStoredItem('user', {
-        ...userData,
-        ...profile
-      });
-      
-      addNotification({
-        type: 'settings',
-        title: 'Profile Updated',
-        message: 'Your profile information has been successfully updated.',
-        icon: '✅',
-        action: '/others'
-      });
-    } catch (error) {
-      console.error('Error updating profile:', error);
+  const handleSaveProfile = () => {
+    // Validate required address fields
+    if (!profile.street.trim() || !profile.city.trim() || !profile.zipCode.trim()) {
       addNotification({
         type: 'error',
-        title: 'Update Failed',
-        message: 'Failed to update profile. Please try again.',
-        icon: '❌',
+        title: 'Address Validation',
+        message: 'Please fill in Street, City, and Zip Code fields.',
+        icon: ' warning ',
         action: '/others'
       });
+      return;
     }
+
+    // Show confirmation popup
+    showPopup(
+      'confirm',
+      'Save Profile Changes',
+      `Are you sure you want to save your profile changes? This will update your personal information and address.`,
+      async () => {
+        try {
+          // Create address object from structured fields
+          const newAddress = {
+            street: profile.street.trim(),
+            city: profile.city.trim(),
+            state: profile.state.trim(),
+            zipCode: profile.zipCode.trim(),
+            country: profile.country.trim()
+          };
+
+          console.log('Structured address object:', newAddress);
+
+          // Update backend with all profile data
+          await userAPI.updateProfile({
+            userId: userData.id,
+            name: profile.name,
+            phone: profile.phone,
+            dateOfBirth: profile.dateOfBirth,
+            gender: profile.gender,
+            addresses: [newAddress]
+          });
+
+          // Update localStorage
+          setStoredItem('user', {
+            ...userData,
+            ...profile
+          });
+          
+          addNotification({
+            type: 'settings',
+            title: 'Profile Updated',
+            message: 'Your profile information has been successfully updated.',
+            icon: ' success ',
+            action: '/others'
+          });
+
+          // Show success popup
+          showPopup(
+            'success',
+            'Profile Saved Successfully!',
+            'Your profile changes have been saved and will take effect immediately.'
+          );
+        } catch (error) {
+          console.error('Error updating profile:', error);
+          addNotification({
+            type: 'error',
+            title: 'Update Failed',
+            message: 'Failed to update profile. Please try again.',
+            icon: ' error ',
+            action: '/others'
+          });
+
+          // Show error popup
+          showPopup(
+            'error',
+            'Profile Update Failed',
+            'There was an error saving your profile changes. Please check your connection and try again.'
+          );
+        }
+      }
+    );
   };
 
   const handleSendContact = (e) => {
     e.preventDefault();
     if (!contactForm.subject || !contactForm.message) {
-      alert('Please fill in all fields');
+      showPopup(
+        'warning',
+        'Missing Information',
+        'Please fill in both subject and message fields before sending.'
+      );
       return;
     }
-    console.log('Sending message:', contactForm);
-    addNotification({
-      type: 'support',
-      title: 'Message Sent',
-      message: 'Your support request has been sent successfully.',
-      icon: '📧',
-      action: '/messages'
-    });
-    setContactForm({ subject: '', message: '' });
+    
+    showPopup(
+      'confirm',
+      'Send Support Message',
+      `Are you sure you want to send this support message? Our team will respond to: ${profile.email}`,
+      () => {
+        console.log('Sending message:', contactForm);
+        addNotification({
+          type: 'support',
+          title: 'Message Sent',
+          message: 'Your support request has been sent successfully.',
+          icon: ' email ',
+          action: '/messages'
+        });
+        setContactForm({ subject: '', message: '' });
+        
+        // Show success popup
+        showPopup(
+          'success',
+          'Message Sent Successfully!',
+          'Your support request has been received. We will get back to you within 24 hours.'
+        );
+      }
+    );
   };
 
   const handleAddPaymentMethod = () => {
@@ -671,413 +779,210 @@ const OthersPage = () => {
         </header>
 
         <div className="settings-container">
-          {/* Tab Navigation */}
-          <div className="tab-navigation">
-            <button 
-              className={`tab-btn ${activeTab === 'profile' ? 'active' : ''}`}
-              onClick={() => setActiveTab('profile')}
-            >
-              👤 Profile
-            </button>
-            <button 
-              className={`tab-btn ${activeTab === 'settings' ? 'active' : ''}`}
-              onClick={() => setActiveTab('settings')}
-            >
-              ⚙️ Settings
-            </button>
-            <button 
-              className={`tab-btn ${activeTab === 'statistics' ? 'active' : ''}`}
-              onClick={() => setActiveTab('statistics')}
-            >
-              📊 Statistics
-            </button>
-            <button 
-              className={`tab-btn ${activeTab === 'support' ? 'active' : ''}`}
-              onClick={() => setActiveTab('support')}
-            >
-              📧 Support
-            </button>
-          </div>
-
-          {/* Profile Tab */}
-          {activeTab === 'profile' && (
-            <div className="tab-content">
-              <section className="settings-section">
-                <h2 className="section-title">Profile Information</h2>
-                <div className="profile-header">
-                  <div className="profile-card">
-                    <div className="profile-avatar-section">
-                      <div className="profile-avatar">
-                        <img src={profile.profileImage} alt="Profile" />
-                      </div>
-                      <div className="profile-actions">
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={handleImageUpload}
-                          className="avatar-input"
-                          id="side-photo-input"
-                        />
-                        <label htmlFor="side-photo-input" className="side-change-btn">
-                          Change Profile Picture
-                        </label>
+          <div className="tab-content">
+            <section className="settings-section">
+              <h2 className="section-title">Profile Information</h2>
+              <div className="profile-header">
+                <div className="profile-card">
+                  <div className="profile-avatar-section">
+                    <div className="profile-avatar">
+                      <img src={profile.profileImage} alt="Profile" />
+                    </div>
+                    <div className="profile-actions">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        className="avatar-input"
+                        id="side-photo-input"
+                      />
+                      <label htmlFor="side-photo-input" className="side-change-btn">
+                        Change Profile Picture
+                      </label>
+                    </div>
+                  </div>
+                  <div className="profile-info">
+                    <div className="profile-header-info">
+                      <h3>{profile.name}</h3>
+                      <p className="profile-email">{profile.email}</p>
+                      <div className="profile-badges">
+                        <span className="badge premium">{profile.membership}</span>
+                        <span className="badge verified">Verified</span>
                       </div>
                     </div>
-                    <div className="profile-info">
-                      <div className="profile-header-info">
-                        <h3>{profile.name}</h3>
-                        <p className="profile-email">{profile.email}</p>
-                        <div className="profile-badges">
-                          <span className="badge premium">{profile.membership}</span>
-                          <span className="badge verified">Verified</span>
-                        </div>
+                    <div className="profile-stats">
+                      <div className="stat-item">
+                        <span className="stat-label">Total Orders</span>
+                        <span className="stat-value">{loading ? 'Loading...' : stats.totalOrders}</span>
                       </div>
-                      <div className="profile-stats">
-                        <div className="stat-item">
-                          <span className="stat-label">Member Since</span>
-                          <span className="stat-value">{loading ? 'Loading...' : stats.memberSince}</span>
-                        </div>
-                        <div className="stat-item">
-                          <span className="stat-label">Total Orders</span>
-                          <span className="stat-value">{loading ? 'Loading...' : stats.totalOrders}</span>
-                        </div>
-                        <div className="stat-item">
-                          <span className="stat-label">Total Spent</span>
-                          <span className="stat-value">{loading ? 'Loading...' : `₹${stats.totalSpent.toFixed(2)}`}</span>
-                        </div>
+                      <div className="stat-item">
+                        <span className="stat-label">Total Spent</span>
+                        <span className="stat-value">{loading ? 'Loading...' : `₹${stats.totalSpent.toFixed(2)}`}</span>
                       </div>
                     </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="settings-form">
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Full Name</label>
+                    <input
+                      type="text"
+                      value={profile.name}
+                      onChange={(e) => handleProfileChange('name', e.target.value)}
+                      className="input-custom"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Email</label>
+                    <input
+                      type="email"
+                      value={profile.email}
+                      onChange={(e) => handleProfileChange('email', e.target.value)}
+                      className="input-custom"
+                    />
                   </div>
                 </div>
                 
-                <div className="settings-form">
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label>Full Name</label>
-                      <input
-                        type="text"
-                        value={profile.name}
-                        onChange={(e) => handleProfileChange('name', e.target.value)}
-                        className="input-custom"
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label>Email</label>
-                      <input
-                        type="email"
-                        value={profile.email}
-                        onChange={(e) => handleProfileChange('email', e.target.value)}
-                        className="input-custom"
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label>Phone</label>
-                      <input
-                        type="tel"
-                        value={profile.phone}
-                        onChange={(e) => handleProfileChange('phone', e.target.value)}
-                        className="input-custom"
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label>Date of Birth</label>
-                      <input
-                        type="date"
-                        value={profile.dateOfBirth}
-                        onChange={(e) => handleProfileChange('dateOfBirth', e.target.value)}
-                        className="input-custom"
-                      />
-                    </div>
-                  </div>
-
+                <div className="form-row">
                   <div className="form-group">
-                    <label>Gender</label>
-                    <div className="radio-group">
-                      <label className="radio-label">
-                        <input
-                          type="radio"
-                          name="gender"
-                          value="male"
-                          checked={profile.gender === 'male'}
-                          onChange={(e) => handleProfileChange('gender', e.target.value)}
-                        />
-                        Male
-                      </label>
-                      <label className="radio-label">
-                        <input
-                          type="radio"
-                          name="gender"
-                          value="female"
-                          checked={profile.gender === 'female'}
-                          onChange={(e) => handleProfileChange('gender', e.target.value)}
-                        />
-                        Female
-                      </label>
-                      <label className="radio-label">
-                        <input
-                          type="radio"
-                          name="gender"
-                          value="other"
-                          checked={profile.gender === 'other'}
-                          onChange={(e) => handleProfileChange('gender', e.target.value)}
-                        />
-                        Other
-                      </label>
-                    </div>
-                  </div>
-
-                  <div className="form-group">
-                    <label>Address</label>
-                    <textarea
-                      value={profile.address}
-                      onChange={(e) => handleProfileChange('address', e.target.value)}
+                    <label>Phone</label>
+                    <input
+                      type="tel"
+                      value={profile.phone}
+                      onChange={(e) => handleProfileChange('phone', e.target.value)}
                       className="input-custom"
-                      rows="3"
                     />
                   </div>
-
-                  <button className="save-btn" onClick={handleSaveProfile}>
-                    💾 Save Profile
-                  </button>
-                </div>
-              </section>
-            </div>
-          )}
-
-          {/* Settings Tab */}
-          {activeTab === 'settings' && (
-            <div className="tab-content">
-              <section className="settings-section">
-                <h2 className="section-title">Preferences</h2>
-                <div className="settings-form">
-                  <div className="setting-item">
-                    <label>🔔 Push Notifications</label>
-                    <div className="checkbox-container">
-                      <input
-                        type="checkbox"
-                        checked={settings.notifications}
-                        onChange={(e) => handleSettingChange('notifications', e.target.checked)}
-                      />
-                      <span>Receive order updates and alerts</span>
-                    </div>
-                  </div>
-
-                  <div className="setting-item">
-                    <label>📧 Email Updates</label>
-                    <div className="checkbox-container">
-                      <input
-                        type="checkbox"
-                        checked={settings.emailUpdates}
-                        onChange={(e) => handleSettingChange('emailUpdates', e.target.checked)}
-                      />
-                      <span>Weekly newsletter and promotions</span>
-                    </div>
-                  </div>
-
-                  <div className="setting-item">
-                    <label>📱 SMS Alerts</label>
-                    <div className="checkbox-container">
-                      <input
-                        type="checkbox"
-                        checked={settings.smsAlerts}
-                        onChange={(e) => handleSettingChange('smsAlerts', e.target.checked)}
-                      />
-                      <span>Order status via SMS</span>
-                    </div>
-                  </div>
-
-                  <div className="setting-item">
-                    <label>🌙 Dark Mode</label>
-                    <div className="checkbox-container">
-                      <input
-                        type="checkbox"
-                        checked={settings.darkMode}
-                        onChange={(e) => handleSettingChange('darkMode', e.target.checked)}
-                      />
-                      <span>Easier on the eyes</span>
-                    </div>
-                  </div>
-
-                  <div className="setting-item">
-                    <label>🌍 Language</label>
-                    <select
-                      value={settings.language}
-                      onChange={(e) => handleSettingChange('language', e.target.value)}
+                  <div className="form-group">
+                    <label>Date of Birth</label>
+                    <input
+                      type="date"
+                      value={profile.dateOfBirth}
+                      onChange={(e) => handleProfileChange('dateOfBirth', e.target.value)}
                       className="input-custom"
-                    >
-                      <option value="english">English</option>
-                      <option value="hindi">हिंदी</option>
-                      <option value="odia">ଓଡ଼ିଆ</option>
-                    </select>
+                    />
                   </div>
+                </div>
 
-                  <div className="setting-item">
-                    <label>🔐 Two-Factor Auth</label>
-                    <div className="checkbox-container">
+                <div className="form-group">
+                  <label>Gender</label>
+                  <div className="radio-group">
+                    <label className="radio-label">
                       <input
-                        type="checkbox"
-                        checked={settings.twoFactorAuth}
-                        onChange={(e) => handleSettingChange('twoFactorAuth', e.target.checked)}
+                        type="radio"
+                        name="gender"
+                        value="male"
+                        checked={profile.gender === 'male'}
+                        onChange={(e) => handleProfileChange('gender', e.target.value)}
                       />
-                      <span>Extra security layer</span>
-                    </div>
-                  </div>
-                </div>
-              </section>
-
-              <section className="settings-section">
-                <h2 className="section-title">Security</h2>
-                <div className="security-options">
-                  <button className="security-btn" onClick={() => alert('Change password functionality coming soon!')}>
-                    🔑 Change Password
-                  </button>
-                  <button className="security-btn" onClick={() => alert('Enable 2FA functionality coming soon!')}>
-                    🔐 Enable Two-Factor Auth
-                  </button>
-                  <button className="security-btn" onClick={() => alert('Privacy settings coming soon!')}>
-                    🛡️ Privacy Settings
-                  </button>
-                </div>
-              </section>
-            </div>
-          )}
-
-          {/* Statistics Tab */}
-          {activeTab === 'statistics' && (
-            <div className="tab-content">
-              <section className="settings-section">
-                <h2 className="section-title">Your Statistics</h2>
-                <div className="stats-grid">
-                  <div className="stat-card">
-                    <div className="stat-icon">🛒</div>
-                    <div className="stat-info">
-                      <h3>{stats.totalOrders}</h3>
-                      <p>Total Orders</p>
-                    </div>
-                  </div>
-                  <div className="stat-card">
-                    <div className="stat-icon">💰</div>
-                    <div className="stat-info">
-                      <h3>₹{stats.totalSpent.toFixed(2)}</h3>
-                      <p>Total Spent</p>
-                    </div>
-                  </div>
-                  <div className="stat-card">
-                    <div className="stat-icon">❤️</div>
-                    <div className="stat-info">
-                      <h3>{stats.favoriteItems}</h3>
-                      <p>Favorite Items</p>
-                    </div>
-                  </div>
-                  <div className="stat-card">
-                    <div className="stat-icon">📍</div>
-                    <div className="stat-info">
-                      <h3>{stats.savedAddresses}</h3>
-                      <p>Saved Addresses</p>
-                    </div>
+                      Male
+                    </label>
+                    <label className="radio-label">
+                      <input
+                        type="radio"
+                        name="gender"
+                        value="female"
+                        checked={profile.gender === 'female'}
+                        onChange={(e) => handleProfileChange('gender', e.target.value)}
+                      />
+                      Female
+                    </label>
+                    <label className="radio-label">
+                      <input
+                        type="radio"
+                        name="gender"
+                        value="other"
+                        checked={profile.gender === 'other'}
+                        onChange={(e) => handleProfileChange('gender', e.target.value)}
+                      />
+                      Other
+                    </label>
                   </div>
                 </div>
 
-                <div className="stats-details">
-                  <div className="detail-item">
-                    <span className="detail-label">Member Since:</span>
-                    <span className="detail-value">{stats.memberSince}</span>
-                  </div>
-                  <div className="detail-item">
-                    <span className="detail-label">Last Login:</span>
-                    <span className="detail-value">{stats.lastLogin}</span>
-                  </div>
-                </div>
-              </section>
-            </div>
-          )}
-
-          {/* Support Tab */}
-          {activeTab === 'support' && (
-            <div className="tab-content">
-              <section className="settings-section">
-                <h2 className="section-title">Payment Methods</h2>
-                <div className="payment-methods">
-                  <div className="payment-card">
-                    <div className="payment-icon">💳</div>
-                    <div className="payment-info">
-                      <h4>Credit Card</h4>
-                      <p>••••• •••• •••• 4242</p>
-                      <button className="edit-btn" onClick={() => alert('Edit payment method coming soon!')}>Edit</button>
+                <div className="form-group">
+                  <label>Address Information</label>
+                  <div className="address-fields">
+                    <div className="form-row">
+                      <div className="form-group address-street">
+                        <label>Street Address *</label>
+                        <input
+                          type="text"
+                          value={profile.street}
+                          onChange={(e) => handleProfileChange('street', e.target.value)}
+                          className="input-custom"
+                          placeholder="123 Main St, Apt 4B"
+                          required
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="form-row">
+                      <div className="form-group address-city">
+                        <label>City *</label>
+                        <input
+                          type="text"
+                          value={profile.city}
+                          onChange={(e) => handleProfileChange('city', e.target.value)}
+                          className="input-custom"
+                          placeholder="New York"
+                          required
+                        />
+                      </div>
+                      
+                      <div className="form-group address-state">
+                        <label>State</label>
+                        <input
+                          type="text"
+                          value={profile.state}
+                          onChange={(e) => handleProfileChange('state', e.target.value)}
+                          className="input-custom"
+                          placeholder="NY"
+                        />
+                      </div>
+                      
+                      <div className="form-group address-zip">
+                        <label>ZIP Code *</label>
+                        <input
+                          type="text"
+                          value={profile.zipCode}
+                          onChange={(e) => handleProfileChange('zipCode', e.target.value)}
+                          className="input-custom"
+                          placeholder="10001"
+                          required
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="form-row">
+                      <div className="form-group address-country">
+                        <label>Country</label>
+                        <input
+                          type="text"
+                          value={profile.country}
+                          onChange={(e) => handleProfileChange('country', e.target.value)}
+                          className="input-custom"
+                          placeholder="India"
+                        />
+                      </div>
                     </div>
                   </div>
-                  <button className="add-payment-btn" onClick={handleAddPaymentMethod}>
-                    ➕ Add Payment Method
-                  </button>
                 </div>
-              </section>
 
-              <section className="settings-section">
-                <h2 className="section-title">Saved Addresses</h2>
-                <div className="address-list">
-                  <div className="address-item">
-                    <div className="address-info">
-                      <h4>Home</h4>
-                      <p>{profile.address}</p>
-                    </div>
-                    <button className="edit-btn" onClick={() => alert('Edit address coming soon!')}>Edit</button>
-                  </div>
-                </div>
-                <button className="add-address-btn" onClick={handleAddAddress}>
-                  ➕ Add New Address
+                <button className="save-btn" onClick={handleSaveProfile}>
+                  💾 Save Profile
                 </button>
-              </section>
-
-              <section className="settings-section">
-                <h2 className="section-title">Contact Support</h2>
-                <div className="contact-form">
-                  <div className="form-group">
-                    <label>Subject</label>
-                    <select
-                      value={contactForm.subject}
-                      onChange={(e) => handleContactChange('subject', e.target.value)}
-                      className="input-custom"
-                    >
-                      <option value="">Select a topic</option>
-                      <option value="order_issue">Order Issue</option>
-                      <option value="payment_problem">Payment Problem</option>
-                      <option value="account_help">Account Help</option>
-                      <option value="feature_request">Feature Request</option>
-                      <option value="bug_report">Bug Report</option>
-                      <option value="other">Other</option>
-                    </select>
-                  </div>
-                  <div className="form-group">
-                    <label>Message</label>
-                    <textarea
-                      value={contactForm.message}
-                      onChange={(e) => handleContactChange('message', e.target.value)}
-                      className="input-custom"
-                      rows="5"
-                      placeholder="Describe your issue or request in detail..."
-                    />
-                  </div>
-                  <button className="send-btn" onClick={handleSendContact}>
-                    📧 Send Message
-                  </button>
-                </div>
-              </section>
-            </div>
-          )}
+              </div>
+            </section>
+          </div>
 
           {/* Account Actions */}
           <section className="settings-section danger-zone">
             <h2 className="section-title">Account Actions</h2>
             <div className="danger-actions">
-              <button className="danger-btn" onClick={() => alert('Export data functionality coming soon!')}>
-                📥 Export Data
-              </button>
-              <button className="danger-btn" onClick={() => alert('Delete account functionality coming soon!')}>
-                🗑️ Delete Account
-              </button>
               <button className="logout-btn" onClick={handleLogout}>
                 🚪 Logout
               </button>
@@ -1092,6 +997,16 @@ const OthersPage = () => {
       </main>
       
       <HoveringCart />
+      
+      {/* Popup Modal */}
+      <PopupModal
+        isOpen={popupModal.isOpen}
+        onClose={closePopup}
+        type={popupModal.type}
+        title={popupModal.title}
+        message={popupModal.message}
+        onConfirm={popupModal.onConfirm}
+      />
     </div>
   );
 };

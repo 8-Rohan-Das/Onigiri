@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Fix User Dates</title>
+</head>
+<body>
+    <h1>Fix User CreatedAt Dates</h1>
+    <button onclick="fixDates()">Fix User Dates</button>
+    <button onclick="checkUsers()">Check Users</button>
+    <div id="result"></div>
+
+    <script>
+        async function fixDates() {
+            try {
+                const response = await fetch('http://localhost:5000/api/debug/fix-dates', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                const data = await response.json();
+                document.getElementById('result').innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+            } catch (error) {
+                document.getElementById('result').innerHTML = 'Error: ' + error.message;
+            }
+        }
+
+        async function checkUsers() {
+            try {
+                const response = await fetch('http://localhost:5000/api/debug/users');
+                const data = await response.json();
+                document.getElementById('result').innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+            } catch (error) {
+                document.getElementById('result').innerHTML = 'Error: ' + error.message;
+            }
+        }
+    </script>
+</body>
+</html>

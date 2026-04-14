@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { getStoredItem, setStoredItem } from '../utils/storageUtils.js';
+import { getUserStoredItem, setUserStoredItem } from '../utils/storageUtils.js';
 import { useNotifications } from './NotificationContext';
 
 const CartContext = createContext();
@@ -15,11 +15,11 @@ export const CartProvider = ({ children }) => {
       { id: 'def-2', name: 'Pepperoni Pizza', quantity: 1, price: 180.00, icon: '🍕' },
       { id: 'def-3', name: 'Fish Burger & Vege', quantity: 1, price: 150.00, icon: '🍔' },
     ];
-    return getStoredItem('cartItems', defaultItems);
+    return getUserStoredItem('cartItems', defaultItems);
   });
 
   useEffect(() => {
-    setStoredItem('cartItems', cartItems);
+    setUserStoredItem('cartItems', cartItems);
   }, [cartItems]);
 
   const addToCart = (item) => {

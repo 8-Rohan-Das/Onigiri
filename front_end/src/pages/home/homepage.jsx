@@ -442,24 +442,6 @@ const Homepage = () => {
                 </div>
               </section>
             </div>
-
-            {/* Address Card */}
-            <section className="address-card">
-              <div className="address-header">
-                <h2 className="section-title">Your Address</h2>
-                <button className="change-btn">Change</button>
-              </div>
-              <h3 style={{marginBottom: '10px', color: 'var(--text-dark)'}}>
-                Plot No. 42, Sector 5, CDA Building
-              </h3>
-              <p className="address-text">
-                Saheed Nagar, Bhubaneswar, Odisha 751019, India
-              </p>
-              <button className="add-details-btn">
-                <span>➕</span>
-                <span>Add Details</span>
-              </button>
-            </section>
           </div>
         </div>
 

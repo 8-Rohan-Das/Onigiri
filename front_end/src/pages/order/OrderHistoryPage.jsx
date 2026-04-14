@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getStoredUser, getStoredItem, setStoredItem, removeStoredItem } from '../../utils/storageUtils.js';
+import { getStoredUser, getUserStoredItem, setUserStoredItem, removeUserStoredItem } from '../../utils/storageUtils.js';
 import { paymentAPI, orderAPI } from '../../services/api.js';
 
 import NotificationButton from '../../components/NotificationButton';
@@ -41,15 +41,15 @@ const OrderHistoryPage = () => {
   useEffect(() => {
     // Load orders once from localStorage on mount
     try {
-      const savedHistory = getStoredItem('orderHistory', []);
-      const lastOrder    = getStoredItem('lastOrder');
+      const savedHistory = getUserStoredItem('orderHistory', []);
+      const lastOrder    = getUserStoredItem('lastOrder');
 
       let allOrders = Array.isArray(savedHistory) ? savedHistory : [];
 
       if (lastOrder && !allOrders.find(o => o.orderNumber === lastOrder.orderNumber)) {
         allOrders = [lastOrder, ...allOrders];
-        setStoredItem('orderHistory', allOrders);
-        removeStoredItem('lastOrder');
+        setUserStoredItem('orderHistory', allOrders);
+        removeUserStoredItem('lastOrder');
       }
 
       const formatted = allOrders.map(order => ({
@@ -110,9 +110,9 @@ const OrderHistoryPage = () => {
       setOrders(prev => prev.map(o => statusMap[o.fullId] ? { ...o, status: statusMap[o.fullId] } : o));
 
       // Keep localStorage in sync so refresh shows correct status
-      const history = getStoredItem('orderHistory', []);
+      const history = getUserStoredItem('orderHistory', []);
       const updated = history.map(o => statusMap[o.orderNumber] ? { ...o, status: statusMap[o.orderNumber] } : o);
-      setStoredItem('orderHistory', updated);
+      setUserStoredItem('orderHistory', updated);
     };
 
     if (orders.length === 0) return;
@@ -162,8 +162,8 @@ const OrderHistoryPage = () => {
       alert('Warning: Could not clear data from server, but local history will be cleared.');
     } finally {
       // Always clear localStorage and UI
-      removeStoredItem('orderHistory');
-      removeStoredItem('lastOrder');
+      removeUserStoredItem('orderHistory');
+      removeUserStoredItem('lastOrder');
       setOrders([]);
       
       // Reset button
