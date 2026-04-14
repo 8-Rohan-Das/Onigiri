@@ -43,7 +43,7 @@ const OthersPage = () => {
     { id: 'favorite', label: 'Favorite', image: heartImage },
     { id: 'messages', label: 'Messages', image: emailImage },
     { id: 'order-history', label: 'Order History', image: orderHistoryImage },
-    { id: 'others', label: 'Others', image: otherImage },
+    { id: 'others', label: 'User Details', image: otherImage },
   ];
 
   // User settings state
@@ -154,6 +154,7 @@ const OthersPage = () => {
             phone: profileData.phone || prev.phone,
             dateOfBirth: profileData.dateOfBirth || prev.dateOfBirth,
             gender: profileData.gender || prev.gender,
+            profileImage: profileData.profileImage || prev.profileImage,
             addresses: profileData.addresses || [],
             address: primaryAddress.street 
               ? `${primaryAddress.street}, ${primaryAddress.city}, ${primaryAddress.state || ''} ${primaryAddress.zipCode}, ${primaryAddress.country || 'India'}`
@@ -342,14 +343,26 @@ const OthersPage = () => {
     if (file) {
       // Check file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
-        alert('File size must be less than 5MB');
+        addNotification({
+          type: 'error',
+          title: 'File Too Large',
+          message: 'File size must be less than 5MB.',
+          icon: '⚠️',
+          action: '/others'
+        });
         return;
       }
       
       // Check file type
       const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
       if (!allowedTypes.includes(file.type)) {
-        alert('Only JPEG, PNG, GIF, and WebP images are allowed');
+        addNotification({
+          type: 'error',
+          title: 'Invalid File Type',
+          message: 'Only JPEG, PNG, GIF, and WebP images are allowed.',
+          icon: '⚠️',
+          action: '/others'
+        });
         return;
       }
 
@@ -361,6 +374,8 @@ const OthersPage = () => {
       };
       reader.readAsDataURL(file);
     }
+    // Reset input so the same file can be selected again
+    e.target.value = '';
   };
 
   const openImageEditor = (imageUrl) => {
@@ -605,20 +620,24 @@ const OthersPage = () => {
       updateImageTransform();
     });
 
-    // Dragging functionality
-    maskedImageContainer.addEventListener('mousedown', (e) => {
+    // Dragging functionality with touch support
+    const handleDragStart = (e) => {
       isDragging = true;
-      dragStartX = e.clientX - imageX;
-      dragStartY = e.clientY - imageY;
+      const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+      const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+      dragStartX = clientX - imageX;
+      dragStartY = clientY - imageY;
       maskedImageContainer.style.cursor = 'grabbing';
       e.preventDefault();
-    });
+    };
 
-    document.addEventListener('mousemove', (e) => {
+    const handleDragMove = (e) => {
       if (!isDragging) return;
+      const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+      const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
       
-      imageX = e.clientX - dragStartX;
-      imageY = e.clientY - dragStartY;
+      imageX = clientX - dragStartX;
+      imageY = clientY - dragStartY;
       
       // Constrain to circle bounds
       const maxOffset = (300 * currentZoom / 100) / 2 - 50;
@@ -626,18 +645,28 @@ const OthersPage = () => {
       imageY = Math.max(-maxOffset, Math.min(maxOffset, imageY));
       
       updateImageTransform();
-    });
+    };
 
-    document.addEventListener('mouseup', () => {
+    const handleDragEnd = () => {
       isDragging = false;
       maskedImageContainer.style.cursor = 'move';
-    });
+    };
+
+    // Add both mouse and touch event listeners
+    maskedImageContainer.addEventListener('mousedown', handleDragStart);
+    maskedImageContainer.addEventListener('touchstart', handleDragStart);
+    document.addEventListener('mousemove', handleDragMove);
+    document.addEventListener('touchmove', handleDragMove);
+    document.addEventListener('mouseup', handleDragEnd);
+    document.addEventListener('touchend', handleDragEnd);
 
     // Rotate functionality
-    document.getElementById('rotate-btn').addEventListener('click', () => {
+    const handleRotate = () => {
       currentRotation += 90;
       updateImageTransform();
-    });
+    };
+    
+    document.getElementById('rotate-btn').addEventListener('click', handleRotate);
 
     // Update image transform function
     function updateImageTransform() {
@@ -645,7 +674,7 @@ const OthersPage = () => {
     }
 
     // Apply functionality
-    document.getElementById('apply-btn').addEventListener('click', () => {
+    const handleApply = async () => {
       // Ensure image is loaded before processing
       if (img.naturalWidth === 0 || img.naturalHeight === 0) {
         addNotification({
@@ -694,37 +723,95 @@ const OthersPage = () => {
       
       // Convert to data URL and update profile
       const circularImageUrl = canvas.toDataURL('image/jpeg', 0.9);
-      setProfile({ ...profile, profileImage: circularImageUrl });
       
-      addNotification({
-        type: 'settings',
-        title: 'Profile Picture Updated',
-        message: 'Your profile picture has been cropped to a perfect circle and updated successfully.',
-        icon: '📷',
-        action: '/others'
-      });
-      
-      document.body.removeChild(modal);
-    });
+      try {
+        // Update backend
+        await userAPI.updateProfileImage(userData.id, circularImageUrl);
+        
+        // Update localStorage immediately
+        setStoredItem('user', {
+          ...userData,
+          profileImage: circularImageUrl
+        });
+        
+        // Update component state
+        setProfile(prev => ({ ...prev, profileImage: circularImageUrl }));
+        
+        addNotification({
+          type: 'settings',
+          title: 'Profile Picture Updated',
+          message: 'Your profile picture has been cropped to a perfect circle and saved successfully.',
+          icon: '📷',
+          action: '/others'
+        });
+        
+        // Cleanup and close
+        cleanupModal();
+        document.body.removeChild(modal);
+      } catch (error) {
+        console.error('Error saving profile image:', error);
+        addNotification({
+          type: 'error',
+          title: 'Save Failed',
+          message: 'Failed to save profile picture. Please try again.',
+          icon: '⚠️',
+          action: '/others'
+        });
+      }
+    };
+    
+    document.getElementById('apply-btn').addEventListener('click', handleApply);
 
-    // Cancel functionality
-    document.getElementById('cancel-btn').addEventListener('click', () => {
+    // Cleanup function to remove event listeners
+    const cleanupModal = () => {
+      // Remove drag event listeners
+      maskedImageContainer.removeEventListener('mousedown', handleDragStart);
+      maskedImageContainer.removeEventListener('touchstart', handleDragStart);
+      document.removeEventListener('mousemove', handleDragMove);
+      document.removeEventListener('touchmove', handleDragMove);
+      document.removeEventListener('mouseup', handleDragEnd);
+      document.removeEventListener('touchend', handleDragEnd);
+      
+      // Remove button event listeners
+      const applyBtn = document.getElementById('apply-btn');
+      const cancelBtn = document.getElementById('cancel-btn');
+      const rotateBtn = document.getElementById('rotate-btn');
+      
+      if (applyBtn) applyBtn.removeEventListener('click', handleApply);
+      if (cancelBtn) cancelBtn.removeEventListener('click', handleClose);
+      if (rotateBtn) rotateBtn.removeEventListener('click', handleRotate);
+      
+      // Remove modal background click listener
+      modal.removeEventListener('click', handleBackgroundClick);
+    };
+    
+    const handleClose = () => {
+      cleanupModal();
       document.body.removeChild(modal);
-    });
+    };
+    
+    const handleBackgroundClick = (e) => {
+      if (e.target === modal) {
+        handleClose();
+      }
+    };
+    
+    // Cancel functionality
+    document.getElementById('cancel-btn').addEventListener('click', handleClose);
 
     // Close modal on background click
-    modal.addEventListener('click', (e) => {
-      if (e.target === modal) {
-        document.body.removeChild(modal);
-      }
-    });
+    modal.addEventListener('click', handleBackgroundClick);
   };
 
   return (
     <div className="homepage-container">
       {/* Sidebar */}
       <aside className="sidebar">
-        <div className="sidebar-logo">
+        <div 
+          className="sidebar-logo" 
+          onClick={() => navigate('/home')}
+          style={{ cursor: 'pointer' }}
+        >
           <img src={logo} alt="Onigiri Logo" className="logo-image" />
           <h1>ONIGIRI</h1>
         </div>
@@ -768,7 +855,7 @@ const OthersPage = () => {
         <header className="main-header">
           <div className="user-profile">
             <div className="profile-image">
-              <img src={userImage} alt="User Profile" style={{width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%'}} />
+              <img src={profile.profileImage} alt="User Profile" style={{width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%'}} />
             </div>
             <div className="user-info">
               <h3>Welcome, {userName}!</h3>

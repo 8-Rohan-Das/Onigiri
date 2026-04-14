@@ -14,6 +14,7 @@ const userSchema = new mongoose.Schema({
     zipCode: { type: String, required: true },
     country: { type: String }
   }],
+  profileImage: { type: String, default: '' },
   totalOrders: { type: Number, default: 0 },
   totalSpent: { type: Number, default: 0 }
 }, { timestamps: true });

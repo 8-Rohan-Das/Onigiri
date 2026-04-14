@@ -35,7 +35,7 @@ const NotificationPage = () => {
     { id: 'favorite', label: 'Favorite', image: heartImage },
     { id: 'messages', label: 'Messages', image: emailImage },
     { id: 'order-history', label: 'Order History', image: orderHistoryImage },
-    { id: 'others', label: 'Others', image: otherImage },
+    { id: 'others', label: 'User Details', image: otherImage },
   ];
 
   const handleNotificationClick = (notification) => {
@@ -103,7 +103,11 @@ const NotificationPage = () => {
     <div className="homepage-container">
       {/* Sidebar */}
       <aside className="sidebar">
-        <div className="sidebar-logo">
+        <div 
+          className="sidebar-logo" 
+          onClick={() => navigate('/home')}
+          style={{ cursor: 'pointer' }}
+        >
           <img src={logo} alt="Onigiri Logo" className="logo-image" />
           <h1>ONIGIRI</h1>
         </div>

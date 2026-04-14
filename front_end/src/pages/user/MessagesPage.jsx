@@ -4,6 +4,7 @@ import { useNotifications } from '../../context/NotificationContext';
 import { getStoredUser, removeStoredItem } from '../../utils/storageUtils.js';
 import NotificationButton from '../../components/NotificationButton';
 import HoveringCart from '../../components/HoveringCart';
+import emailjs from '@emailjs/browser';
 import '../home/homepage.css';
 import './MessagesPage.css';
 import logo from '../../assets/logo.png';
@@ -31,7 +32,7 @@ const MessagesPage = () => {
     { id: 'favorite', label: 'Favorite', image: heartImage },
     { id: 'messages', label: 'Messages', image: emailImage },
     { id: 'order-history', label: 'Order History', image: orderHistoryImage },
-    { id: 'others', label: 'Others', image: otherImage },
+    { id: 'others', label: 'User Details', image: otherImage },
   ];
 
   // Messages data
@@ -85,6 +86,7 @@ const MessagesPage = () => {
     message: '',
     category: 'general'
   });
+  const [isSending, setIsSending] = useState(false);
 
   const handleMessageClick = (message) => {
     setSelectedMessage(message);
@@ -124,24 +126,53 @@ const MessagesPage = () => {
       return;
     }
     
-    // Simulate sending contact form
-    addNotification({
-      type: 'system',
-      title: 'Contact Form Submitted',
-      message: `Your inquiry about "${contactForm.subject}" has been received. We'll respond within 24 hours.`,
-      icon: '📧'
-    });
+    setIsSending(true);
     
-    // Reset form
-    setContactForm({
-      name: '',
-      email: '',
-      subject: '',
-      message: '',
-      category: 'general'
-    });
-    
-    alert('Thank you for contacting us! We will get back to you soon.');
+    // EmailJS configuration
+const serviceId = 'service_s1zzadk';
+const templateId = 'template_ge1oq35';
+const publicKey = '_RF0V4uUe6scOc1Gp';
+
+const templateParams = {
+  name: contactForm.name,
+  email: contactForm.email,
+  subject: contactForm.subject || 'No Subject',
+  message: contactForm.message,
+  category: contactForm.category,
+  time: new Date().toLocaleString(),
+};
+
+emailjs.send(serviceId, templateId, templateParams, {
+  publicKey: publicKey,
+})
+      .then((response) => {
+        console.log('Email sent successfully!', response.status, response.text);
+        
+        addNotification({
+          type: 'system',
+          title: 'Message Sent',
+          message: `Your inquiry has been sent successfully. We'll respond within 24 hours.`,
+          icon: '📧'
+        });
+        
+        // Reset form
+        setContactForm({
+          name: '',
+          email: '',
+          subject: '',
+          message: '',
+          category: 'general'
+        });
+        
+        alert('Thank you for contacting us! Your message has been sent successfully.');
+      })
+      .catch((error) => {
+        console.error('EmailJS error:', error);
+        alert('Failed to send message. Please try again later or contact us directly.');
+      })
+      .finally(() => {
+        setIsSending(false);
+      });
   };
 
 
@@ -151,7 +182,11 @@ const MessagesPage = () => {
     <div className="homepage-container">
       {/* Sidebar */}
       <aside className="sidebar">
-        <div className="sidebar-logo">
+        <div 
+          className="sidebar-logo" 
+          onClick={() => navigate('/home')}
+          style={{ cursor: 'pointer' }}
+        >
           <img src={logo} alt="Onigiri Logo" className="logo-image" />
           <h1>ONIGIRI</h1>
         </div>
@@ -389,143 +424,177 @@ const MessagesPage = () => {
                   </div>
                 ) : (
                   <div className="no-message-selected">
-                    <div className="empty-state-icon">�</div>
+                    <div className="empty-state-icon">📭</div>
                     <h3>Select a message</h3>
                     <p>Choose a message from the inbox to view details</p>
                   </div>
                 )}
               </div>
 
-              {/* New Message Section */}
-              <div className="new-message-section">
-                <div className="compose-header">
-                  <h3>Compose New Message</h3>
-                  <span className="compose-subtitle">Send us a message</span>
+            </div>
+          ) : (
+          <div className="contact-page-wrapper">
+            <header className="contact-page-header">
+              <h2 className="section-title">Get in Touch</h2>
+              <p className="section-subtitle">Have a question or feedback? We'd love to hear from you.</p>
+            </header>
+            
+            <div className="contact-grid">
+              <div className="contact-info-column">
+                <div className="contact-info-card">
+                  <h3>Contact Information</h3>
+                  <p>Reach out to us through any of these channels. Our team is available to assist you.</p>
+                  
+                  <div className="contact-channels-list">
+                    <div className="contact-channel-item">
+                      <div className="channel-icon-wrapper phone">📞</div>
+                      <div className="channel-details">
+                        <h4>Phone</h4>
+                        <p>+91 98765 43210</p>
+                        <span className="channel-meta">Mon-Sat, 9AM-9PM</span>
+                      </div>
+                    </div>
+                    
+                    <div className="contact-channel-item">
+                      <div className="channel-icon-wrapper email">✉️</div>
+                      <div className="channel-details">
+                        <h4>Email</h4>
+                        <p>support@onigiri.com</p>
+                        <span className="channel-meta">24/7 Support</span>
+                      </div>
+                    </div>
+                    
+                    <div className="contact-channel-item">
+                      <div className="channel-icon-wrapper chat">💬</div>
+                      <div className="channel-details">
+                        <h4>Live Chat</h4>
+                        <p>Available on our App</p>
+                        <span className="channel-meta">Instant response</span>
+                      </div>
+                    </div>
+
+                    <div className="contact-channel-item">
+                      <div className="channel-icon-wrapper social">🌐</div>
+                      <div className="channel-details">
+                        <h4>Follow Us</h4>
+                        <div className="social-icons">
+                          <span></span> <span></span> <span></span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div className="compose-form">
-                  <textarea
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    placeholder="Type your message here..."
-                    rows={4}
-                    className="compose-textarea"
-                  />
-                  <div className="compose-actions">
-                    <button className="action-btn secondary-btn">
-                      <span>📎</span> Attach
-                    </button>
-                    <button className="action-btn primary-btn" onClick={handleSendMessage}>
-                      <span>📤</span> Send Message
-                    </button>
+
+                <div className="contact-support-banner">
+                  <div className="banner-icon">🚀</div>
+                  <div className="banner-text">
+                    <h4>Need urgent help?</h4>
+                    <p>Check our <a href="#faq">FAQ section</a> for quick answers to common questions.</p>
                   </div>
                 </div>
               </div>
-            </div>
-          ) : (
-          /* Contact Us Form */
-          <div className="contact-form-container">
-            <h2 className="section-title">Contact Us</h2>
-            <form onSubmit={handleContactSubmit} className="contact-form contact-form-card">
-              <div className="contact-form-row">
-                <div className="contact-form-group">
-                  <label className="contact-label">Name *</label>
-                  <input
-                    type="text"
-                    value={contactForm.name}
-                    onChange={(e) => setContactForm({...contactForm, name: e.target.value})}
-                    required
-                    className="contact-input"
-                  />
-                </div>
-                <div className="contact-form-group">
-                  <label className="contact-label">Email *</label>
-                  <input
-                    type="email"
-                    value={contactForm.email}
-                    onChange={(e) => setContactForm({...contactForm, email: e.target.value})}
-                    required
-                    className="contact-input"
-                  />
-                </div>
-              </div>
-              
-              <div className="contact-form-group">
-                <label className="contact-label">Category</label>
-                <select
-                  value={contactForm.category}
-                  onChange={(e) => setContactForm({...contactForm, category: e.target.value})}
-                  className="contact-input"
-                >
-                  <option value="general">General Inquiry</option>
-                  <option value="order">Order Related</option>
-                  <option value="payment">Payment Issue</option>
-                  <option value="technical">Technical Support</option>
-                  <option value="feedback">Feedback</option>
-                  <option value="complaint">Complaint</option>
-                </select>
-              </div>
-              
-              <div className="contact-form-group">
-                <label className="contact-label">Subject</label>
-                <input
-                  type="text"
-                  value={contactForm.subject}
-                  onChange={(e) => setContactForm({...contactForm, subject: e.target.value})}
-                  placeholder="Brief description of your inquiry"
-                  className="contact-input"
-                />
-              </div>
-              
-              <div className="contact-form-group">
-                <label className="contact-label">Message *</label>
-                <textarea
-                  value={contactForm.message}
-                  onChange={(e) => setContactForm({...contactForm, message: e.target.value})}
-                  required
-                  rows={6}
-                  placeholder="Please provide detailed information about your inquiry..."
-                  className="contact-input contact-textarea"
-                />
-              </div>
-              
-              <div className="contact-form-actions">
-                <button
-                  type="submit"
-                  className="contact-submit-btn"
-                >
-                  Send Message
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setContactForm({ name: '', email: '', subject: '', message: '', category: 'general' })}
-                  className="contact-clear-btn"
-                >
-                  Clear Form
-                </button>
-              </div>
-            </form>
 
-            <div className="contact-info-section">
-              <h3>Other Ways to Reach Us</h3>
-              <div className="contact-channels">
-                <div className="contact-channel">
-                  <div className="contact-channel-icon">📞</div>
-                  <h4>Phone</h4>
-                  <p>+91 98765 43210</p>
-                  <p className="contact-channel-meta">Mon-Sat, 9AM-9PM</p>
-                </div>
-                <div className="contact-channel">
-                  <div className="contact-channel-icon">✉️</div>
-                  <h4>Email</h4>
-                  <p>support@onigiri.com</p>
-                  <p className="contact-channel-meta">24/7 Support</p>
-                </div>
-                <div className="contact-channel">
-                  <div className="contact-channel-icon">💬</div>
-                  <h4>Live Chat</h4>
-                  <p>Available on app</p>
-                  <p className="contact-channel-meta">Instant help</p>
-                </div>
+              <div className="contact-form-column">
+                <form onSubmit={handleContactSubmit} className="contact-form-card">
+                  <div className="form-header">
+                    <h3>Send a Message</h3>
+                    <p>Required fields are marked with *</p>
+                  </div>
+                  
+                  <div className="contact-form-row">
+                    <div className="contact-form-group">
+                      <label className="contact-label">Full Name *</label>
+                      <input
+                        type="text"
+                        value={contactForm.name}
+                        onChange={(e) => setContactForm({...contactForm, name: e.target.value})}
+                        required
+                        placeholder="John Doe"
+                        className="contact-input"
+                      />
+                    </div>
+                    <div className="contact-form-group">
+                      <label className="contact-label">Email Address *</label>
+                      <input
+                        type="email"
+                        value={contactForm.email}
+                        onChange={(e) => setContactForm({...contactForm, email: e.target.value})}
+                        required
+                        placeholder="john@example.com"
+                        className="contact-input"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="form-row">
+                    <div className="contact-form-group">
+                      <label className="contact-label">Inquiry Category</label>
+                      <div className="select-wrapper">
+                        <select
+                          value={contactForm.category}
+                          onChange={(e) => setContactForm({...contactForm, category: e.target.value})}
+                          className="contact-input contact-select"
+                        >
+                          <option value="general">General Inquiry</option>
+                          <option value="order">Order Related</option>
+                          <option value="payment">Payment Issue</option>
+                          <option value="technical">Technical Support</option>
+                          <option value="feedback">Feedback</option>
+                          <option value="complaint">Complaint</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="contact-form-group">
+                    <label className="contact-label">Subject</label>
+                    <input
+                      type="text"
+                      value={contactForm.subject}
+                      onChange={(e) => setContactForm({...contactForm, subject: e.target.value})}
+                      placeholder="What is this regarding?"
+                      className="contact-input"
+                    />
+                  </div>
+                  
+                  <div className="contact-form-group">
+                    <label className="contact-label">Message *</label>
+                    <textarea
+                      value={contactForm.message}
+                      onChange={(e) => setContactForm({...contactForm, message: e.target.value})}
+                      required
+                      rows={5}
+                      placeholder="Tell us how we can help you..."
+                      className="contact-input contact-textarea"
+                    />
+                  </div>
+                  
+                  <div className="contact-form-actions">
+                    <button
+                      type="submit"
+                      className="contact-submit-btn"
+                      disabled={isSending}
+                    >
+                      {isSending ? (
+                        <span className="btn-content">
+                          <span className="loader"></span> Sending...
+                        </span>
+                      ) : (
+                        <span className="btn-content">
+                          Send Message <span>🚀</span>
+                        </span>
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setContactForm({ name: '', email: '', subject: '', message: '', category: 'general' })}
+                      className="contact-clear-btn"
+                      disabled={isSending}
+                    >
+                      Reset
+                    </button>
+                  </div>
+                </form>
               </div>
             </div>
           </div>

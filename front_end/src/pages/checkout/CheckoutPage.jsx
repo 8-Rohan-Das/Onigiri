@@ -36,7 +36,11 @@ const CheckoutPage = () => {
             <span className="btn-text">Back to Home</span>
           </button>
 
-          <div className="logo-section" aria-hidden>
+          <div 
+            className="logo-section" 
+            onClick={handleBackToHome}
+            style={{ cursor: 'pointer' }}
+          >
             <img src={logo} alt="Onigiri Logo" className="logo-image" />
             <h1>ONIGIRI</h1>
           </div>
@@ -70,72 +74,122 @@ const CheckoutPage = () => {
       </header>
 
       <div className="checkout-content">
-        <main className="checkout-main" aria-labelledby="checkout-title">
-          <form className="checkout-form" onSubmit={handleSubmit}>
-            <h2 id="checkout-title" className="visually-hidden">Checkout form</h2>
-
-            <section className="form-section" aria-labelledby="delivery-heading">
-              <h2 id="delivery-heading">Delivery Information</h2>
-
-              <div className="form-grid">
-                <div className="form-group">
-                  <label htmlFor="fullName">Full Name</label>
-                  <input id="fullName" name="fullName" value={formData.fullName} onChange={handleInputChange} required />
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="email">Email</label>
-                  <input id="email" name="email" type="email" value={formData.email} onChange={handleInputChange} required />
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="phone">Phone Number</label>
-                  <input id="phone" name="phone" type="tel" value={formData.phone} onChange={handleInputChange} placeholder="9876543210" maxLength="10" pattern="\d{10}" title="Please enter a valid 10-digit Indian phone number" required />
-                </div>
+        <div className="checkout-main-grid">
+          <header className="checkout-flow-header">
+            <div className="checkout-progress">
+              <div className="progress-step completed">
+                <span className="step-icon">🛒</span>
+                <span className="step-label">Cart</span>
               </div>
-
-              <div className="form-group">
-                <label htmlFor="address">Delivery Address</label>
-                <input id="address" name="address" value={formData.address} onChange={handleInputChange} required />
+              <div className="progress-line completed"></div>
+              <div className="progress-step active">
+                <span className="step-icon">📋</span>
+                <span className="step-label">Details</span>
               </div>
+              <div className="progress-line"></div>
+              <div className="progress-step">
+                <span className="step-icon">🚀</span>
+                <span className="step-label">Finish</span>
+              </div>
+            </div>
+          </header>
 
-              <div className="form-grid">
-                <div className="form-group">
-                  <label htmlFor="city">City</label>
-                  <input id="city" name="city" value={formData.city} onChange={handleInputChange} required />
+          <main className="checkout-main" aria-labelledby="checkout-title">
+            <form className="checkout-form" onSubmit={handleSubmit}>
+              <h2 id="checkout-title" className="visually-hidden">Checkout form</h2>
+
+              <section className="form-section" aria-labelledby="delivery-heading">
+                <header className="section-header">
+                  <div className="section-title-wrapper">
+                  </div>
+                </header>
+
+                <div className="form-grid">
+                  <div className="form-group">
+                    <label htmlFor="fullName">Full Name</label>
+                    <input id="fullName" name="fullName" value={formData.fullName} onChange={handleInputChange} required placeholder="John Doe" />
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="email">Email</label>
+                    <input id="email" name="email" type="email" value={formData.email} onChange={handleInputChange} required placeholder="john@example.com" />
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="phone">Phone Number</label>
+                    <input id="phone" name="phone" type="tel" value={formData.phone} onChange={handleInputChange} placeholder="9876543210" maxLength="10" pattern="\d{10}" title="Please enter a valid 10-digit Indian phone number" required />
+                  </div>
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="state">State</label>
-                  <input id="state" name="state" value={formData.state} onChange={handleInputChange} required />
+                  <label htmlFor="address">Delivery Address</label>
+                  <input id="address" name="address" value={formData.address} onChange={handleInputChange} required placeholder="Flat, Street, Landmark" />
                 </div>
 
-                <div className="form-group">
-                  <label htmlFor="zipCode">ZIP Code</label>
-                  <input id="zipCode" name="zipCode" value={formData.zipCode} onChange={handleInputChange} required />
+                <div className="form-grid">
+                  <div className="form-group">
+                    <label htmlFor="city">City</label>
+                    <input id="city" name="city" value={formData.city} onChange={handleInputChange} required placeholder="e.g. Bhubaneswar" />
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="state">State</label>
+                    <input id="state" name="state" value={formData.state} onChange={handleInputChange} required placeholder="e.g. Odisha" />
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="zipCode">ZIP Code</label>
+                    <input id="zipCode" name="zipCode" value={formData.zipCode} onChange={handleInputChange} required placeholder="123456" />
+                  </div>
                 </div>
-              </div>
-            </section>
+              </section>
 
-            <section className="form-section" aria-labelledby="payment-heading">
-              <h2 id="payment-heading">Payment Method</h2>
+              <section className="form-section" aria-labelledby="payment-heading">
+                <header className="section-header">
+                  <div className="section-title-wrapper">
+                    <span className="section-icon">💳</span>
+                    <h2 id="payment-heading">Payment Method</h2>
+                  </div>
+                  <p className="section-desc">Select your preferred way to pay securely</p>
+                </header>
 
-              <div className="payment-options" role="radiogroup" aria-label="Payment method">
-                <label className="payment-option">
-                  <input type="radio" name="paymentMethod" value="cod" checked={formData.paymentMethod === 'cod'} onChange={handleInputChange} />
-                  <span>Cash on Delivery</span>
-                </label>
+                <div className="payment-options" role="radiogroup" aria-label="Payment method">
+                  <label className={`payment-option-card ${formData.paymentMethod === 'cod' ? 'active' : ''}`}>
+                    <input type="radio" name="paymentMethod" value="cod" checked={formData.paymentMethod === 'cod'} onChange={handleInputChange} className="hidden-radio" />
+                    <div className="payment-option-content">
+                      <span className="pay-icon">💵</span>
+                      <div className="pay-text">
+                        <span className="pay-title">Cash on Delivery</span>
+                        <span className="pay-meta">Pay when you receive</span>
+                      </div>
+                      <div className="check-mark">✓</div>
+                    </div>
+                  </label>
 
-                <label className="payment-option">
-                  <input type="radio" name="paymentMethod" value="card" checked={formData.paymentMethod === 'card'} onChange={handleInputChange} />
-                  <span>Credit / Debit Card</span>
-                </label>
+                  <label className={`payment-option-card ${formData.paymentMethod === 'card' ? 'active' : ''}`}>
+                    <input type="radio" name="paymentMethod" value="card" checked={formData.paymentMethod === 'card'} onChange={handleInputChange} className="hidden-radio" />
+                    <div className="payment-option-content">
+                      <span className="pay-icon">💳</span>
+                      <div className="pay-text">
+                        <span className="pay-title">Credit / Debit Card</span>
+                        <span className="pay-meta">All major cards accepted</span>
+                      </div>
+                      <div className="check-mark">✓</div>
+                    </div>
+                  </label>
 
-                <label className="payment-option">
-                  <input type="radio" name="paymentMethod" value="upi" checked={formData.paymentMethod === 'upi'} onChange={handleInputChange} />
-                  <span>UPI Payment</span>
-                </label>
-              </div>
+                  <label className={`payment-option-card ${formData.paymentMethod === 'upi' ? 'active' : ''}`}>
+                    <input type="radio" name="paymentMethod" value="upi" checked={formData.paymentMethod === 'upi'} onChange={handleInputChange} className="hidden-radio" />
+                    <div className="payment-option-content">
+                      <span className="pay-icon">📱</span>
+                      <div className="pay-text">
+                        <span className="pay-title">UPI Payment</span>
+                        <span className="pay-meta">GPay, PhonePe, etc.</span>
+                      </div>
+                      <div className="check-mark">✓</div>
+                    </div>
+                  </label>
+                </div>
 
               {formData.paymentMethod === 'card' && (
                 <div className="card-details">
@@ -189,21 +243,12 @@ const CheckoutPage = () => {
             </div>
           </form>
         </main>
+      </div>
 
-        {/* Desktop sidebar or mobile toggle */}
-        <aside className={`order-summary ${showSummary ? 'open' : ''}`} aria-labelledby="summary-heading">
+      {/* Desktop sidebar or mobile toggle */}
+        <aside className="order-summary" aria-labelledby="summary-heading">
           <div className="summary-top">
             <h2 id="summary-heading">Order Summary</h2>
-
-            {/* Mobile toggle button */}
-            <button
-              className="summary-toggle"
-              type="button"
-              aria-expanded={showSummary}
-              onClick={toggleSummary}
-            >
-              {showSummary ? 'Hide' : 'View'}
-            </button>
           </div>
 
           <div className="order-items" role="list">

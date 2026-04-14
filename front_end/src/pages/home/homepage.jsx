@@ -177,7 +177,11 @@ const Homepage = () => {
     <div className="homepage-container">
       {/* Sidebar */}
       <aside className="sidebar">
-        <div className="sidebar-logo">
+        <div 
+          className="sidebar-logo" 
+          onClick={() => navigate('/home')}
+          style={{ cursor: 'pointer' }}
+        >
           <img src={logo} alt="Onigiri Logo" className="logo-image" />
           <h1>ONIGIRI</h1>
         </div>

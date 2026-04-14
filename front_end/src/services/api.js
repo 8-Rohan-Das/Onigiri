@@ -51,6 +51,7 @@ export const authAPI = {
 export const userAPI = {
   getProfile: (userId) => api.get('/user/profile', { params: { userId } }),
   updateProfile: (userData) => api.put('/user/profile', userData),
+  updateProfileImage: (userId, profileImage) => api.put('/user/profile', { userId, profileImage }),
   getOrderHistory: () => api.get('/user/orders'),
 };
 

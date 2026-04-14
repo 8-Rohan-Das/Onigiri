@@ -38,6 +38,7 @@ router.get('/profile', async (req, res) => {
             dateOfBirth: user.dateOfBirth,
             gender: user.gender,
             addresses: user.addresses,
+            profileImage: user.profileImage || '',
             totalOrders: user.totalOrders,
             totalSpent: user.totalSpent,
             memberSince: memberSince,
@@ -52,7 +53,7 @@ router.get('/profile', async (req, res) => {
 // Update user profile
 router.put('/profile', async (req, res) => {
     try {
-        const { userId, name, phone, dateOfBirth, gender, addresses } = req.body;
+        const { userId, name, phone, dateOfBirth, gender, addresses, profileImage } = req.body;
         
         console.log('Profile update request:', { userId, name, phone, dateOfBirth, gender, addresses });
         
@@ -73,6 +74,7 @@ router.put('/profile', async (req, res) => {
         if (phone) user.phone = phone;
         if (dateOfBirth) user.dateOfBirth = dateOfBirth;
         if (gender) user.gender = gender;
+        if (profileImage !== undefined) user.profileImage = profileImage;
         if (addresses) {
             console.log('Updating addresses to:', addresses);
             user.addresses = addresses;
@@ -89,7 +91,8 @@ router.put('/profile', async (req, res) => {
                 phone: user.phone,
                 dateOfBirth: user.dateOfBirth,
                 gender: user.gender,
-                addresses: user.addresses
+                addresses: user.addresses,
+                profileImage: user.profileImage
             }
         });
     } catch (error) {

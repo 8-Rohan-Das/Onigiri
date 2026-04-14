@@ -32,7 +32,7 @@ const OrderHistoryPage = () => {
     { id: 'favorite', label: 'Favorite', image: heartImage },
     { id: 'messages', label: 'Messages', image: emailImage },
     { id: 'order-history', label: 'Order History', image: orderHistoryImage },
-    { id: 'others', label: 'Others', image: otherImage },
+    { id: 'others', label: 'User Details', image: otherImage },
   ];
 
   // Order history data
@@ -190,7 +190,11 @@ const OrderHistoryPage = () => {
     <div className="homepage-container">
       {/* Sidebar */}
       <aside className="sidebar">
-        <div className="sidebar-logo">
+        <div 
+          className="sidebar-logo" 
+          onClick={() => navigate('/home')}
+          style={{ cursor: 'pointer' }}
+        >
           <img src={logo} alt="Onigiri Logo" className="logo-image" />
           <h1>ONIGIRI</h1>
         </div>
@@ -245,133 +249,146 @@ const OrderHistoryPage = () => {
         </header>
 
         {/* Filter Section */}
-        <section className="filter-section">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-            <h2 className="section-title">Your Orders</h2>
+        <section className="filter-shelf">
+          <div className="filter-shelf-top">
+            <h2 className="section-title">Order Dashboard</h2>
             <button 
-              className="filter-btn"
+              className="clear-history-premium"
               onClick={handleClearHistory}
-              style={{ backgroundColor: '#dc3545', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '4px', cursor: 'pointer' }}
             >
-              🗑️ Clear History
+              <span className="clear-icon">🗑️</span>
+              <span className="clear-text">Clear History</span>
             </button>
           </div>
-          <div className="filter-buttons">
-            <button
-              className={`filter-btn ${filterStatus === 'all' ? 'active' : ''}`}
-              onClick={() => setFilterStatus('all')}
-            >
-              All
-            </button>
-            <button
-              className={`filter-btn ${filterStatus === 'pending' ? 'active' : ''}`}
-              onClick={() => setFilterStatus('pending')}
-            >
-              Pending
-            </button>
-            <button
-              className={`filter-btn ${filterStatus === 'delivered' ? 'active' : ''}`}
-              onClick={() => setFilterStatus('delivered')}
-            >
-              Delivered
-            </button>
-            <button
-              className={`filter-btn ${filterStatus === 'cancelled' ? 'active' : ''}`}
-              onClick={() => setFilterStatus('cancelled')}
-            >
-              Cancelled
-            </button>
+          <div className="filter-pills-container">
+            <div className="filter-pills" role="tablist">
+              {['all', 'pending', 'delivered', 'cancelled'].map((status) => (
+                <button
+                  key={status}
+                  className={`filter-pill ${filterStatus === status ? 'active' : ''}`}
+                  onClick={() => setFilterStatus(status)}
+                  role="tab"
+                  aria-selected={filterStatus === status}
+                >
+                  {status.charAt(0).toUpperCase() + status.slice(1)}
+                </button>
+              ))}
+            </div>
           </div>
         </section>
 
         {/* Orders Grid */}
-        <section className="orders-history-section">
+        <section className="orders-dashboard-grid">
           {filteredOrders.length > 0 ? (
-            <div className="orders-list">
-              {filteredOrders.map((order) => (
-                <div key={order.id} className="order-card">
-                  <div className="order-header">
-                    <div className="order-info">
-                      <span className="restaurant-name">{order.restaurant}</span>
-                      <h3>{order.id}</h3>
-                      <span className="order-date">{order.date} • {order.time}</span>
-                    </div>
-                    <div className="order-status">
-                      <span 
-                        className="status-badge"
-                        style={{ backgroundColor: getStatusColor(order.status || 'pending') }}
-                      >
-                        {order.status || 'pending'}
-                      </span>
-                      <span className="order-total-badge">₹{(order.total || 0).toFixed(2)}</span>
-                    </div>
-                  </div>
-                  
-                  <div className="order-items">
-                    {order.items && order.items.length > 0 ? (
-                      order.items.map((item, index) => (
-                        <div key={item.id || index} className="order-item">
-                          <span className="item-icon">
-                            {item.image ? (
-                              <img 
-                                src={item.image} 
-                                alt={item.name || 'Item'} 
-                                style={{width: '100%', height: '100%', objectFit: 'cover'}} 
-                                onError={(e) => {
-                                  e.target.style.display = 'none';
-                                  e.target.parentElement.innerHTML = item.icon || '🍽️';
-                                }}
-                              />
-                            ) : (
-                              item.icon || '🍽️'
-                            )}
-                          </span>
-                          <span className="item-name">{item.name || 'Unknown Item'}</span>
-                          <div style={{ marginLeft: 'auto', display: 'flex', gap: '8px', alignItems: 'center' }}>
-                            <span className="item-quantity">x{item.quantity || 1}</span>
-                            <span className="item-price">₹{(item.price || 0).toFixed(2)}</span>
-                          </div>
-                        </div>
-                      ))
-                    ) : (
-                      <div className="order-item">
-                        <span className="item-name">No items details available</span>
+            <div className="orders-masonry">
+              {filteredOrders.map((order, idx) => (
+                <div 
+                  key={order.id} 
+                  className="order-card-premium"
+                  style={{ '--order-index': idx }}
+                >
+                  <div className="order-card-inner">
+                    <header className="order-card-header">
+                      <div className="restaurant-badge">
+                        <span className="res-icon">🍜</span>
+                        <span className="res-name">{order.restaurant}</span>
                       </div>
-                    )}
-                  </div>
-                  
-                  <div className="order-actions">
-                    <button
-                      className="order-btn btn-secondary"
-                      onClick={() => handleViewDetails(order)}
-                    >
-                      Details
-                    </button>
-                    <button
-                      className="order-btn btn-track"
-                      onClick={() => handleTrackOrder(order)}
-                    >
-                      🚴 Track Order
-                    </button>
-                    {(order.status || '').toLowerCase() === 'delivered' && (
-                      <button
-                        className="order-btn btn-primary"
-                        onClick={() => handleReorder(order)}
-                      >
-                        Reorder
-                      </button>
-                    )}
+                      <div className="order-metadata">
+                        <span className="order-id">{order.id}</span>
+                        <span className="order-timestamp">{order.date} • {order.time}</span>
+                      </div>
+                    </header>
+                    
+                    <div className="order-card-body">
+                      <div className="item-snapshots">
+                        {order.items && order.items.length > 0 ? (
+                          order.items.slice(0, 3).map((item, index) => (
+                            <div key={item.id || index} className="item-snapshot">
+                              <div className="item-thumb">
+                                {item.image ? (
+                                  <img 
+                                    src={item.image} 
+                                    alt={item.name} 
+                                    onError={(e) => {
+                                      e.target.style.display = 'none';
+                                      e.target.parentElement.innerHTML = '🍽️';
+                                    }}
+                                  />
+                                ) : (
+                                  <span className="item-emoji">{item.icon || '🍽️'}</span>
+                                )}
+                                <span className="item-count">x{item.quantity}</span>
+                              </div>
+                              <div className="item-short-details">
+                                <span className="item-n">{item.name}</span>
+                                <span className="item-p">₹{(item.price || 0).toFixed(0)}</span>
+                              </div>
+                            </div>
+                          ))
+                        ) : (
+                          <p className="no-items-msg">No item details available</p>
+                        )}
+                        {order.items && order.items.length > 3 && (
+                          <div className="more-items">+{order.items.length - 3} more items</div>
+                        )}
+                      </div>
+                    </div>
+
+                    <footer className="order-card-footer">
+                      <div className="order-summary-strip">
+                        <div className="status-pill-wrapper">
+                          <span className={`status-dot ${order.status.toLowerCase()}`}></span>
+                          <span className={`status-text ${order.status.toLowerCase()}`}>
+                            {order.status}
+                          </span>
+                        </div>
+                        <div className="order-price-total">
+                          <span className="currency">₹</span>
+                          <span className="amount">{order.total.toFixed(2)}</span>
+                        </div>
+                      </div>
+                      
+                      <div className="order-action-bar">
+                        <button
+                          className="action-btn-sm tertiary"
+                          onClick={() => handleViewDetails(order)}
+                          title="View Details"
+                        >
+                          Details
+                        </button>
+                        <button
+                          className="action-btn-sm secondary"
+                          onClick={() => handleTrackOrder(order)}
+                        >
+                          <span className="btn-ico">🚴</span> Track
+                        </button>
+                        {(order.status || '').toLowerCase() === 'delivered' && (
+                          <button
+                            className="action-btn-sm primary"
+                            onClick={() => handleReorder(order)}
+                          >
+                            Reorder
+                          </button>
+                        )}
+                      </div>
+                    </footer>
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="empty-orders">
-              <div className="empty-icon">📋</div>
-              <h3>No orders found</h3>
-              <p>No orders match the selected filter</p>
-              <button className="order-btn btn-primary" onClick={() => navigate('/home')}>
-                Browse Menu
+            <div className="empty-orders-state">
+              <div className="empty-state-visual">
+                <div className="empty-circle">
+                  <span className="empty-ico">📋</span>
+                </div>
+                <div className="empty-decor dec-1"></div>
+                <div className="empty-decor dec-2"></div>
+              </div>
+              <h3>No culinary adventures yet?</h3>
+              <p>Your order history is currently empty. Start your journey with our delicious menu!</p>
+              <button className="browse-menu-btn" onClick={() => navigate('/home')}>
+                Explore Menu
               </button>
             </div>
           )}
